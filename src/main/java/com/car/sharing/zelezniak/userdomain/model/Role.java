@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
 

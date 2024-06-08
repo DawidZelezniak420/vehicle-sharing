@@ -44,4 +44,12 @@ public class UserCredentials {
     public int hashCode() {
         return Objects.hash(email, password);
     }
+
+    @Override
+    public String toString() {
+        return "UserCredentials{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

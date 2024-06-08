@@ -3,6 +3,8 @@ package com.CarSharing.userdomain;
 import com.CarSharing.config.TestBeans;
 import com.car.sharing.zelezniak.CarSharingApplication;
 import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.userdomain.model.value_objects.UserName;
 import com.car.sharing.zelezniak.userdomain.service.UserOperations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,11 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestBeans.class)
 class UserDAOTest {
 
+    private static ApplicationUser userWithId5 = createUserWithId5();
+
     @Autowired
     private ApplicationUser appUser;
 
     @Autowired
-    private UserOperations userDAO;
+    private UserOperations userOperations;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -59,9 +63,32 @@ class UserDAOTest {
     }
 
     @Test
-    void shouldReturnAllUsers(){
-        Collection<ApplicationUser> allUsers = userDAO.getAll();
+    void shouldReturnAllUsersWithCorrectData(){
+        List<ApplicationUser> allUsers = userOperations.getAll();
+        assertTrue(allUsers.contains(userWithId5));
         assertEquals(3,allUsers.size());
+
+        for (ApplicationUser allUser : allUsers) {
+            assertNotNull(allUser.getId());
+            assertNotNull(allUser.getUsername());
+            assertNotNull(allUser.getCredentials());
+        }
+    }
+
+    @Test
+    void shouldFindAppUserById(){
+        ApplicationUser user = userOperations.findById(5L);
+        assertEquals(userWithId5,user);
+    }
+
+    @Test
+    void shouldAddUser(){
+        appUser.setId(1L);
+        appUser.setUserName(new UserName("Uncle","Bob"));
+        appUser.setCredentials(new UserCredentials("bob@gmail.com","somepassword"));
+        userOperations.add(appUser);
+        assertEquals(4,userOperations.getAll().size());
+        assertEquals(appUser,userOperations.findById(1L));
     }
 
     @AfterEach
@@ -69,5 +96,13 @@ class UserDAOTest {
         jdbcTemplate.execute("delete from users_roles");
         jdbcTemplate.execute("delete from roles");
         jdbcTemplate.execute("delete from users");
+    }
+
+    private static ApplicationUser createUserWithId5() {
+        ApplicationUser user = new ApplicationUser();
+        user.setId(5L);
+        user.setUserName(new UserName("UserFive", "Five"));
+        user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
+        return user;
     }
 }

@@ -7,13 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -24,7 +24,8 @@ import java.util.Set;
 @Table(name = "users")
 public class ApplicationUser implements UserDetails {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -34,12 +35,11 @@ public class ApplicationUser implements UserDetails {
     @Embedded
     private UserCredentials credentials;
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
-    @JoinTable(name = "users_addresses",joinColumns =
-    @JoinColumn(name = "user_id"),inverseJoinColumns =
+    @JoinTable(name = "users_addresses", joinColumns =
+    @JoinColumn(name = "user_id"), inverseJoinColumns =
     @JoinColumn(name = "address_id"))
     private List<Address> addresses;
 
@@ -60,5 +60,31 @@ public class ApplicationUser implements UserDetails {
 
     public String getUsername() {
         return credentials.getEmail();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ApplicationUser that = (ApplicationUser) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(userName, that.userName) &&
+                Objects.equals(credentials, that.credentials) &&
+                Objects.equals(createdAt, that.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userName, credentials, createdAt);
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationUser{" +
+                "id=" + id +
+                ", userName=" + userName +
+                ", credentials=" + credentials +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

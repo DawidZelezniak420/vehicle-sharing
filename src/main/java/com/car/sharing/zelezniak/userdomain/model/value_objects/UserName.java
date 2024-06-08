@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Objects;
+
 @Getter
 @AllArgsConstructor
 @Embeddable
@@ -22,5 +24,27 @@ public class UserName {
     public UserName() {
         firstName = "";
         lastName = "";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserName userName = (UserName) o;
+        return Objects.equals(firstName, userName.firstName) &&
+                Objects.equals(lastName, userName.lastName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName);
+    }
+
+    @Override
+    public String toString() {
+        return "UserName{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
     }
 }

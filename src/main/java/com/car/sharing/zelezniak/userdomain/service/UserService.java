@@ -7,4 +7,6 @@ import java.util.Collection;
 public interface UserService {
 
     Collection<ApplicationUser> getAll();
+
+    ApplicationUser findById(Long id);
 }
