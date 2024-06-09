@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -30,18 +29,16 @@ public class ApplicationUser implements UserDetails {
     private Long id;
 
     @Embedded
-    private UserName userName;
+    private UserName name;
 
     @Embedded
     private UserCredentials credentials;
 
     private LocalDateTime createdAt;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
-    @JoinTable(name = "users_addresses", joinColumns =
-    @JoinColumn(name = "user_id"), inverseJoinColumns =
-    @JoinColumn(name = "address_id"))
-    private List<Address> addresses;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles", joinColumns =
@@ -49,6 +46,9 @@ public class ApplicationUser implements UserDetails {
     @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
+    public String getEmail(){
+        return credentials.getEmail();
+    }
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
@@ -67,24 +67,26 @@ public class ApplicationUser implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ApplicationUser that = (ApplicationUser) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(userName, that.userName) &&
-                Objects.equals(credentials, that.credentials) &&
-                Objects.equals(createdAt, that.createdAt);
+        return  Objects.equals(name, that.name)
+                && Objects.equals(credentials, that.credentials)
+                && Objects.equals(createdAt, that.createdAt)
+                && Objects.equals(address, that.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userName, credentials, createdAt);
+        return Objects.hash(name, credentials, createdAt, address);
     }
+
 
     @Override
     public String toString() {
         return "ApplicationUser{" +
-                "id=" + id +
-                ", userName=" + userName +
-                ", credentials=" + credentials +
+                "address=" + address +
                 ", createdAt=" + createdAt +
+                ", credentials=" + credentials +
+                ", name=" + name +
+                ", id=" + id +
                 '}';
     }
 }

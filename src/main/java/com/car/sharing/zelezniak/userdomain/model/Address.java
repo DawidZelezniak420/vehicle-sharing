@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -38,6 +39,37 @@ public class Address {
     @Column(name = "country")
     private String country;
 
-    @ManyToMany(mappedBy = "addresses")
+    @OneToMany(mappedBy = "address")
     private Set<ApplicationUser> appUser;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(street, address.street)
+                && Objects.equals(houseNumber, address.houseNumber)
+                && Objects.equals(flatNumber, address.flatNumber)
+                && Objects.equals(city, address.city)
+                && Objects.equals(postalCode, address.postalCode)
+                && Objects.equals(country, address.country);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, street, houseNumber, flatNumber, city, postalCode, country);
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "id=" + id +
+                ", street='" + street + '\'' +
+                ", flatNumber='" + flatNumber + '\'' +
+                ", houseNumber='" + houseNumber + '\'' +
+                ", city='" + city + '\'' +
+                ", country='" + country + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                '}';
+    }
 }
