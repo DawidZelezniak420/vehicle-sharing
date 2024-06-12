@@ -1,6 +1,6 @@
-package com.CarSharing.config;
+package com.car.sharing.zelezniak.config;
 
-import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,11 +1,10 @@
-package com.CarSharing.userdomain;
+package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.CarSharingApplication;
-import com.car.sharing.zelezniak.userdomain.model.Address;
-import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
-import com.car.sharing.zelezniak.userdomain.model.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.model.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.service.UserOperationsValidator;
+import com.car.sharing.zelezniak.userdomain.model.user.Address;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.userdomain.service.UserValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,14 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
-class UserOperationsValidatorTest {
+class UserValidatorTest {
 
     private static ApplicationUser userWithId5;
 
@@ -30,7 +26,7 @@ class UserOperationsValidatorTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private UserOperationsValidator validator;
+    private UserValidator validator;
 
     @Value("${create.role.user}")
     private String createRoleUser;
@@ -42,13 +38,16 @@ class UserOperationsValidatorTest {
     private String setRoleUserFive;
     @Value("${set.role.user.six}")
     private String setRoleUserSix;
-    @Value("${create.address.three}")
-    private String createAddressThree;
+    @Value("${create.address.five}")
+    private String createAddressFive;
+    @Value("${create.address.six}")
+    private String createAddressSix;
 
     @BeforeEach
     void createUsers(){
         jdbcTemplate.execute(createRoleUser);
-        jdbcTemplate.execute(createAddressThree);
+        jdbcTemplate.execute(createAddressFive);
+        jdbcTemplate.execute(createAddressSix);
         jdbcTemplate.execute(createUserFive);
         jdbcTemplate.execute(createUserSix);
         jdbcTemplate.execute(setRoleUserFive);
@@ -71,18 +70,18 @@ class UserOperationsValidatorTest {
     }
 
     @Test
-    void shouldTestUserExists() {
+    void shouldThrowExceptionIfUserExists() {
         String existingUserEmail = userWithId5.getEmail();
         assertThrows(IllegalArgumentException.class,()->
-           validator.checkIfUserExists(existingUserEmail));
+           validator.ifUserExistsThrowException(existingUserEmail));
     }
 
     @Test
-    void shouldTestUserNotExists() {
+    void shouldNotThrowExceptionIfUserNotExists() {
         ApplicationUser user = new ApplicationUser();
         user.setCredentials(new UserCredentials("someuser@gmail.com", "somepass"));
 
-        assertDoesNotThrow(() -> validator.checkIfUserExists(user.getEmail()));
+        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(user.getEmail()));
     }
 
     @Test
@@ -115,9 +114,7 @@ class UserOperationsValidatorTest {
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
-        Set<ApplicationUser> users = new HashSet<>();
-        users.add(user);
-        Address address = new Address(3L, "teststreet", "5", "150", "Warsaw", "00-001", "Poland", users);
+        Address address = new Address(5L,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
         user.setAddress(address);
         return user;
     }

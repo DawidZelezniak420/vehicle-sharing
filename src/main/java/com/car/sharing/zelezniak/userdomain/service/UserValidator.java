@@ -1,22 +1,24 @@
 package com.car.sharing.zelezniak.userdomain.service;
 
-import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
 import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class UserOperationsValidator {
+public class UserValidator {
 
     private final AppUserRepository userRepository;
 
     public void throwExceptionIfObjectIsNull(Object o) {
-        if (o == null)
-            throw new IllegalArgumentException("Incorrect value");
+        if (o == null) {
+            throw new IllegalArgumentException(
+                    "Argument is incorrect");
+        }
     }
 
-    public void checkIfUserExists(String email) {
+    public void ifUserExistsThrowException(String email) {
         if (userWithSuchEmailExists(email))
             throw new IllegalArgumentException(
                    createMessage(email));
@@ -27,7 +29,8 @@ public class UserOperationsValidator {
         String newEmail = newData.getEmail();
         if(emailsAreNotSame(userFromDbEmail,newEmail)
         && userWithSuchEmailExists(newEmail)){
-            throw new IllegalArgumentException(createMessage(newEmail));
+            throw new IllegalArgumentException(
+                    createMessage(newEmail));
         }
     }
 

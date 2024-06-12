@@ -1,4 +1,4 @@
-package com.car.sharing.zelezniak.userdomain.model.value_objects;
+package com.car.sharing.zelezniak.userdomain.model.user.value_objects;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
@@ -38,7 +38,8 @@ public class UserCredentials {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserCredentials that = (UserCredentials) o;
-        return Objects.equals(email, that.email) && Objects.equals(password, that.password);
+        return Objects.equals(email, that.email)
+                && Objects.equals(password, that.password);
     }
 
     public int hashCode() {

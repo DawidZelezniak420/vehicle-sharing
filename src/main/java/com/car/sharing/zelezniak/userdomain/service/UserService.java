@@ -1,6 +1,6 @@
 package com.car.sharing.zelezniak.userdomain.service;
 
-import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
 
 import java.util.Collection;
 
@@ -8,5 +8,5 @@ public interface UserService {
 
     Collection<ApplicationUser> getAll();
 
-    ApplicationUser findById(Long id);
+    ApplicationUser getById(Long id);
 }

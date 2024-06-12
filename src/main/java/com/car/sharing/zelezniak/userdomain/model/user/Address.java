@@ -1,5 +1,6 @@
-package com.car.sharing.zelezniak.userdomain.model;
+package com.car.sharing.zelezniak.userdomain.model.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -38,9 +38,6 @@ public class Address {
 
     @Column(name = "country")
     private String country;
-
-    @OneToMany(mappedBy = "address")
-    private Set<ApplicationUser> appUser;
 
     @Override
     public boolean equals(Object o) {

@@ -1,9 +1,7 @@
 package com.car.sharing.zelezniak.userdomain.service;
 
-import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
 import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
-import com.car.sharing.zelezniak.userdomain.repository.UserDAO;
-import com.car.sharing.zelezniak.utils.TimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +14,7 @@ import java.util.NoSuchElementException;
 public class UserOperations implements UserService {
 
     private final AppUserRepository userRepository;
-    private final UserDAO userDAO;
-    private final UserOperationsValidator validator;
+    private final UserValidator validator;
 
     @Transactional(readOnly = true)
     public List<ApplicationUser> getAll() {
@@ -25,16 +22,9 @@ public class UserOperations implements UserService {
     }
 
     @Transactional(readOnly = true)
-    public ApplicationUser findById(Long id) {
+    public ApplicationUser getById(Long id) {
         validator.throwExceptionIfObjectIsNull(id);
         return findUser(id);
-    }
-
-    @Transactional
-    public void add(ApplicationUser appUser) {
-        validator.throwExceptionIfObjectIsNull(appUser);
-        validator.checkIfUserExists(appUser.getEmail());
-        addUser(appUser);
     }
 
     @Transactional
@@ -42,17 +32,14 @@ public class UserOperations implements UserService {
         validator.throwExceptionIfObjectIsNull(id);
         validator.throwExceptionIfObjectIsNull(newData);
         ApplicationUser userFromDb = findUser(id);
-        String userFromDbEmail = userFromDb.getEmail();
-        validator.checkIfUserCanBeUpdated(userFromDbEmail, newData);
-        updateUser(userFromDb,newData);
-        userRepository.save(userFromDb);
+        validateAndUpdateUser(userFromDb, newData);
     }
 
-    private void updateUser(ApplicationUser userFromDb, ApplicationUser newData) {
-        userFromDb.setName(newData.getName());
-        userFromDb.setCredentials(newData.getCredentials());
-        userFromDb.setAddress(newData.getAddress());
-
+    @Transactional
+    public void delete(Long id) {
+        validator.throwExceptionIfObjectIsNull(id);
+        ApplicationUser userToDelete = findUser(id);
+        handleDeleteUser(userToDelete);
     }
 
     private ApplicationUser findUser(Long id) {
@@ -62,12 +49,20 @@ public class UserOperations implements UserService {
                                 "User with id : " + id + " does not exists."));
     }
 
-    private void addUser(ApplicationUser appUser) {
-        var creationDate =
-                TimeFormatter.getFormattedActualDateTime();
-        appUser.setCreatedAt(creationDate);
-        userRepository.save(appUser);
+    private void validateAndUpdateUser(ApplicationUser userFromDb,
+                                       ApplicationUser newData) {
+        String userFromDbEmail = userFromDb.getEmail();
+        validator.checkIfUserCanBeUpdated(userFromDbEmail, newData);
+        userRepository.updateUser(userFromDb.getId(), newData.getName(),
+                newData.getCredentials(), newData.getAddress());
     }
 
+    private void handleDeleteUser(ApplicationUser userToDelete) {
+        removeRoles(userToDelete);
+        userRepository.delete(userToDelete);
+    }
 
+    private void removeRoles(ApplicationUser userToDelete) {
+        userToDelete.setRoles(null);
+    }
 }

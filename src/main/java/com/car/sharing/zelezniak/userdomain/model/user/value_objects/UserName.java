@@ -1,4 +1,4 @@
-package com.car.sharing.zelezniak.userdomain.model.value_objects;
+package com.car.sharing.zelezniak.userdomain.model.user.value_objects;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Size;
@@ -31,8 +31,8 @@ public class UserName {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserName userName = (UserName) o;
-        return Objects.equals(firstName, userName.firstName) &&
-                Objects.equals(lastName, userName.lastName);
+        return Objects.equals(firstName, userName.firstName)
+                && Objects.equals(lastName, userName.lastName);
     }
 
     @Override

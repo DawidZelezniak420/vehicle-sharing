@@ -1,4 +1,4 @@
-package com.car.sharing.zelezniak.userdomain.model;
+package com.car.sharing.zelezniak.userdomain.model.user;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,5 +24,12 @@ public class Role implements GrantedAuthority {
     @Override
     public String getAuthority() {
         return roleName;
+    }
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "roleName='" + roleName + '\'' +
+                '}';
     }
 }

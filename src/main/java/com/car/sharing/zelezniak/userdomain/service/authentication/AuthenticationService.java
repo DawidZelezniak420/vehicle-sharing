@@ -1,0 +1,104 @@
+package com.car.sharing.zelezniak.userdomain.service.authentication;
+
+import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
+import com.car.sharing.zelezniak.userdomain.model.login.LoginResponse;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Role;
+import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
+import com.car.sharing.zelezniak.userdomain.repository.RoleRepository;
+import com.car.sharing.zelezniak.userdomain.service.UserValidator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class AuthenticationService implements Authenticator {
+
+    private final AppUserRepository userRepository;
+    private final PasswordEncoder encoder;
+    private final RoleRepository roleRepository;
+    private final UserValidator validator;
+    private final AuthenticationManager authenticationManager;
+    private final JWTGenerator jwtGenerator;
+
+    public UserDetails loadUserByUsername(
+            String username)
+            throws UsernameNotFoundException {
+        validator.throwExceptionIfObjectIsNull(username);
+        return userRepository.findByCredentialsEmail(username);
+    }
+
+    @Transactional
+    public ApplicationUser register(
+            ApplicationUser newUser) {
+        validator.throwExceptionIfObjectIsNull(newUser);
+        validator.ifUserExistsThrowException(newUser.getEmail());
+        add(newUser);
+        return newUser;
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest loginRequest) {
+        UserCredentials credentials = loginRequest.getCredentials();
+        String email = credentials.getEmail();
+        String password = credentials.getPassword();
+       return tryLoginUser(email, password);
+    }
+
+    private void add(ApplicationUser user) {
+        setRequiredDataAndEncodePassword(user);
+        userRepository.save(user);
+    }
+
+    private void setRequiredDataAndEncodePassword(
+            ApplicationUser user) {
+        user.setCreationDate();
+        user.setCredentials(
+                new UserCredentials(user.getEmail(),
+                        encoder.encode(user.getPassword())));
+        handleAddRoleForUser(user);
+    }
+
+    private void handleAddRoleForUser(
+            ApplicationUser appUser) {
+        Role roleUser = findOrCreateRoleUser();
+        appUser.addRole(roleUser);
+    }
+
+    private Role findOrCreateRoleUser() {
+        Role role = roleRepository.findByRoleName("USER");
+        if (roleIsNull(role)) {
+            role = new Role("USER");
+            roleRepository.save(role);
+        }
+        return role;
+    }
+
+    private boolean roleIsNull(Role roleUser) {
+        return roleUser == null;
+    }
+
+    private LoginResponse tryLoginUser(String email
+                                    , String password) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            email, password));
+            String token = jwtGenerator.generateJWT(auth);
+            return new LoginResponse(
+                    userRepository.findByCredentialsEmail(email), token);
+        } catch (AuthenticationException e) {
+            return new LoginResponse(null, "");
+        }
+    }
+
+}

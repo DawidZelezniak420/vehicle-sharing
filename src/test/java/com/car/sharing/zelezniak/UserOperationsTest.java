@@ -1,13 +1,11 @@
-package com.CarSharing.userdomain;
+package com.car.sharing.zelezniak;
 
-import com.CarSharing.config.TestBeans;
-import com.car.sharing.zelezniak.CarSharingApplication;
-import com.car.sharing.zelezniak.userdomain.model.Address;
-import com.car.sharing.zelezniak.userdomain.model.ApplicationUser;
-import com.car.sharing.zelezniak.userdomain.model.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.model.value_objects.UserName;
+import com.car.sharing.zelezniak.config.TestBeans;
+import com.car.sharing.zelezniak.userdomain.model.user.Address;
+import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
 import com.car.sharing.zelezniak.userdomain.service.UserOperations;
-import com.car.sharing.zelezniak.utils.TimeFormatter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +16,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,16 +51,19 @@ class UserOperationsTest {
     private String setRoleUserSix;
     @Value("${set.role.user.seven}")
     private String setRoleUserSeven;
-    @Value("${create.address.three}")
-    private String createAddressThree;
-    @Value("${create.address.four}")
-    private String createAddressFour;
+    @Value("${create.address.five}")
+    private String createAddressFive;
+    @Value("${create.address.six}")
+    private String createAddressSix;
+    @Value("${create.address.seven}")
+    private String createAddressSeven;
 
     @BeforeEach
-    void createUsers(){
+    void createUsers() {
         jdbcTemplate.execute(createRoleUser);
-        jdbcTemplate.execute(createAddressThree);
-        jdbcTemplate.execute(createAddressFour);
+        jdbcTemplate.execute(createAddressFive);
+        jdbcTemplate.execute(createAddressSix);
+        jdbcTemplate.execute(createAddressSeven);
         jdbcTemplate.execute(createUserFive);
         jdbcTemplate.execute(createUserSix);
         jdbcTemplate.execute(createUserSeven);
@@ -74,10 +74,10 @@ class UserOperationsTest {
     }
 
     @Test
-    void shouldReturnAllUsersWithCorrectData(){
+    void shouldReturnAllUsersWithCorrectData() {
         List<ApplicationUser> allUsers = userOperations.getAll();
         assertTrue(allUsers.contains(userWithId5));
-        assertEquals(3,allUsers.size());
+        assertEquals(3, allUsers.size());
 
         for (ApplicationUser user : allUsers) {
             assertNotNull(user.getId());
@@ -88,47 +88,41 @@ class UserOperationsTest {
     }
 
     @Test
-    void shouldFindAppUserById(){
-        ApplicationUser user = userOperations.findById(5L);
-        assertEquals(userWithId5,user);
+    void shouldFindAppUserById() {
+        ApplicationUser user = userOperations.getById(5L);
+        assertEquals(userWithId5, user);
     }
 
     @Test
-    void shouldAddUser(){
-        appUser.setId(1L);
-        appUser.setName(new UserName("Uncle","Bob"));
-        appUser.setCredentials(new UserCredentials("bob@gmail.com","somepassword"));
-        appUser.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
-        Set<ApplicationUser> users = new HashSet<>();
-        users.add(appUser);
-        Address address = new Address(3L,"teststreet","5","150","Warsaw","00-001","Poland",users);
-        appUser.setAddress(address);
-
-        userOperations.add(appUser);
-
-        assertEquals(4,userOperations.getAll().size());
-        assertEquals(appUser,userOperations.findById(1L));
+    void shouldNotFindAppUserById(){
+        Long nonExistentId= 20L;
+        assertThrows(NoSuchElementException.class,()->
+                userOperations.getById(nonExistentId));
     }
 
     @Test
-    void shouldUpdateUser(){
+    void shouldUpdateUser() {
         appUser.setId(5L);
-        appUser.setName(new UserName("Uncle","Bob"));
-        appUser.setCredentials(new UserCredentials("bob@gmail.com","somepassword"));
+        appUser.setName(new UserName("Uncle", "Bob"));
+        appUser.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
 
-        userOperations.update(5L,appUser);
-        ApplicationUser updatedUser = userOperations.findById(5L);
+        userOperations.update(5L, appUser);
+        ApplicationUser updatedUser = userOperations.getById(5L);
 
-        assertEquals(appUser,updatedUser);
+        assertEquals(appUser, updatedUser);
     }
 
     @Test
-    void shouldDeleteUser(){
-
+    void shouldDeleteUser() {
+        assertEquals(3, userOperations.getAll().size());
+        userOperations.delete(5L);
+        List<ApplicationUser> users = userOperations.getAll();
+        assertEquals(2, users.size());
+        assertFalse(users.contains(userWithId5));
     }
 
     @AfterEach
-    void deleteDataFromDb(){
+    void cleanupDatabase() {
         jdbcTemplate.execute("delete from users_roles");
         jdbcTemplate.execute("delete from roles");
         jdbcTemplate.execute("delete from users");
@@ -142,9 +136,7 @@ class UserOperationsTest {
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
-        Set<ApplicationUser> users = new HashSet<>();
-        users.add(user);
-        Address address = new Address(3L,"teststreet","5","150","Warsaw","00-001","Poland",users);
+        Address address = new Address(5L,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
         user.setAddress(address);
         return user;
     }
