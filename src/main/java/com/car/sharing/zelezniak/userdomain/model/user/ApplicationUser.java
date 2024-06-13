@@ -3,7 +3,6 @@ package com.car.sharing.zelezniak.userdomain.model.user;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
 import com.car.sharing.zelezniak.utils.TimeFormatter;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

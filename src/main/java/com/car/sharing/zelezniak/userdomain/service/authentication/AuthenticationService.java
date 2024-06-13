@@ -80,7 +80,7 @@ public class AuthenticationService implements Authenticator {
         Role role = roleRepository.findByRoleName("USER");
         if (role == null) {
             role = new Role("USER");
-            entityManager.persist(role);
+            roleRepository.save(role);
         }
         return role;
     }
@@ -93,7 +93,8 @@ public class AuthenticationService implements Authenticator {
                             email, password));
             String token = jwtGenerator.generateJWT(auth);
             return new LoginResponse(
-                    userRepository.findByCredentialsEmail(email), token);
+                    userRepository.findByCredentialsEmail(email),
+                    token);
         } catch (AuthenticationException e) {
             log.error("User with email : " + email + " can not be authenticated - bad credentials.");
             return new LoginResponse(null, "");

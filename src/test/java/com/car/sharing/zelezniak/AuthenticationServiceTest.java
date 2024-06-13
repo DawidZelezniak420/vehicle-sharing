@@ -10,9 +10,7 @@ import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
 import com.car.sharing.zelezniak.userdomain.service.UserOperations;
 import com.car.sharing.zelezniak.userdomain.service.authentication.AuthenticationService;
 import com.car.sharing.zelezniak.utils.TimeFormatter;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthenticationServiceTest {
 
     private static ApplicationUser userWithId5;
@@ -86,6 +85,7 @@ class AuthenticationServiceTest {
 
     @Test
     @Transactional
+    @Order(1)
     void shouldRegisterNewUser() {
         appUser.setId(null);
         appUser.setName(new UserName("Uncle", "Bob"));
@@ -101,12 +101,8 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void shouldLoadUserByEmail(){
-        assertEquals(userWithId5,userRepository.findByCredentialsEmail("userfive@gmail.com"));
-    }
-
-    @Test
     @Transactional
+    @Order(2)
     void shouldRegisterAndLoginUser(){
         appUser.setId(null);
         appUser.setName(new UserName("Uncle", "Bob"));
@@ -123,6 +119,12 @@ class AuthenticationServiceTest {
         String token = login.getJwt();
         String[] tokenParts = token.split("\\.");
         assertEquals(3,tokenParts.length);
+    }
+
+
+    @Test
+    void shouldLoadUserByEmail(){
+        assertEquals(userWithId5,userRepository.findByCredentialsEmail("userfive@gmail.com"));
     }
 
     @AfterEach

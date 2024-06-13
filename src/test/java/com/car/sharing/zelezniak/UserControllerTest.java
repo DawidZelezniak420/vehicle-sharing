@@ -213,7 +213,6 @@ class UserControllerTest {
         jdbcTemplate.execute("delete from users");
         jdbcTemplate.execute("delete from addresses");
         userWithId5 = null;
-        appUser = new ApplicationUser();
         token = null;
     }
 

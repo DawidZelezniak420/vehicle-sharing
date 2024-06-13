@@ -1,7 +1,6 @@
 package com.car.sharing.zelezniak.userdomain.service;
 
 import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

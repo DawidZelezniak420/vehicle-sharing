@@ -23,9 +23,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(
-            @RequestBody LoginRequest loginRequest){
-        return authentication.login(loginRequest);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public LoginResponse login(@RequestBody LoginRequest loginRequest){
+        System.out.println("Login request: " + loginRequest);
+        LoginResponse loginResponse = authentication.login(loginRequest);
+        System.out.println("Login response: " + loginResponse);
+        return loginResponse;
     }
 
 
