@@ -1,27 +1,36 @@
 package com.car.sharing.zelezniak;
 
+import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
+import com.car.sharing.zelezniak.userdomain.model.login.LoginResponse;
 import com.car.sharing.zelezniak.userdomain.model.user.Address;
 import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
 import com.car.sharing.zelezniak.userdomain.service.UserOperations;
 import com.car.sharing.zelezniak.userdomain.service.authentication.AuthenticationService;
 import com.car.sharing.zelezniak.utils.TimeFormatter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
-class UserAuthenticationTest {
+class AuthenticationServiceTest {
 
     private static ApplicationUser userWithId5;
+
+    @Autowired
+    private AppUserRepository userRepository;
 
     @Autowired
     private ApplicationUser appUser;
@@ -31,6 +40,9 @@ class UserAuthenticationTest {
 
     @Autowired
     private UserOperations userOperations;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -73,6 +85,7 @@ class UserAuthenticationTest {
 
 
     @Test
+    @Transactional
     void shouldRegisterNewUser() {
         appUser.setId(null);
         appUser.setName(new UserName("Uncle", "Bob"));
@@ -83,9 +96,45 @@ class UserAuthenticationTest {
 
         userAuthentication.register(appUser);
 
-        assertEquals(4, userOperations.getAll().size());
-        assertEquals(appUser, userOperations.getById(1L));
+        assertEquals(4, userRepository.count());
+        assertEquals(appUser, userOperations.getById(appUser.getId()));
     }
+
+    @Test
+    void shouldLoadUserByEmail(){
+        assertEquals(userWithId5,userRepository.findByCredentialsEmail("userfive@gmail.com"));
+    }
+
+    @Test
+    @Transactional
+    void shouldRegisterAndLoginUser(){
+        appUser.setId(null);
+        appUser.setName(new UserName("Uncle", "Bob"));
+        appUser.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        appUser.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        Address address = new Address( null,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        appUser.setAddress(address);
+
+        userAuthentication.register(appUser);
+        LoginRequest loginRequest = new LoginRequest("bob@gmail.com","somepassword");
+        LoginResponse login = userAuthentication.login(loginRequest);
+
+        assertEquals(appUser,login.getUser());
+        String token = login.getJwt();
+        String[] tokenParts = token.split("\\.");
+        assertEquals(3,tokenParts.length);
+    }
+
+    @AfterEach
+    void cleanupDatabase() {
+        jdbcTemplate.execute("delete from users_roles");
+        jdbcTemplate.execute("delete from roles");
+        jdbcTemplate.execute("delete from users");
+        jdbcTemplate.execute("delete from addresses");
+        userWithId5 = null;
+        appUser = new ApplicationUser();
+    }
+
 
     private static ApplicationUser createUserWithId5() {
         ApplicationUser user = new ApplicationUser();

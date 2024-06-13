@@ -6,12 +6,14 @@ import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
 import com.car.sharing.zelezniak.userdomain.model.user.Role;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.userdomain.service.UserService;
 import com.car.sharing.zelezniak.userdomain.service.authentication.JWTGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,21 +25,21 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
 @AutoConfigureMockMvc
-@ExtendWith(SpringExtension.class)
 class UserControllerTest {
 
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
@@ -60,6 +62,12 @@ class UserControllerTest {
 
     @Autowired
     private JWTGenerator jwtGenerator;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private UserService userService;
 
     private String token;
 
@@ -103,7 +111,7 @@ class UserControllerTest {
     @Test
     void shouldReturnAllUsersWithCorrectData() throws Exception {
         mockMvc.perform(get("/users/")
-                        .header("Authorization","Bearer "+token))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(3)))
@@ -117,8 +125,8 @@ class UserControllerTest {
 
     @Test
     void shouldFindAppUserById() throws Exception {
-        mockMvc.perform(get("/users/{id}",5L)
-                .header("Authorization","Bearer "+ token))
+        mockMvc.perform(get("/users/{id}", 5L)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(jsonPath("$.id").value(userWithId5.getId()))
                 .andExpect(jsonPath("$.credentials.email").value(userWithId5.getEmail()))
                 .andExpect(jsonPath("$.credentials.password").value(userWithId5.getPassword()))
@@ -129,21 +137,73 @@ class UserControllerTest {
 
     @Test
     void shouldNotFindAppUserById() throws Exception {
-        mockMvc.perform(get("/users/{id}",20L)
-                .header("Authorization","Bearer "+token))
+        mockMvc.perform(get("/users/{id}", 20L)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value("User with id : " + 20 + " does not exists."))
                 .andExpect(jsonPath("$.code").value(404));
     }
 
     @Test
-    void shouldUpdateUser() {
+    @DisplayName("run update method with token generated for role ADMIN")
+    @Transactional
+    void shouldUpdateUserWhenRoleAdmin() throws Exception {
+        appUser.setName(new UserName("Jim", "Beam"));
+        appUser.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
+        Address address = new Address(5L, "somestreet", "25", "10", "Lublin", "21-070", "Poland");
+        entityManager.merge(address);
+        appUser.setAddress(address);
 
+        mockMvc.perform(put("/users/update/{id}", 5L)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(appUser))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userWithId5.getId()))
+                .andExpect(jsonPath("$.credentials.email").value(appUser.getEmail()))
+                .andExpect(jsonPath("$.credentials.password").value(appUser.getPassword()))
+                .andExpect(jsonPath("$.name.firstName").value(appUser.getName().getFirstName()))
+                .andExpect(jsonPath("$.name.lastName").value(appUser.getName().getLastName()))
+                .andExpect(jsonPath("$.address").value(appUser.getAddress()));
     }
 
     @Test
-    void shouldDeleteUser() {
+    @DisplayName("run update method with token generated for role USER")
+    @Transactional
+    void shouldUpdateUserWhenRoleUser() throws Exception {
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("USER"));
+        UserDetails userDetails = new User("user", "password", authorities);
+        String token = jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
 
+        appUser.setName(new UserName("Jim", "Beam"));
+        appUser.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
+        Address address = new Address(5L, "somestreet", "25", "10", "Lublin", "21-070", "Poland");
+        entityManager.merge(address);
+        appUser.setAddress(address);
+
+        mockMvc.perform(put("/users/update/{id}", 5L)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(appUser))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(userWithId5.getId()))
+                .andExpect(jsonPath("$.credentials.email").value(appUser.getEmail()))
+                .andExpect(jsonPath("$.credentials.password").value(appUser.getPassword()))
+                .andExpect(jsonPath("$.name.firstName").value(appUser.getName().getFirstName()))
+                .andExpect(jsonPath("$.name.lastName").value(appUser.getName().getLastName()))
+                .andExpect(jsonPath("$.address").value(appUser.getAddress()));
+    }
+
+    @Test
+    void shouldDeleteUser() throws Exception {
+        assertEquals(3, userService.getAll().size());
+        mockMvc.perform(delete("/users/delete/{id}", 5L)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+        assertEquals(2, userService.getAll().size());
     }
 
     @AfterEach
@@ -157,11 +217,11 @@ class UserControllerTest {
         token = null;
     }
 
-    private String generateToken(){
+    private String generateToken() {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority("ADMIN"));
         UserDetails userDetails = new User("admin", "password", authorities);
-        return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails,null,authorities));
+        return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
     }
 
     private static ApplicationUser createUserWithId5() {
@@ -173,7 +233,7 @@ class UserControllerTest {
         user.setAddress(address);
         user.setRoles(
                 new HashSet<>(
-                List.of(new Role("USER"))));
+                        List.of(new Role("USER"))));
         return user;
     }
 }

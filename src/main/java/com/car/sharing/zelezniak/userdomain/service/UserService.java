@@ -9,4 +9,8 @@ public interface UserService {
     Collection<ApplicationUser> getAll();
 
     ApplicationUser getById(Long id);
+
+    ApplicationUser update(Long id, ApplicationUser newData);
+
+    void delete(Long id);
 }

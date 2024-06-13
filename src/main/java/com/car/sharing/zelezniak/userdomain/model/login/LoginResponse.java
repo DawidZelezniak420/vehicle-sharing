@@ -14,4 +14,12 @@ public class LoginResponse {
 
     private ApplicationUser user;
     private String jwt;
+
+    @Override
+    public String toString() {
+        return "LoginResponse{" +
+                "user=" + user +
+                ", jwt='" + jwt + '\'' +
+                '}';
+    }
 }

@@ -43,7 +43,9 @@ public class ApplicationUser implements UserDetails {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade ={
+            CascadeType.DETACH,
+            CascadeType.MERGE})
     @JoinTable(name = "users_roles", joinColumns =
     @JoinColumn(name = "user_id"), inverseJoinColumns =
     @JoinColumn(name = "role_id"))

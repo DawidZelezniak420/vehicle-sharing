@@ -8,7 +8,9 @@ import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredent
 import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
 import com.car.sharing.zelezniak.userdomain.repository.RoleRepository;
 import com.car.sharing.zelezniak.userdomain.service.UserValidator;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class AuthenticationService implements Authenticator {
 
     private final AppUserRepository userRepository;
@@ -29,6 +33,7 @@ public class AuthenticationService implements Authenticator {
     private final UserValidator validator;
     private final AuthenticationManager authenticationManager;
     private final JWTGenerator jwtGenerator;
+    private final EntityManager entityManager;
 
     public UserDetails loadUserByUsername(
             String username)
@@ -37,7 +42,6 @@ public class AuthenticationService implements Authenticator {
         return userRepository.findByCredentialsEmail(username);
     }
 
-    @Transactional
     public ApplicationUser register(
             ApplicationUser newUser) {
         validator.throwExceptionIfObjectIsNull(newUser);
@@ -46,12 +50,10 @@ public class AuthenticationService implements Authenticator {
         return newUser;
     }
 
-    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest loginRequest) {
-        UserCredentials credentials = loginRequest.getCredentials();
-        String email = credentials.getEmail();
-        String password = credentials.getPassword();
-       return tryLoginUser(email, password);
+        String email = loginRequest.getEmail();
+        String password = loginRequest.getPassword();
+        return tryLoginUser(email, password);
     }
 
     private void add(ApplicationUser user) {
@@ -76,19 +78,15 @@ public class AuthenticationService implements Authenticator {
 
     private Role findOrCreateRoleUser() {
         Role role = roleRepository.findByRoleName("USER");
-        if (roleIsNull(role)) {
+        if (role == null) {
             role = new Role("USER");
-            roleRepository.save(role);
+            entityManager.persist(role);
         }
         return role;
     }
 
-    private boolean roleIsNull(Role roleUser) {
-        return roleUser == null;
-    }
-
     private LoginResponse tryLoginUser(String email
-                                    , String password) {
+            , String password) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -97,6 +95,7 @@ public class AuthenticationService implements Authenticator {
             return new LoginResponse(
                     userRepository.findByCredentialsEmail(email), token);
         } catch (AuthenticationException e) {
+            log.error("User with email : " + email + " can not be authenticated - bad credentials.");
             return new LoginResponse(null, "");
         }
     }

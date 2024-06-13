@@ -113,6 +113,16 @@ class UserOperationsTest {
     }
 
     @Test
+    void shouldNotUpdateUser() {
+        appUser.setId(5L);
+        appUser.setName(new UserName("Uncle", "Bob"));
+        appUser.setCredentials(new UserCredentials("usersix@gmail.com", "somepassword"));
+
+        assertThrows(IllegalArgumentException.class,()->
+                userOperations.update(5L, appUser));
+    }
+
+    @Test
     void shouldDeleteUser() {
         assertEquals(3, userOperations.getAll().size());
         userOperations.delete(5L);

@@ -1,6 +1,7 @@
 package com.car.sharing.zelezniak.userdomain.service;
 
 import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,12 @@ public class UserOperations implements UserService {
     }
 
     @Transactional
-    public void update(Long id, ApplicationUser newData) {
+    public ApplicationUser update(Long id,
+                                  ApplicationUser newData) {
         validator.throwExceptionIfObjectIsNull(id);
         validator.throwExceptionIfObjectIsNull(newData);
         ApplicationUser userFromDb = findUser(id);
-        validateAndUpdateUser(userFromDb, newData);
+        return validateAndUpdateUser(userFromDb, newData);
     }
 
     @Transactional
@@ -49,12 +51,14 @@ public class UserOperations implements UserService {
                                 "User with id : " + id + " does not exists."));
     }
 
-    private void validateAndUpdateUser(ApplicationUser userFromDb,
-                                       ApplicationUser newData) {
+    private ApplicationUser validateAndUpdateUser(ApplicationUser userFromDb,
+                                                  ApplicationUser newData) {
         String userFromDbEmail = userFromDb.getEmail();
         validator.checkIfUserCanBeUpdated(userFromDbEmail, newData);
-        userRepository.updateUser(userFromDb.getId(), newData.getName(),
-                newData.getCredentials(), newData.getAddress());
+        userFromDb.setName(newData.getName());
+        userFromDb.setCredentials(newData.getCredentials());
+        userFromDb.setAddress(newData.getAddress());
+        return userFromDb;
     }
 
     private void handleDeleteUser(ApplicationUser userToDelete) {
