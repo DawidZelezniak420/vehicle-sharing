@@ -1,12 +1,12 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.userdomain.controller.UserController;
+import com.car.sharing.zelezniak.userdomain.controller.ClientController;
 import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.user.Role;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.service.UserService;
+import com.car.sharing.zelezniak.userdomain.service.ClientService;
 import com.car.sharing.zelezniak.userdomain.service.authentication.JWTGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -40,19 +40,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
 @AutoConfigureMockMvc
-class UserControllerTest {
+class ClientControllerTest {
 
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
-    private static ApplicationUser userWithId5;
+    private static Client userWithId5;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private UserController userController;
+    private ClientController clientController;
 
     @Autowired
-    private ApplicationUser appUser;
+    private Client client;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -67,7 +67,7 @@ class UserControllerTest {
     private EntityManager entityManager;
 
     @Autowired
-    private UserService userService;
+    private ClientService clientService;
 
     private String token;
 
@@ -110,7 +110,7 @@ class UserControllerTest {
 
     @Test
     void shouldReturnAllUsersWithCorrectData() throws Exception {
-        mockMvc.perform(get("/users/")
+        mockMvc.perform(get("/clients/")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
@@ -125,7 +125,7 @@ class UserControllerTest {
 
     @Test
     void shouldFindAppUserById() throws Exception {
-        mockMvc.perform(get("/users/{id}", 5L)
+        mockMvc.perform(get("/clients/{id}", 5L)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(jsonPath("$.id").value(userWithId5.getId()))
                 .andExpect(jsonPath("$.credentials.email").value(userWithId5.getEmail()))
@@ -137,7 +137,7 @@ class UserControllerTest {
 
     @Test
     void shouldNotFindAppUserById() throws Exception {
-        mockMvc.perform(get("/users/{id}", 20L)
+        mockMvc.perform(get("/clients/{id}", 20L)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value("User with id : " + 20 + " does not exists."))
@@ -148,24 +148,24 @@ class UserControllerTest {
     @DisplayName("run update method with token generated for role ADMIN")
     @Transactional
     void shouldUpdateUserWhenRoleAdmin() throws Exception {
-        appUser.setName(new UserName("Jim", "Beam"));
-        appUser.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
+        client.setName(new UserName("Jim", "Beam"));
+        client.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
         Address address = new Address(5L, "somestreet", "25", "10", "Lublin", "21-070", "Poland");
         entityManager.merge(address);
-        appUser.setAddress(address);
+        client.setAddress(address);
 
-        mockMvc.perform(put("/users/update/{id}", 5L)
+        mockMvc.perform(put("/clients/update/{id}", 5L)
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(appUser))
+                        .content(objectMapper.writeValueAsString(client))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userWithId5.getId()))
-                .andExpect(jsonPath("$.credentials.email").value(appUser.getEmail()))
-                .andExpect(jsonPath("$.credentials.password").value(appUser.getPassword()))
-                .andExpect(jsonPath("$.name.firstName").value(appUser.getName().getFirstName()))
-                .andExpect(jsonPath("$.name.lastName").value(appUser.getName().getLastName()))
-                .andExpect(jsonPath("$.address").value(appUser.getAddress()));
+                .andExpect(jsonPath("$.credentials.email").value(client.getEmail()))
+                .andExpect(jsonPath("$.credentials.password").value(client.getPassword()))
+                .andExpect(jsonPath("$.name.firstName").value(client.getName().getFirstName()))
+                .andExpect(jsonPath("$.name.lastName").value(client.getName().getLastName()))
+                .andExpect(jsonPath("$.address").value(client.getAddress()));
     }
 
     @Test
@@ -177,40 +177,40 @@ class UserControllerTest {
         UserDetails userDetails = new User("user", "password", authorities);
         String token = jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
 
-        appUser.setName(new UserName("Jim", "Beam"));
-        appUser.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
+        client.setName(new UserName("Jim", "Beam"));
+        client.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
         Address address = new Address(5L, "somestreet", "25", "10", "Lublin", "21-070", "Poland");
         entityManager.merge(address);
-        appUser.setAddress(address);
+        client.setAddress(address);
 
-        mockMvc.perform(put("/users/update/{id}", 5L)
+        mockMvc.perform(put("/clients/update/{id}", 5L)
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(appUser))
+                        .content(objectMapper.writeValueAsString(client))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userWithId5.getId()))
-                .andExpect(jsonPath("$.credentials.email").value(appUser.getEmail()))
-                .andExpect(jsonPath("$.credentials.password").value(appUser.getPassword()))
-                .andExpect(jsonPath("$.name.firstName").value(appUser.getName().getFirstName()))
-                .andExpect(jsonPath("$.name.lastName").value(appUser.getName().getLastName()))
-                .andExpect(jsonPath("$.address").value(appUser.getAddress()));
+                .andExpect(jsonPath("$.credentials.email").value(client.getEmail()))
+                .andExpect(jsonPath("$.credentials.password").value(client.getPassword()))
+                .andExpect(jsonPath("$.name.firstName").value(client.getName().getFirstName()))
+                .andExpect(jsonPath("$.name.lastName").value(client.getName().getLastName()))
+                .andExpect(jsonPath("$.address").value(client.getAddress()));
     }
 
     @Test
     void shouldDeleteUser() throws Exception {
-        assertEquals(3, userService.getAll().size());
-        mockMvc.perform(delete("/users/delete/{id}", 5L)
+        assertEquals(3, clientService.getAll().size());
+        mockMvc.perform(delete("/clients/delete/{id}", 5L)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
-        assertEquals(2, userService.getAll().size());
+        assertEquals(2, clientService.getAll().size());
     }
 
     @AfterEach
     void cleanupDatabase() {
-        jdbcTemplate.execute("delete from users_roles");
+        jdbcTemplate.execute("delete from clients_roles");
         jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from users");
+        jdbcTemplate.execute("delete from clients");
         jdbcTemplate.execute("delete from addresses");
         userWithId5 = null;
         token = null;
@@ -223,8 +223,8 @@ class UserControllerTest {
         return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
     }
 
-    private static ApplicationUser createUserWithId5() {
-        ApplicationUser user = new ApplicationUser();
+    private static Client createUserWithId5() {
+        Client user = new Client();
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));

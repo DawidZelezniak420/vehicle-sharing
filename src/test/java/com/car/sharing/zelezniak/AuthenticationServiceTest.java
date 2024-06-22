@@ -3,11 +3,11 @@ package com.car.sharing.zelezniak;
 import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
 import com.car.sharing.zelezniak.userdomain.model.login.LoginResponse;
 import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
-import com.car.sharing.zelezniak.userdomain.service.UserOperations;
+import com.car.sharing.zelezniak.userdomain.repository.ClientRepository;
+import com.car.sharing.zelezniak.userdomain.service.ClientOperations;
 import com.car.sharing.zelezniak.userdomain.service.authentication.AuthenticationService;
 import com.car.sharing.zelezniak.utils.TimeFormatter;
 import org.junit.jupiter.api.*;
@@ -26,19 +26,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthenticationServiceTest {
 
-    private static ApplicationUser userWithId5;
+    private static Client userWithId5;
 
     @Autowired
-    private AppUserRepository userRepository;
+    private ClientRepository clientRepository;
 
     @Autowired
-    private ApplicationUser appUser;
+    private Client client;
 
     @Autowired
     private AuthenticationService userAuthentication;
 
     @Autowired
-    private UserOperations userOperations;
+    private ClientOperations clientOperations;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -87,35 +87,35 @@ class AuthenticationServiceTest {
     @Transactional
     @Order(1)
     void shouldRegisterNewUser() {
-        appUser.setId(null);
-        appUser.setName(new UserName("Uncle", "Bob"));
-        appUser.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
-        appUser.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        client.setId(null);
+        client.setName(new UserName("Uncle", "Bob"));
+        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
         Address address = new Address( null,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        appUser.setAddress(address);
+        client.setAddress(address);
 
-        userAuthentication.register(appUser);
+        userAuthentication.register(client);
 
-        assertEquals(4, userRepository.count());
-        assertEquals(appUser, userOperations.getById(appUser.getId()));
+        assertEquals(4, clientRepository.count());
+        assertEquals(client, clientOperations.getById(client.getId()));
     }
 
     @Test
     @Transactional
     @Order(2)
     void shouldRegisterAndLoginUser(){
-        appUser.setId(null);
-        appUser.setName(new UserName("Uncle", "Bob"));
-        appUser.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
-        appUser.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        client.setId(null);
+        client.setName(new UserName("Uncle", "Bob"));
+        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
         Address address = new Address( null,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        appUser.setAddress(address);
+        client.setAddress(address);
 
-        userAuthentication.register(appUser);
+        userAuthentication.register(client);
         LoginRequest loginRequest = new LoginRequest("bob@gmail.com","somepassword");
         LoginResponse login = userAuthentication.login(loginRequest);
 
-        assertEquals(appUser,login.getUser());
+        assertEquals(client,login.getClient());
         String token = login.getJwt();
         String[] tokenParts = token.split("\\.");
         assertEquals(3,tokenParts.length);
@@ -124,22 +124,22 @@ class AuthenticationServiceTest {
 
     @Test
     void shouldLoadUserByEmail(){
-        assertEquals(userWithId5,userRepository.findByCredentialsEmail("userfive@gmail.com"));
+        assertEquals(userWithId5, clientRepository.findByCredentialsEmail("userfive@gmail.com"));
     }
 
     @AfterEach
     void cleanupDatabase() {
-        jdbcTemplate.execute("delete from users_roles");
+        jdbcTemplate.execute("delete from clients_roles");
         jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from users");
+        jdbcTemplate.execute("delete from clients");
         jdbcTemplate.execute("delete from addresses");
         userWithId5 = null;
-        appUser = new ApplicationUser();
+        client = new Client();
     }
 
 
-    private static ApplicationUser createUserWithId5() {
-        ApplicationUser user = new ApplicationUser();
+    private static Client createUserWithId5() {
+        Client user = new Client();
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));

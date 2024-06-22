@@ -2,13 +2,13 @@ package com.car.sharing.zelezniak.userdomain.service.authentication;
 
 import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
 import com.car.sharing.zelezniak.userdomain.model.login.LoginResponse;
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.user.Role;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
+import com.car.sharing.zelezniak.userdomain.repository.ClientRepository;
 import com.car.sharing.zelezniak.userdomain.repository.RoleRepository;
 import com.car.sharing.zelezniak.userdomain.service.UserValidator;
-import jakarta.persistence.EntityManager;
+import com.car.sharing.zelezniak.utils.TimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,27 +27,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AuthenticationService implements Authenticator {
 
-    private final AppUserRepository userRepository;
+    private final ClientRepository clientRepository;
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
     private final UserValidator validator;
     private final AuthenticationManager authenticationManager;
     private final JWTGenerator jwtGenerator;
-    private final EntityManager entityManager;
 
     public UserDetails loadUserByUsername(
             String username)
             throws UsernameNotFoundException {
         validator.throwExceptionIfObjectIsNull(username);
-        return userRepository.findByCredentialsEmail(username);
+        return clientRepository.findByCredentialsEmail(username);
     }
 
-    public ApplicationUser register(
-            ApplicationUser newUser) {
-        validator.throwExceptionIfObjectIsNull(newUser);
-        validator.ifUserExistsThrowException(newUser.getEmail());
-        add(newUser);
-        return newUser;
+    public Client register(
+            Client client) {
+        validator.throwExceptionIfObjectIsNull(client);
+        validator.ifUserExistsThrowException(client.getEmail());
+        add(client);
+        return client;
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
@@ -56,24 +55,24 @@ public class AuthenticationService implements Authenticator {
         return tryLoginUser(email, password);
     }
 
-    private void add(ApplicationUser user) {
-        setRequiredDataAndEncodePassword(user);
-        userRepository.save(user);
+    private void add(Client client) {
+        setRequiredDataAndEncodePassword(client);
+        clientRepository.save(client);
     }
 
     private void setRequiredDataAndEncodePassword(
-            ApplicationUser user) {
-        user.setCreationDate();
-        user.setCredentials(
-                new UserCredentials(user.getEmail(),
-                        encoder.encode(user.getPassword())));
-        handleAddRoleForUser(user);
+            Client client) {
+        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        client.setCredentials(
+                new UserCredentials(client.getEmail(),
+                        encoder.encode(client.getPassword())));
+        handleAddRoleForUser(client);
     }
 
     private void handleAddRoleForUser(
-            ApplicationUser appUser) {
+            Client client) {
         Role roleUser = findOrCreateRoleUser();
-        appUser.addRole(roleUser);
+        client.addRole(roleUser);
     }
 
     private Role findOrCreateRoleUser() {
@@ -93,7 +92,7 @@ public class AuthenticationService implements Authenticator {
                             email, password));
             String token = jwtGenerator.generateJWT(auth);
             return new LoginResponse(
-                    userRepository.findByCredentialsEmail(email),
+                    clientRepository.findByCredentialsEmail(email),
                     token);
         } catch (AuthenticationException e) {
             log.error("User with email : " + email + " can not be authenticated - bad credentials.");

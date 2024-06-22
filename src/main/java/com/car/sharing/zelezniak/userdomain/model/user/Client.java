@@ -2,7 +2,6 @@ package com.car.sharing.zelezniak.userdomain.model.user;
 
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.utils.TimeFormatter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,8 +21,8 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
-public class ApplicationUser implements UserDetails {
+@Table(name = "clients")
+public class Client implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +44,7 @@ public class ApplicationUser implements UserDetails {
     @ManyToMany(fetch = FetchType.EAGER, cascade ={
             CascadeType.DETACH,
             CascadeType.MERGE})
-    @JoinTable(name = "users_roles", joinColumns =
+    @JoinTable(name = "clients_roles", joinColumns =
     @JoinColumn(name = "user_id"), inverseJoinColumns =
     @JoinColumn(name = "role_id"))
     private Set<Role> roles;
@@ -72,16 +71,11 @@ public class ApplicationUser implements UserDetails {
         roles.add(roleUser);
     }
 
-    public void setCreationDate() {
-        this.createdAt = TimeFormatter
-                .getFormattedActualDateTime();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ApplicationUser that = (ApplicationUser) o;
+        Client that = (Client) o;
         return Objects.equals(name, that.name)
                 && Objects.equals(credentials, that.credentials)
                 && Objects.equals(createdAt, that.createdAt)

@@ -6,12 +6,14 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
-@Embeddable
+
 @Getter
-@AllArgsConstructor
+@Embeddable
+@RequiredArgsConstructor
 public class UserCredentials {
 
     private static final String EMAIL_PATTERN = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$";
@@ -30,8 +32,8 @@ public class UserCredentials {
     private final String password;
 
     public UserCredentials() {
-        email = "";
-        password = "";
+        email = null;
+        password = null;
     }
 
     public boolean equals(Object o) {
@@ -48,9 +50,7 @@ public class UserCredentials {
 
     @Override
     public String toString() {
-        return "UserCredentials{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+        return "email= " + email +
+                ", password= " + password;
     }
 }

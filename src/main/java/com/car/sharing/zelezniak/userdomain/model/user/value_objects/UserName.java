@@ -4,12 +4,13 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
 @Getter
-@AllArgsConstructor
 @Embeddable
+@RequiredArgsConstructor
 public class UserName {
 
     private static final String FIRST_NAME_SIZE_INVALID =  "First name must contains at least 3 characters";
@@ -23,7 +24,7 @@ public class UserName {
 
     public UserName() {
         firstName = "";
-        lastName = "";
+        lastName = null;
     }
 
     @Override
@@ -42,9 +43,7 @@ public class UserName {
 
     @Override
     public String toString() {
-        return "UserName{" +
-                "firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                '}';
+        return "firstName= " + firstName +
+                ", lastName= " + lastName;
     }
 }

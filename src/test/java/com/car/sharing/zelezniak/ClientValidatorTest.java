@@ -1,7 +1,7 @@
 package com.car.sharing.zelezniak;
 
 import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
 import com.car.sharing.zelezniak.userdomain.service.UserValidator;
@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
-class UserValidatorTest {
+class ClientValidatorTest {
 
-    private static ApplicationUser userWithId5;
+    private static Client userWithId5;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -78,10 +78,10 @@ class UserValidatorTest {
 
     @Test
     void shouldNotThrowExceptionIfUserNotExists() {
-        ApplicationUser user = new ApplicationUser();
-        user.setCredentials(new UserCredentials("someuser@gmail.com", "somepass"));
+        Client c = new Client();
+        c.setCredentials(new UserCredentials("someuser@gmail.com", "somepass"));
 
-        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(user.getEmail()));
+        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(c.getEmail()));
     }
 
     @Test
@@ -102,15 +102,15 @@ class UserValidatorTest {
 
     @AfterEach
     void deleteDataFromDb(){
-        jdbcTemplate.execute("delete from users_roles");
+        jdbcTemplate.execute("delete from clients_roles");
         jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from users");
+        jdbcTemplate.execute("delete from clients");
         jdbcTemplate.execute("delete from addresses");
         userWithId5 = null;
     }
 
-    private static ApplicationUser createUserWithId5() {
-        ApplicationUser user = new ApplicationUser();
+    private static Client createUserWithId5() {
+        Client user = new Client();
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));

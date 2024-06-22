@@ -2,14 +2,16 @@ package com.car.sharing.zelezniak;
 
 import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
 import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
+import com.car.sharing.zelezniak.userdomain.repository.ClientRepository;
 import com.car.sharing.zelezniak.userdomain.service.authentication.AuthenticationService;
 import com.car.sharing.zelezniak.utils.TimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,14 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @AutoConfigureMockMvc
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthenticationControllerTest {
 
     private static final MediaType APPLICATION_JSON =
             MediaType.APPLICATION_JSON;
 
     @Autowired
-    private ApplicationUser appUser;
+    private Client client;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -40,7 +41,7 @@ class AuthenticationControllerTest {
     private AuthenticationService authService;
 
     @Autowired
-    private AppUserRepository userRepository;
+    private ClientRepository userRepository;
 
     @Autowired
     private ObjectMapper mapper;
@@ -50,28 +51,25 @@ class AuthenticationControllerTest {
 
     @BeforeEach
     void createUser() {
-        appUser.setId(null);
-        appUser.setName(new UserName("Uncle", "Bob"));
-        appUser.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
-        appUser.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        client.setName(new UserName("Uncle", "Bob"));
+        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
         Address address = new Address(null, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        appUser.setAddress(address);
+        client.setAddress(address);
     }
 
     @Test
-    @Order(1)
     void shouldRegisterUser() throws Exception {
-        UserName name = appUser.getName();
-        Address address = appUser.getAddress();
-
+        UserName name = client.getName();
+        Address address = client.getAddress();
         mockMvc.perform(post("/auth/register")
                         .contentType(APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(appUser)))
+                        .content(mapper.writeValueAsString(client)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.name.firstName").value(name.getFirstName()))
                 .andExpect(jsonPath("$.name.lastName").value(name.getLastName()))
-                .andExpect(jsonPath("$.credentials.email").value(appUser.getEmail()))
+                .andExpect(jsonPath("$.credentials.email").value(client.getEmail()))
                 .andExpect(jsonPath("$.address.street").value(address.getStreet()))
                 .andExpect(jsonPath("$.address.houseNumber").value(address.getHouseNumber()))
                 .andExpect(jsonPath("$.address.flatNumber").value(address.getFlatNumber()))
@@ -83,13 +81,12 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    @Order(2)
     void shouldRegisterAndLoginUser() throws Exception {
-        authService.register(appUser);
+        authService.register(client);
 
-        LoginRequest loginRequest = new LoginRequest(appUser.getEmail(), "somepassword");
+        LoginRequest loginRequest = new LoginRequest(client.getEmail(), "somepassword");
 
-        ApplicationUser registeredUser = userRepository.findByCredentialsEmail(appUser.getEmail());
+        Client registeredUser = userRepository.findByCredentialsEmail(client.getEmail());
         UserName name = registeredUser.getName();
         Address address = registeredUser.getAddress();
 
@@ -98,23 +95,23 @@ class AuthenticationControllerTest {
                         .content(mapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isAccepted())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.user.name.firstName").value(name.getFirstName()))
-                .andExpect(jsonPath("$.user.name.lastName").value(name.getLastName()))
-                .andExpect(jsonPath("$.user.credentials.email").value(appUser.getEmail()))
-                .andExpect(jsonPath("$.user.address.street").value(address.getStreet()))
-                .andExpect(jsonPath("$.user.address.houseNumber").value(address.getHouseNumber()))
-                .andExpect(jsonPath("$.user.address.flatNumber").value(address.getFlatNumber()))
-                .andExpect(jsonPath("$.user.address.city").value(address.getCity()))
-                .andExpect(jsonPath("$.user.address.postalCode").value(address.getPostalCode()))
-                .andExpect(jsonPath("$.user.address.country").value(address.getCountry()))
+                .andExpect(jsonPath("$.client.name.firstName").value(name.getFirstName()))
+                .andExpect(jsonPath("$.client.name.lastName").value(name.getLastName()))
+                .andExpect(jsonPath("$.client.credentials.email").value(client.getEmail()))
+                .andExpect(jsonPath("$.client.address.street").value(address.getStreet()))
+                .andExpect(jsonPath("$.client.address.houseNumber").value(address.getHouseNumber()))
+                .andExpect(jsonPath("$.client.address.flatNumber").value(address.getFlatNumber()))
+                .andExpect(jsonPath("$.client.address.city").value(address.getCity()))
+                .andExpect(jsonPath("$.client.address.postalCode").value(address.getPostalCode()))
+                .andExpect(jsonPath("$.client.address.country").value(address.getCountry()))
                 .andExpect(jsonPath("$.jwt").isNotEmpty());
     }
 
     @AfterEach
     void deleteTestData() {
-        jdbcTemplate.execute("delete from users_roles");
+        jdbcTemplate.execute("delete from clients_roles");
         jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from users");
+        jdbcTemplate.execute("delete from clients");
         jdbcTemplate.execute("delete from addresses");
     }
 }

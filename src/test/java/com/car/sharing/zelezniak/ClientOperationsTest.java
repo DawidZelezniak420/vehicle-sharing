@@ -2,10 +2,10 @@ package com.car.sharing.zelezniak;
 
 import com.car.sharing.zelezniak.config.TestBeans;
 import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.service.UserOperations;
+import com.car.sharing.zelezniak.userdomain.service.ClientOperations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
 @Import(TestBeans.class)
-class UserOperationsTest {
+class ClientOperationsTest {
 
-    private static ApplicationUser userWithId5;
-
-    @Autowired
-    private ApplicationUser appUser;
+    private static Client userWithId5;
 
     @Autowired
-    private UserOperations userOperations;
+    private Client client;
+
+    @Autowired
+    private ClientOperations clientOperations;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -75,11 +75,11 @@ class UserOperationsTest {
 
     @Test
     void shouldReturnAllUsersWithCorrectData() {
-        List<ApplicationUser> allUsers = userOperations.getAll();
-        assertTrue(allUsers.contains(userWithId5));
-        assertEquals(3, allUsers.size());
+        List<Client> clients = clientOperations.getAll();
+        assertTrue(clients.contains(userWithId5));
+        assertEquals(3, clients.size());
 
-        for (ApplicationUser user : allUsers) {
+        for (Client user : clients) {
             assertNotNull(user.getId());
             assertNotNull(user.getUsername());
             assertNotNull(user.getCredentials());
@@ -89,60 +89,60 @@ class UserOperationsTest {
 
     @Test
     void shouldFindAppUserById() {
-        ApplicationUser user = userOperations.getById(5L);
-        assertEquals(userWithId5, user);
+        Client client = clientOperations.getById(5L);
+        assertEquals(userWithId5, client);
     }
 
     @Test
     void shouldNotFindAppUserById(){
         Long nonExistentId= 20L;
         assertThrows(NoSuchElementException.class,()->
-                userOperations.getById(nonExistentId));
+                clientOperations.getById(nonExistentId));
     }
 
     @Test
     void shouldUpdateUser() {
-        appUser.setId(5L);
-        appUser.setName(new UserName("Uncle", "Bob"));
-        appUser.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setId(5L);
+        client.setName(new UserName("Uncle", "Bob"));
+        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
 
-        userOperations.update(5L, appUser);
-        ApplicationUser updatedUser = userOperations.getById(5L);
+        clientOperations.update(5L, client);
+        Client updatedUser = clientOperations.getById(5L);
 
-        assertEquals(appUser, updatedUser);
+        assertEquals(client, updatedUser);
     }
 
     @Test
     void shouldNotUpdateUser() {
-        appUser.setId(5L);
-        appUser.setName(new UserName("Uncle", "Bob"));
-        appUser.setCredentials(new UserCredentials("usersix@gmail.com", "somepassword"));
+        client.setId(5L);
+        client.setName(new UserName("Uncle", "Bob"));
+        client.setCredentials(new UserCredentials("usersix@gmail.com", "somepassword"));
 
         assertThrows(IllegalArgumentException.class,()->
-                userOperations.update(5L, appUser));
+                clientOperations.update(5L, client));
     }
 
     @Test
     void shouldDeleteUser() {
-        assertEquals(3, userOperations.getAll().size());
-        userOperations.delete(5L);
-        List<ApplicationUser> users = userOperations.getAll();
-        assertEquals(2, users.size());
-        assertFalse(users.contains(userWithId5));
+        assertEquals(3, clientOperations.getAll().size());
+        clientOperations.delete(5L);
+        List<Client> clients = clientOperations.getAll();
+        assertEquals(2, clients.size());
+        assertFalse(clients.contains(userWithId5));
     }
 
     @AfterEach
     void cleanupDatabase() {
-        jdbcTemplate.execute("delete from users_roles");
+        jdbcTemplate.execute("delete from clients_roles");
         jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from users");
+        jdbcTemplate.execute("delete from clients");
         jdbcTemplate.execute("delete from addresses");
         userWithId5 = null;
-        appUser = new ApplicationUser();
+        client = new Client();
     }
 
-    private static ApplicationUser createUserWithId5() {
-        ApplicationUser user = new ApplicationUser();
+    private static Client createUserWithId5() {
+        Client user = new Client();
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));

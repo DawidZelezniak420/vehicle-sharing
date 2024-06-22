@@ -1,6 +1,6 @@
 package com.car.sharing.zelezniak.userdomain.controller;
 
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
 import com.car.sharing.zelezniak.userdomain.model.login.LoginResponse;
 import com.car.sharing.zelezniak.userdomain.service.authentication.Authenticator;
@@ -17,9 +17,9 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApplicationUser register(
-            @RequestBody ApplicationUser user){
-    return authentication.register(user);
+    public Client register(
+            @RequestBody Client client){
+    return authentication.register(client);
     }
 
     @PostMapping("/login")

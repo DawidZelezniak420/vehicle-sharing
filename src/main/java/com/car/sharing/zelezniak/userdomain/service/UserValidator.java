@@ -1,7 +1,7 @@
 package com.car.sharing.zelezniak.userdomain.service;
 
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
-import com.car.sharing.zelezniak.userdomain.repository.AppUserRepository;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
+import com.car.sharing.zelezniak.userdomain.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserValidator {
 
-    private final AppUserRepository userRepository;
+    private final ClientRepository userRepository;
 
     public void throwExceptionIfObjectIsNull(Object o) {
         if (o == null) {
@@ -25,7 +25,7 @@ public class UserValidator {
     }
 
     public void checkIfUserCanBeUpdated(String userFromDbEmail,
-                                        ApplicationUser newData) {
+                                        Client newData) {
         String newEmail = newData.getEmail();
         if(emailsAreNotSame(userFromDbEmail,newEmail)
         && userWithSuchEmailExists(newEmail)){

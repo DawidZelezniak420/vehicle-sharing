@@ -1,7 +1,7 @@
 package com.car.sharing.zelezniak.userdomain.controller;
 
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
-import com.car.sharing.zelezniak.userdomain.service.UserService;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
+import com.car.sharing.zelezniak.userdomain.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -9,27 +9,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/clients")
 @RequiredArgsConstructor
-public class UserController {
+public class ClientController {
 
-    private final UserService userService;
+    private final ClientService userService;
 
     @GetMapping("/")
-    public Collection<ApplicationUser> getAll() {
+    public Collection<Client> getAll() {
         return userService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ApplicationUser getById(
+    public Client getById(
             @PathVariable Long id) {
         return userService.getById(id);
     }
 
     @PutMapping("/update/{id}")
-    public ApplicationUser update(
+    public Client update(
             @PathVariable Long id,
-            @RequestBody ApplicationUser newData) {
+            @RequestBody Client newData) {
         return userService.update(id, newData);
     }
 

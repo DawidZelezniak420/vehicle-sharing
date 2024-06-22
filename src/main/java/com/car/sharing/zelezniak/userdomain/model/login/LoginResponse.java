@@ -1,6 +1,6 @@
 package com.car.sharing.zelezniak.userdomain.model.login;
 
-import com.car.sharing.zelezniak.userdomain.model.user.ApplicationUser;
+import com.car.sharing.zelezniak.userdomain.model.user.Client;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,13 +12,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginResponse {
 
-    private ApplicationUser user;
+    private Client client;
     private String jwt;
 
     @Override
     public String toString() {
         return "LoginResponse{" +
-                "user=" + user +
+                "user=" + client +
                 ", jwt='" + jwt + '\'' +
                 '}';
     }
