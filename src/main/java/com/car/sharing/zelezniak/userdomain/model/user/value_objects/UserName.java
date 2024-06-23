@@ -22,11 +22,6 @@ public class UserName {
     @Size(min = 2,message = LAST_NAME_SIZE_INVALID)
     private final String lastName;
 
-    public UserName() {
-        firstName = "";
-        lastName = null;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

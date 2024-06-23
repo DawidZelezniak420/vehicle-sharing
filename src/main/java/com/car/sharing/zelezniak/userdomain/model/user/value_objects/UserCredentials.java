@@ -21,7 +21,6 @@ public class UserCredentials {
     private static final String INVALID_EMAIL_PATTERN= "Pattern of email address is invalid.";
     private static final String INVALID_PASSWORD = "Password must contains at least 5 characters.";
 
-
     @NotNull(message = INVALID_EMAIL)
     @Pattern(regexp = EMAIL_PATTERN,
             message = INVALID_EMAIL_PATTERN)
@@ -30,11 +29,6 @@ public class UserCredentials {
     @NotNull(message = INVALID_PASSWORD)
     @Size(min = 5, message = INVALID_PASSWORD)
     private final String password;
-
-    public UserCredentials() {
-        email = null;
-        password = null;
-    }
 
     public boolean equals(Object o) {
         if (this == o) return true;

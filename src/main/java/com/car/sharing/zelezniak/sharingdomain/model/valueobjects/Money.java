@@ -19,21 +19,6 @@ public class Money {
         this.money = format(money);
     }
 
-    public Money() {
-        money = ZERO;
-    }
-
-    private void validate(BigDecimal money) {
-        if(money == null || money.compareTo(ZERO) < 0){
-            throw new IllegalArgumentException("Money value in incorrect");
-        }
-    }
-
-    private BigDecimal format(BigDecimal money) {
-        return money.setScale(
-                2, RoundingMode.HALF_UP);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -45,5 +30,25 @@ public class Money {
     @Override
     public int hashCode() {
         return Objects.hashCode(money);
+    }
+
+    private void validate(BigDecimal money) {
+        if(money == null || isLowerThanZero(money)){
+          throwException();
+        }
+    }
+
+    private boolean isLowerThanZero(BigDecimal money) {
+        return  money.compareTo(ZERO) < 0;
+    }
+
+    private void throwException() {
+        throw new IllegalArgumentException(
+                "Money value in incorrect");
+    }
+
+    private BigDecimal format(BigDecimal money) {
+        return money.setScale(
+                2, RoundingMode.HALF_UP);
     }
 }
