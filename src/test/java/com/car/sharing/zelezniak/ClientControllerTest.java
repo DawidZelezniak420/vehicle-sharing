@@ -1,13 +1,13 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.userdomain.controller.ClientController;
-import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.Client;
-import com.car.sharing.zelezniak.userdomain.model.user.Role;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.service.ClientService;
-import com.car.sharing.zelezniak.userdomain.service.authentication.JWTGenerator;
+import com.car.sharing.zelezniak.user_domain.controller.ClientController;
+import com.car.sharing.zelezniak.user_domain.model.user.Address;
+import com.car.sharing.zelezniak.user_domain.model.user.Client;
+import com.car.sharing.zelezniak.user_domain.model.user.Role;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.user_domain.service.ClientService;
+import com.car.sharing.zelezniak.user_domain.service.authentication.JWTGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ClientControllerTest {
 
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
-    private static Client userWithId5;
+    private static Client clientWithId5;
 
     @Autowired
     private MockMvc mockMvc;
@@ -93,50 +94,52 @@ class ClientControllerTest {
     private String createAddressSeven;
 
     @BeforeEach
-    void createUsers() {
-        jdbcTemplate.execute(createRoleUser);
-        jdbcTemplate.execute(createAddressFive);
-        jdbcTemplate.execute(createAddressSix);
-        jdbcTemplate.execute(createAddressSeven);
-        jdbcTemplate.execute(createUserFive);
-        jdbcTemplate.execute(createUserSix);
-        jdbcTemplate.execute(createUserSeven);
-        jdbcTemplate.execute(setRoleUserFive);
-        jdbcTemplate.execute(setRoleUserSix);
-        jdbcTemplate.execute(setRoleUserSeven);
-        userWithId5 = createUserWithId5();
-        token = generateToken();
+    void setupDatabase() {
+        executeQueries(createRoleUser, createAddressFive,
+                createAddressSix, createAddressSeven, createUserFive,
+                createUserSix, createUserSeven, setRoleUserFive,
+                setRoleUserSix, setRoleUserSeven);
+        clientWithId5 = createClientWithId5();
+        token = generateToken("ADMIN");
+    }
+
+    @AfterEach
+    void cleanupDatabase() {
+        executeQueries("delete from clients_roles","delete from roles",
+                "delete from clients","delete from addresses");
+        clientWithId5 = null;
+        token = null;
     }
 
     @Test
-    void shouldReturnAllUsersWithCorrectData() throws Exception {
+    void shouldReturnAllClients() throws Exception {
         mockMvc.perform(get("/clients/")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$.[0].id").value(userWithId5.getId()))
-                .andExpect(jsonPath("$.[0].credentials.email").value(userWithId5.getEmail()))
-                .andExpect(jsonPath("$.[0].credentials.password").value(userWithId5.getPassword()))
-                .andExpect(jsonPath("$.[0].name.firstName").value(userWithId5.getName().getFirstName()))
-                .andExpect(jsonPath("$.[0].name.lastName").value(userWithId5.getName().getLastName()))
-                .andExpect(jsonPath("$.[0].address").value(userWithId5.getAddress()));
+                .andExpect(jsonPath("$.[0].id").value(clientWithId5.getId()))
+                .andExpect(jsonPath("$.[0].credentials.email").value(clientWithId5.getEmail()))
+                .andExpect(jsonPath("$.[0].credentials.password").value(clientWithId5.getPassword()))
+                .andExpect(jsonPath("$.[0].name.firstName").value(clientWithId5.getName().getFirstName()))
+                .andExpect(jsonPath("$.[0].name.lastName").value(clientWithId5.getName().getLastName()))
+                .andExpect(jsonPath("$.[0].address").value(clientWithId5.getAddress()));
     }
 
     @Test
-    void shouldFindAppUserById() throws Exception {
+    void shouldFindClientById() throws Exception {
         mockMvc.perform(get("/clients/{id}", 5L)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(jsonPath("$.id").value(userWithId5.getId()))
-                .andExpect(jsonPath("$.credentials.email").value(userWithId5.getEmail()))
-                .andExpect(jsonPath("$.credentials.password").value(userWithId5.getPassword()))
-                .andExpect(jsonPath("$.name.firstName").value(userWithId5.getName().getFirstName()))
-                .andExpect(jsonPath("$.name.lastName").value(userWithId5.getName().getLastName()))
-                .andExpect(jsonPath("$.address").value(userWithId5.getAddress()));
+                .andExpect(jsonPath("$.id").value(clientWithId5.getId()))
+                .andExpect(jsonPath("$.credentials.email").value(clientWithId5.getEmail()))
+                .andExpect(jsonPath("$.credentials.password").value(clientWithId5.getPassword()))
+                .andExpect(jsonPath("$.name.firstName").value(clientWithId5.getName().getFirstName()))
+                .andExpect(jsonPath("$.name.lastName").value(clientWithId5.getName().getLastName()))
+                .andExpect(jsonPath("$.address").value(clientWithId5.getAddress()));
     }
 
     @Test
-    void shouldNotFindAppUserById() throws Exception {
+    void shouldNotFindClientById() throws Exception {
         mockMvc.perform(get("/clients/{id}", 20L)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().is4xxClientError())
@@ -145,51 +148,54 @@ class ClientControllerTest {
     }
 
     @Test
-    @DisplayName("run update method with token generated for role ADMIN")
-    @Transactional
-    void shouldUpdateUserWhenRoleAdmin() throws Exception {
-        client.setName(new UserName("Jim", "Beam"));
-        client.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
-        Address address = new Address(5L, "somestreet", "25", "10", "Lublin", "21-070", "Poland");
-        entityManager.merge(address);
-        client.setAddress(address);
-
-        mockMvc.perform(put("/clients/update/{id}", 5L)
-                        .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(client))
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userWithId5.getId()))
-                .andExpect(jsonPath("$.credentials.email").value(client.getEmail()))
-                .andExpect(jsonPath("$.credentials.password").value(client.getPassword()))
-                .andExpect(jsonPath("$.name.firstName").value(client.getName().getFirstName()))
-                .andExpect(jsonPath("$.name.lastName").value(client.getName().getLastName()))
-                .andExpect(jsonPath("$.address").value(client.getAddress()));
-    }
-
-    @Test
     @DisplayName("run update method with token generated for role USER")
     @Transactional
     void shouldUpdateUserWhenRoleUser() throws Exception {
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority("USER"));
-        UserDetails userDetails = new User("user", "password", authorities);
-        String token = jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
+        String token = generateToken("USER");
+        updateClient();
+        performUpdateUser(token);
+    }
 
+    @Test
+    @DisplayName("run update method with token generated for role ADMIN")
+    @Transactional
+    void shouldUpdateUserWhenRoleAdmin() throws Exception {
+        updateClient();
+        performUpdateUser(token);
+    }
+
+    @Test
+    void shouldDeleteClient() throws Exception {
+        assertEquals(3, clientService.findAll().size());
+        mockMvc.perform(delete("/clients/delete/{id}", 5L)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+        assertEquals(2, clientService.findAll().size());
+    }
+
+    private String generateToken(String role) {
+        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+        UserDetails userDetails = new User(role.toLowerCase(), "password", authorities);
+        return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
+    }
+
+    private void updateClient() {
         client.setName(new UserName("Jim", "Beam"));
         client.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
         Address address = new Address(5L, "somestreet", "25", "10", "Lublin", "21-070", "Poland");
         entityManager.merge(address);
         client.setAddress(address);
+    }
 
+    private void performUpdateUser(String token) throws Exception {
         mockMvc.perform(put("/clients/update/{id}", 5L)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(client))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userWithId5.getId()))
+                .andExpect(jsonPath("$.id").value(clientWithId5.getId()))
                 .andExpect(jsonPath("$.credentials.email").value(client.getEmail()))
                 .andExpect(jsonPath("$.credentials.password").value(client.getPassword()))
                 .andExpect(jsonPath("$.name.firstName").value(client.getName().getFirstName()))
@@ -197,42 +203,18 @@ class ClientControllerTest {
                 .andExpect(jsonPath("$.address").value(client.getAddress()));
     }
 
-    @Test
-    void shouldDeleteUser() throws Exception {
-        assertEquals(3, clientService.getAll().size());
-        mockMvc.perform(delete("/clients/delete/{id}", 5L)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNoContent());
-        assertEquals(2, clientService.getAll().size());
+    private void executeQueries(String ... queries){
+        Arrays.stream(queries).forEach(jdbcTemplate::execute);
     }
 
-    @AfterEach
-    void cleanupDatabase() {
-        jdbcTemplate.execute("delete from clients_roles");
-        jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from clients");
-        jdbcTemplate.execute("delete from addresses");
-        userWithId5 = null;
-        token = null;
-    }
-
-    private String generateToken() {
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority("ADMIN"));
-        UserDetails userDetails = new User("admin", "password", authorities);
-        return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
-    }
-
-    private static Client createUserWithId5() {
-        Client user = new Client();
-        user.setId(5L);
-        user.setName(new UserName("UserFive", "Five"));
-        user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
+    private static Client createClientWithId5() {
+        Client client = new Client();
+        client.setId(5L);
+        client.setName(new UserName("UserFive", "Five"));
+        client.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
         Address address = new Address(5L, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        user.setAddress(address);
-        user.setRoles(
-                new HashSet<>(
-                        List.of(new Role("USER"))));
-        return user;
+        client.setAddress(address);
+        client.setRoles(new HashSet<>(List.of(new Role("USER"))));
+        return client;
     }
 }

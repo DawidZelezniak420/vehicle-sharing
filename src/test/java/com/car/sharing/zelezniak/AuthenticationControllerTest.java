@@ -1,13 +1,13 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
-import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.Client;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.repository.ClientRepository;
-import com.car.sharing.zelezniak.userdomain.service.authentication.AuthenticationService;
-import com.car.sharing.zelezniak.utils.TimeFormatter;
+import com.car.sharing.zelezniak.user_domain.model.login.LoginRequest;
+import com.car.sharing.zelezniak.user_domain.model.user.Address;
+import com.car.sharing.zelezniak.user_domain.model.user.Client;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
+import com.car.sharing.zelezniak.user_domain.service.authentication.AuthenticationService;
+import com.car.sharing.zelezniak.util.TimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class AuthenticationControllerTest {
     private AuthenticationService authService;
 
     @Autowired
-    private ClientRepository userRepository;
+    private ClientRepository clientRepository;
 
     @Autowired
     private ObjectMapper mapper;
@@ -77,7 +77,7 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.address.postalCode").value(address.getPostalCode()))
                 .andExpect(jsonPath("$.address.country").value(address.getCountry()));
 
-        assertEquals(1, userRepository.count());
+        assertEquals(1, clientRepository.count());
     }
 
     @Test
@@ -86,7 +86,7 @@ class AuthenticationControllerTest {
 
         LoginRequest loginRequest = new LoginRequest(client.getEmail(), "somepassword");
 
-        Client registeredUser = userRepository.findByCredentialsEmail(client.getEmail());
+        Client registeredUser = clientRepository.findByCredentialsEmail(client.getEmail());
         UserName name = registeredUser.getName();
         Address address = registeredUser.getAddress();
 

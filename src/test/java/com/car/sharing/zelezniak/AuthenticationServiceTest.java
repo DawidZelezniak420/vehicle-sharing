@@ -1,15 +1,15 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.userdomain.model.login.LoginRequest;
-import com.car.sharing.zelezniak.userdomain.model.login.LoginResponse;
-import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.Client;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.repository.ClientRepository;
-import com.car.sharing.zelezniak.userdomain.service.ClientOperations;
-import com.car.sharing.zelezniak.userdomain.service.authentication.AuthenticationService;
-import com.car.sharing.zelezniak.utils.TimeFormatter;
+import com.car.sharing.zelezniak.user_domain.model.login.LoginRequest;
+import com.car.sharing.zelezniak.user_domain.model.login.LoginResponse;
+import com.car.sharing.zelezniak.user_domain.model.user.Address;
+import com.car.sharing.zelezniak.user_domain.model.user.Client;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
+import com.car.sharing.zelezniak.user_domain.service.ClientOperations;
+import com.car.sharing.zelezniak.user_domain.service.authentication.AuthenticationService;
+import com.car.sharing.zelezniak.util.TimeFormatter;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +18,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,7 +37,7 @@ class AuthenticationServiceTest {
     private Client client;
 
     @Autowired
-    private AuthenticationService userAuthentication;
+    private AuthenticationService authenticationService;
 
     @Autowired
     private ClientOperations clientOperations;
@@ -69,32 +71,28 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void createUsers() {
-        jdbcTemplate.execute(createRoleUser);
-        jdbcTemplate.execute(createAddressFive);
-        jdbcTemplate.execute(createAddressSix);
-        jdbcTemplate.execute(createAddressSeven);
-        jdbcTemplate.execute(createUserFive);
-        jdbcTemplate.execute(createUserSix);
-        jdbcTemplate.execute(createUserSeven);
-        jdbcTemplate.execute(setRoleUserFive);
-        jdbcTemplate.execute(setRoleUserSix);
-        jdbcTemplate.execute(setRoleUserSeven);
+        executeQueries(createRoleUser, createAddressFive,
+                createAddressSix, createAddressSeven, createUserFive,
+                createUserSix, createUserSeven, setRoleUserFive,
+                setRoleUserSix, setRoleUserSeven);
         userWithId5 = createUserWithId5();
     }
 
+    @AfterEach
+    void cleanupDatabase() {
+        executeQueries("delete from clients_roles", "delete from roles",
+                "delete from clients", "delete from addresses");
+        userWithId5 = null;
+        client = new Client();
+    }
 
     @Test
     @Transactional
     @Order(1)
     void shouldRegisterNewUser() {
-        client.setId(null);
-        client.setName(new UserName("Uncle", "Bob"));
-        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
-        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
-        Address address = new Address( null,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        client.setAddress(address);
+        setClientInfo();
 
-        userAuthentication.register(client);
+        authenticationService.register(client);
 
         assertEquals(4, clientRepository.count());
         assertEquals(client, clientOperations.getById(client.getId()));
@@ -103,49 +101,44 @@ class AuthenticationServiceTest {
     @Test
     @Transactional
     @Order(2)
-    void shouldRegisterAndLoginUser(){
-        client.setId(null);
-        client.setName(new UserName("Uncle", "Bob"));
-        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
-        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
-        Address address = new Address( null,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        client.setAddress(address);
+    void shouldRegisterAndLoginUser() {
+        setClientInfo();
 
-        userAuthentication.register(client);
-        LoginRequest loginRequest = new LoginRequest("bob@gmail.com","somepassword");
-        LoginResponse login = userAuthentication.login(loginRequest);
+        authenticationService.register(client);
+        LoginRequest loginRequest = new LoginRequest("bob@gmail.com", "somepassword");
+        LoginResponse login = authenticationService.login(loginRequest);
 
-        assertEquals(client,login.getClient());
+        assertEquals(client, login.getClient());
         String token = login.getJwt();
         String[] tokenParts = token.split("\\.");
-        assertEquals(3,tokenParts.length);
+        assertEquals(3, tokenParts.length);
     }
 
-
     @Test
-    void shouldLoadUserByEmail(){
+    void shouldLoadUserByEmail() {
         assertEquals(userWithId5, clientRepository.findByCredentialsEmail("userfive@gmail.com"));
     }
 
-    @AfterEach
-    void cleanupDatabase() {
-        jdbcTemplate.execute("delete from clients_roles");
-        jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from clients");
-        jdbcTemplate.execute("delete from addresses");
-        userWithId5 = null;
-        client = new Client();
+    private void executeQueries(String... queries) {
+        Arrays.stream(queries).forEach(jdbcTemplate::execute);
     }
-
 
     private static Client createUserWithId5() {
         Client user = new Client();
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
         user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
-        Address address = new Address(5L,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        Address address = new Address(5L, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
         user.setAddress(address);
         return user;
     }
 
+    private void setClientInfo() {
+        client.setId(null);
+        client.setName(new UserName("Uncle", "Bob"));
+        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        Address address = new Address(null, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        client.setAddress(address);
+    }
 }

@@ -1,10 +1,10 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.userdomain.model.user.Address;
-import com.car.sharing.zelezniak.userdomain.model.user.Client;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.userdomain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.userdomain.service.UserValidator;
+import com.car.sharing.zelezniak.user_domain.model.user.Address;
+import com.car.sharing.zelezniak.user_domain.model.user.Client;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.user_domain.service.UserValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,14 +47,17 @@ class ClientValidatorTest {
 
     @BeforeEach
     void createUsers(){
-        jdbcTemplate.execute(createRoleUser);
-        jdbcTemplate.execute(createAddressFive);
-        jdbcTemplate.execute(createAddressSix);
-        jdbcTemplate.execute(createUserFive);
-        jdbcTemplate.execute(createUserSix);
-        jdbcTemplate.execute(setRoleUserFive);
-        jdbcTemplate.execute(setRoleUserSix);
-        userWithId5 = createUserWithId5();
+        executeQueries(createRoleUser,createAddressFive,
+                createAddressSix,createUserFive,createUserSix,
+                setRoleUserFive,setRoleUserSix);
+        userWithId5 = createClientWithId5();
+    }
+
+    @AfterEach
+    void deleteDataFromDb(){
+        executeQueries("delete from clients_roles","delete from roles",
+                "delete from clients","delete from addresses");
+        userWithId5 = null;
     }
 
     @Test
@@ -70,14 +75,14 @@ class ClientValidatorTest {
     }
 
     @Test
-    void shouldThrowExceptionIfUserExists() {
+    void shouldThrowExceptionIfClientExists() {
         String existingUserEmail = userWithId5.getEmail();
         assertThrows(IllegalArgumentException.class,()->
            validator.ifUserExistsThrowException(existingUserEmail));
     }
 
     @Test
-    void shouldNotThrowExceptionIfUserNotExists() {
+    void shouldNotThrowExceptionIfClientNotExists() {
         Client c = new Client();
         c.setCredentials(new UserCredentials("someuser@gmail.com", "somepass"));
 
@@ -85,7 +90,7 @@ class ClientValidatorTest {
     }
 
     @Test
-    void shouldTestUserCanBeUpdated(){
+    void shouldTestClientCanBeUpdated(){
         String userFromDbEmail = userWithId5.getEmail();
         userWithId5.setCredentials(new UserCredentials("newemail@gmail.com","somepass"));
         assertDoesNotThrow(()->
@@ -93,29 +98,24 @@ class ClientValidatorTest {
     }
 
     @Test
-    void shouldTestUserCanNotBeUpdated(){
+    void shouldTestClientCanNotBeUpdated(){
         String userFromDbEmail = "usersix@gmail.com";
         assertThrows(IllegalArgumentException.class,()->
                 validator.checkIfUserCanBeUpdated(userFromDbEmail,userWithId5));
     }
 
-
-    @AfterEach
-    void deleteDataFromDb(){
-        jdbcTemplate.execute("delete from clients_roles");
-        jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from clients");
-        jdbcTemplate.execute("delete from addresses");
-        userWithId5 = null;
+    private void executeQueries(String...queries) {
+        Arrays.stream(queries).forEach(jdbcTemplate::execute);
     }
 
-    private static Client createUserWithId5() {
-        Client user = new Client();
-        user.setId(5L);
-        user.setName(new UserName("UserFive", "Five"));
-        user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
+
+    private static Client createClientWithId5() {
+        Client client = new Client();
+        client.setId(5L);
+        client.setName(new UserName("UserFive", "Five"));
+        client.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
         Address address = new Address(5L,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
-        user.setAddress(address);
-        return user;
+        client.setAddress(address);
+        return client;
     }
 }

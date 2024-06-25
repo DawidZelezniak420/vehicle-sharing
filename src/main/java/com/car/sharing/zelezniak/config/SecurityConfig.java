@@ -1,6 +1,6 @@
 package com.car.sharing.zelezniak.config;
 
-import com.car.sharing.zelezniak.userdomain.service.authentication.RSAKeyProperties;
+import com.car.sharing.zelezniak.user_domain.service.authentication.RSAKeyProperties;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
