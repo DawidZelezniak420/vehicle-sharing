@@ -1,6 +1,8 @@
 package com.car.sharing.zelezniak.sharing_domain.model.value_objects;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -25,7 +27,8 @@ public class Engine {
     private final String engineType;
 
     @NotBlank(message = "Fuel type" + CAN_NOT_BE_BLANK)
-    private final String fuelType;
+    @Enumerated(EnumType.STRING)
+    private final FuelType fuelType;
 
     @Min(value = 1,message = "Horse power" + CANT_BE_BELOW_ONE)
     private final int horsepower;
@@ -50,7 +53,12 @@ public class Engine {
 
     @Override
     public int hashCode() {
-        return Objects.hash(engineType, fuelType, horsepower, cylinders, displacement);
+        return Objects.hash(
+                engineType,
+                fuelType,
+                horsepower,
+                cylinders,
+                displacement);
     }
 
     @Override
@@ -62,5 +70,13 @@ public class Engine {
                 ", cylinders=" + cylinders +
                 ", displacement=" + displacement +
                 '}';
+    }
+
+    public enum FuelType {
+        GASOLINE,
+        GASOLINE_WITH_GAS,
+        DIESEL,
+        ELECTRIC,
+        HYBRID,
     }
 }

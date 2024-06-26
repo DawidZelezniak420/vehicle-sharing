@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Objects;
+
 import static com.car.sharing.zelezniak.constants.ValidationMessages.MUST_BE_SPECIFIED;
 
 @JsonTypeInfo(
@@ -21,12 +23,11 @@ import static com.car.sharing.zelezniak.constants.ValidationMessages.MUST_BE_SPE
         @JsonSubTypes.Type(value = Motorcycle.class, name = "motorcycle")
 })
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "vehicle_type", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @AllArgsConstructor
-@Table(name = "vehicles")
+@Table(name = "vehicle")
 @SuperBuilder(toBuilder = true)
 @AttributeOverrides(
         @AttributeOverride(name = "pricePerDay.money",
@@ -61,9 +62,36 @@ public abstract class Vehicle {
         return vehicleInformation.getDescription();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vehicle vehicle = (Vehicle) o;
+        return Objects.equals(vehicleInformation, vehicle.vehicleInformation)
+                && Objects.equals(pricePerDay, vehicle.pricePerDay)
+                && status == vehicle.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                vehicleInformation,
+                pricePerDay, status);
+    }
+
+    @Override
+    public String toString() {
+        return "Vehicle{" +
+                "id=" + id +
+                ", vehicleInformation=" + vehicleInformation +
+                ", pricePerDay=" + pricePerDay +
+                ", status=" + status +
+                '}';
+    }
 
     public enum Status {
         AVAILABLE,
         UNAVAILABLE
     }
+
 }

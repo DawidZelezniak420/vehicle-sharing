@@ -1,6 +1,6 @@
 package com.car.sharing.zelezniak.sharing_domain.model.value_objects;
 
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -18,6 +18,10 @@ import static com.car.sharing.zelezniak.constants.ValidationMessages.MUST_BE_SPE
 @Builder(toBuilder = true)
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
+@AttributeOverrides(
+        @AttributeOverride(name = "productionYear.year",
+                column = @Column(name = "production_year"))
+)
 public class VehicleInformation {
 
     @NotBlank(message = "Brand" + CAN_NOT_BE_BLANK)
@@ -38,6 +42,9 @@ public class VehicleInformation {
     @NotNull(message = "Engine" + MUST_BE_SPECIFIED)
     private final Engine engine;
 
+    @Enumerated(EnumType.STRING)
+    private final GearType gearType;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,7 +55,8 @@ public class VehicleInformation {
                 && Objects.equals(registrationNumber, that.registrationNumber)
                 && Objects.equals(productionYear, that.productionYear)
                 && Objects.equals(description, that.description)
-                && Objects.equals(engine, that.engine);
+                && Objects.equals(engine, that.engine)
+                && gearType == that.gearType;
     }
 
     @Override
@@ -57,7 +65,8 @@ public class VehicleInformation {
                 brand, model,
                 registrationNumber,
                 productionYear,
-                description, engine);
+                description,
+                engine, gearType);
     }
 
     @Override
@@ -70,5 +79,12 @@ public class VehicleInformation {
                 ", description='" + description +
                 ", engine=" + engine +
                 '}';
+    }
+
+    public enum GearType {
+        MANUAL,
+        AUTOMATIC,
+        CVT,
+        DUAL_CLUTCH
     }
 }

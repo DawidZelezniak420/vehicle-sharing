@@ -15,7 +15,8 @@ public class VehicleUpdateVisitor {
                         existingCar.getVehicleInformation(),
                         newData))
                 .doorsNumber(newData.getDoorsNumber())
-                .carType(newData.getCarType())
+                .bodyType(newData.getBodyType())
+                .driveType(newData.getDriveType())
                 .pricePerDay(newData.getPricePerDay())
                 .build();
     }
@@ -32,16 +33,17 @@ public class VehicleUpdateVisitor {
     }
 
     private VehicleInformation updateVehicleInfo(
-            VehicleInformation vehicleInformation,
+            VehicleInformation actual,
             Vehicle newData) {
-        var newVehicleInfo = newData.getVehicleInformation();
-        return vehicleInformation.toBuilder()
-                .brand(newVehicleInfo.getBrand())
-                .model(newVehicleInfo.getModel())
-                .productionYear(newVehicleInfo.getProductionYear())
-                .registrationNumber(newVehicleInfo.getRegistrationNumber())
-                .description(newVehicleInfo.getDescription())
-                .engine(vehicleInformation.getEngine())
+        var newInfo = newData.getVehicleInformation();
+        return actual.toBuilder()
+                .brand(newInfo.getBrand())
+                .model(newInfo.getModel())
+                .productionYear(newInfo.getProductionYear())
+                .registrationNumber(newInfo.getRegistrationNumber())
+                .description(newInfo.getDescription())
+                .engine(actual.getEngine())
+                .gearType(actual.getGearType())
                 .build();
     }
 }
