@@ -2,6 +2,8 @@ package com.car.sharing.zelezniak.user_domain.service;
 
 import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
+import com.car.sharing.zelezniak.util.validation.DataValidator;
+import com.car.sharing.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +16,8 @@ import java.util.NoSuchElementException;
 public class ClientOperations implements ClientService {
 
     private final ClientRepository clientRepository;
-    private final UserValidator validator;
+    private final ClientValidator clientValidator;
+    private final DataValidator dataValidator;
 
     @Transactional(readOnly = true)
     public List<Client> findAll() {
@@ -22,46 +25,60 @@ public class ClientOperations implements ClientService {
     }
 
     @Transactional(readOnly = true)
-    public Client getById(Long id) {
-        validator.throwExceptionIfObjectIsNull(id);
-        return findUser(id);
+    public Client findById(Long id) {
+        validateClientId(id);
+        return findClient(id);
     }
 
     @Transactional
-    public Client update(Long id,
-                         Client newData) {
-        validator.throwExceptionIfObjectIsNull(id);
-        validator.throwExceptionIfObjectIsNull(newData);
-        Client clientFromDb = findUser(id);
-        return validateAndUpdateUser(clientFromDb, newData);
+    public void updateClient(
+            Long id, Client newData) {
+        validateClientId(id);
+        validateClient(newData);
+        Client clientFromDb = findClient(id);
+        validateAndUpdateClient(
+                clientFromDb, newData);
     }
 
     @Transactional
     public void delete(Long id) {
-        validator.throwExceptionIfObjectIsNull(id);
-        Client clientToDelete = findUser(id);
-        handleDeleteUser(clientToDelete);
+        validateClientId(id);
+        Client clientToDelete = findClient(id);
+        handleDeleteClient(clientToDelete);
     }
 
-    private Client findUser(Long id) {
+    private void validateClientId(Long id) {
+        dataValidator.throwExceptionIfObjectIsNull(
+                id,InputValidator.CLIENT_ID_NOT_NULL);
+    }
+
+    private Client findClient(Long id) {
         return clientRepository.findById(id)
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "User with id : " + id + " does not exists."));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "User with id: " + id + " does not exist."));
     }
 
-    private Client validateAndUpdateUser(
+    private void validateClient(Client client) {
+        dataValidator.throwExceptionIfObjectIsNull(
+                client,InputValidator.CLIENT_NOT_NULL);
+    }
+
+    private void validateAndUpdateClient(
             Client clientFromDb,
             Client newData) {
-        String userFromDbEmail = clientFromDb.getEmail();
-        validator.checkIfUserCanBeUpdated(userFromDbEmail, newData);
+        String clientEmail = clientFromDb.getEmail();
+        clientValidator.checkIfUserCanBeUpdated(clientEmail, newData);
         clientFromDb.setName(newData.getName());
         clientFromDb.setCredentials(newData.getCredentials());
         clientFromDb.setAddress(newData.getAddress());
-        return clientFromDb;
+        saveClient(clientFromDb);
     }
 
-    private void handleDeleteUser(
+    private void saveClient(Client client) {
+        clientRepository.save(client);
+    }
+
+    private void handleDeleteClient(
             Client clientToDelete) {
         removeRoles(clientToDelete);
         clientRepository.delete(clientToDelete);
@@ -71,3 +88,4 @@ public class ClientOperations implements ClientService {
         userToDelete.setRoles(null);
     }
 }
+

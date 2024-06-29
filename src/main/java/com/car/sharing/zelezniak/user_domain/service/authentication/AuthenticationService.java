@@ -7,7 +7,9 @@ import com.car.sharing.zelezniak.user_domain.model.user.Role;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
 import com.car.sharing.zelezniak.user_domain.repository.RoleRepository;
-import com.car.sharing.zelezniak.user_domain.service.UserValidator;
+import com.car.sharing.zelezniak.user_domain.service.ClientValidator;
+import com.car.sharing.zelezniak.util.validation.DataValidator;
+import com.car.sharing.zelezniak.util.validation.InputValidator;
 import com.car.sharing.zelezniak.util.TimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -30,22 +33,26 @@ public class AuthenticationService implements Authenticator {
     private final ClientRepository clientRepository;
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
-    private final UserValidator validator;
+    private final ClientValidator clientValidator;
+    private final DataValidator dataValidator;
     private final AuthenticationManager authenticationManager;
     private final JWTGenerator jwtGenerator;
 
     public UserDetails loadUserByUsername(
             String username)
             throws UsernameNotFoundException {
-        validator.throwExceptionIfObjectIsNull(username);
+        dataValidator.throwExceptionIfObjectIsNull(
+                username, "Username can not be a null.");
         return clientRepository.findByCredentialsEmail(username);
     }
 
     public Client register(
             Client client) {
-        validator.throwExceptionIfObjectIsNull(client);
-        validator.ifUserExistsThrowException(client.getEmail());
-        add(client);
+        dataValidator.throwExceptionIfObjectIsNull(
+                client, InputValidator.CLIENT_NOT_NULL);
+        clientValidator.ifUserExistsThrowException(
+                client.getEmail());
+        saveClient(client);
         return client;
     }
 
@@ -55,14 +62,15 @@ public class AuthenticationService implements Authenticator {
         return tryLoginUser(email, password);
     }
 
-    private void add(Client client) {
+    private void saveClient(Client client) {
         setRequiredDataAndEncodePassword(client);
         clientRepository.save(client);
     }
 
     private void setRequiredDataAndEncodePassword(
             Client client) {
-        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        client.setCreatedAt(
+                TimeFormatter.getFormattedActualDateTime());
         client.setCredentials(
                 new UserCredentials(client.getEmail(),
                         encoder.encode(client.getPassword())));
@@ -76,7 +84,8 @@ public class AuthenticationService implements Authenticator {
     }
 
     private Role findOrCreateRoleUser() {
-        Role role = roleRepository.findByRoleName("USER");
+        Role role = roleRepository.findByRoleName(
+                "USER");
         if (role == null) {
             role = new Role("USER");
             roleRepository.save(role);
@@ -95,7 +104,8 @@ public class AuthenticationService implements Authenticator {
                     clientRepository.findByCredentialsEmail(email),
                     token);
         } catch (AuthenticationException e) {
-            log.error("User with email : " + email + " can not be authenticated - bad credentials.");
+            log.error("User with email : " + email +
+                    " can not be authenticated - bad credentials.");
             return new LoginResponse(null, "");
         }
     }

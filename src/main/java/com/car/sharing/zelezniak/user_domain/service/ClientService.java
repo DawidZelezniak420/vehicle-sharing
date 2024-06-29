@@ -8,9 +8,10 @@ public interface ClientService {
 
     Collection<Client> findAll();
 
-    Client getById(Long id);
+    Client findById(Long id);
 
-    Client update(Long id, Client newData);
+    void updateClient(Long id, Client newData);
 
     void delete(Long id);
+
 }

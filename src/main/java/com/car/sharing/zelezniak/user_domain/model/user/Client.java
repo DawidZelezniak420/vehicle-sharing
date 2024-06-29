@@ -2,11 +2,9 @@ package com.car.sharing.zelezniak.user_domain.model.user;
 
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -22,6 +20,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "clients")
+@Builder
 public class Client implements UserDetails {
 
     @Id
@@ -41,7 +40,7 @@ public class Client implements UserDetails {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade ={
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {
             CascadeType.DETACH,
             CascadeType.MERGE})
     @JoinTable(name = "clients_roles", joinColumns =
@@ -57,6 +56,7 @@ public class Client implements UserDetails {
         return credentials.getPassword();
     }
 
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }

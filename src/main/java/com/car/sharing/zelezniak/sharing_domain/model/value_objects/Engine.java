@@ -16,7 +16,7 @@ import static com.car.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_
 
 @Embeddable
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
 public class Engine {

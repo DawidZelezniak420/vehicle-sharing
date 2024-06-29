@@ -8,4 +8,10 @@ public interface VehicleService {
 
 
     Collection<Vehicle> findAll();
+
+    Vehicle findById(Long id);
+
+    void addVehicle(Vehicle vehicle);
+
+    Vehicle updateVehicle(Long id, Vehicle newData);
 }

@@ -4,6 +4,7 @@ import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -13,29 +14,29 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ClientController {
 
-    private final ClientService userService;
+    private final ClientService clientService;
 
     @GetMapping("/")
     public Collection<Client> findAll() {
-        return userService.findAll();
+        return clientService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Client getById(
+    public Client findById(
             @PathVariable Long id) {
-        return userService.getById(id);
+        return clientService.findById(id);
     }
 
     @PutMapping("/update/{id}")
-    public Client update(
+    public void update(
             @PathVariable Long id,
-            @RequestBody Client newData) {
-        return userService.update(id, newData);
+            @Validated @RequestBody Client newData) {
+        clientService.updateClient(id, newData);
     }
 
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id){
-        userService.delete(id);
+    public void delete(@PathVariable Long id) {
+        clientService.delete(id);
     }
 }

@@ -88,19 +88,17 @@ class AuthenticationServiceTest {
 
     @Test
     @Transactional
-    @Order(1)
     void shouldRegisterNewUser() {
         setClientInfo();
 
         authenticationService.register(client);
 
         assertEquals(4, clientRepository.count());
-        assertEquals(client, clientOperations.getById(client.getId()));
+        assertEquals(client, clientOperations.findById(client.getId()));
     }
 
     @Test
     @Transactional
-    @Order(2)
     void shouldRegisterAndLoginUser() {
         setClientInfo();
 

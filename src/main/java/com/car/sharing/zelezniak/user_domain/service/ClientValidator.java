@@ -7,19 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class UserValidator {
+public class ClientValidator {
 
     private final ClientRepository userRepository;
 
-    public void throwExceptionIfObjectIsNull(Object o) {
-        if (o == null) {
-            throw new IllegalArgumentException(
-                    "Argument is incorrect");
-        }
-    }
-
     public void ifUserExistsThrowException(String email) {
-        if (userWithSuchEmailExists(email))
+        if (userByEmailExists(email))
             throw new IllegalArgumentException(
                    createMessage(email));
     }
@@ -28,10 +21,14 @@ public class UserValidator {
                                         Client newData) {
         String newEmail = newData.getEmail();
         if(emailsAreNotSame(userFromDbEmail,newEmail)
-        && userWithSuchEmailExists(newEmail)){
+        && userByEmailExists(newEmail)){
             throw new IllegalArgumentException(
                     createMessage(newEmail));
         }
+    }
+
+    private String createMessage(String email) {
+        return  "User with email : " + email + " already exist";
     }
 
     private boolean emailsAreNotSame(String userFromDbEmail,
@@ -39,11 +36,9 @@ public class UserValidator {
         return !userFromDbEmail.equals(newEmail);
     }
 
-    private boolean userWithSuchEmailExists(String newEmail) {
+    private boolean userByEmailExists(String newEmail) {
        return userRepository.existsByCredentialsEmail(newEmail);
     }
 
-    private String createMessage(String email) {
-        return  "User with email : " + email + " already exists";
-    }
+
 }

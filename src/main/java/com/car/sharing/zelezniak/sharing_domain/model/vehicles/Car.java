@@ -31,9 +31,10 @@ public class Car extends Vehicle {
     @Enumerated(EnumType.STRING)
     private BodyType bodyType;
 
-    public void update(VehicleUpdateVisitor visitor, Vehicle newData) {
+    public void update(VehicleUpdateVisitor visitor,
+                       Vehicle newData) {
         if(newData instanceof Car updated){
-            visitor.update(this,updated);
+          visitor.update(this,updated);
         }
     }
 

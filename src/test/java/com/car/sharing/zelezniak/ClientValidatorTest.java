@@ -4,7 +4,7 @@ import com.car.sharing.zelezniak.user_domain.model.user.Address;
 import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.user_domain.service.UserValidator;
+import com.car.sharing.zelezniak.user_domain.service.ClientValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ class ClientValidatorTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private UserValidator validator;
+    private ClientValidator validator;
 
     @Value("${create.role.user}")
     private String createRoleUser;
@@ -58,20 +58,6 @@ class ClientValidatorTest {
         executeQueries("delete from clients_roles","delete from roles",
                 "delete from clients","delete from addresses");
         userWithId5 = null;
-    }
-
-    @Test
-    void shouldThrowException() {
-        String given = null;
-        assertThrows(IllegalArgumentException.class, () ->
-                validator.throwExceptionIfObjectIsNull(given));
-    }
-
-    @Test
-    void shouldNotThrowException() {
-        String given = "string";
-        assertDoesNotThrow(() ->
-                validator.throwExceptionIfObjectIsNull(given));
     }
 
     @Test

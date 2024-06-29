@@ -2,6 +2,8 @@ package com.car.sharing.zelezniak.sharing_domain.model.vehicles;
 
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.util.VehicleUpdateVisitor;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,9 +22,11 @@ import java.util.Objects;
 @Table(name = "motorcycles")
 public class Motorcycle extends Vehicle {
 
+    @Enumerated(EnumType.STRING)
     private MotorcycleType motorcycleType;
 
-    public void update(VehicleUpdateVisitor visitor, Vehicle newData) {
+    public void update(VehicleUpdateVisitor visitor,
+                       Vehicle newData) {
         if (newData instanceof Motorcycle updated) {
             visitor.update(this, updated);
         }

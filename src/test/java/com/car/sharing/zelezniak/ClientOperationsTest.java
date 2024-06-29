@@ -69,8 +69,8 @@ class ClientOperationsTest {
 
     @AfterEach
     void cleanupDatabase() {
-        executeQueries("delete from clients_roles","delete from roles",
-                "delete from clients","delete from addresses");
+        executeQueries("delete from clients_roles", "delete from roles",
+                "delete from clients", "delete from addresses");
         clientWithId5 = null;
         client = new Client();
     }
@@ -91,7 +91,8 @@ class ClientOperationsTest {
 
     @Test
     void shouldFindClientById() {
-        Client client = clientOperations.getById(5L);
+        Client client = clientOperations.findById(
+                clientWithId5.getId());
         assertEquals(clientWithId5, client);
     }
 
@@ -99,41 +100,44 @@ class ClientOperationsTest {
     void shouldNotFindClientById() {
         Long nonExistentId = 20L;
         assertThrows(NoSuchElementException.class, () ->
-                clientOperations.getById(nonExistentId));
+                clientOperations.findById(nonExistentId));
     }
 
     @Test
     void shouldUpdateClient() {
-        client.setId(5L);
+        Long client5Id = clientWithId5.getId();
+        client.setId(client5Id);
         client.setName(new UserName("Uncle", "Bob"));
         client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
 
-        clientOperations.update(5L, client);
-        Client updatedUser = clientOperations.getById(5L);
+        clientOperations.updateClient(client5Id, client);
+        Client updatedUser = clientOperations.findById(client5Id);
 
         assertEquals(client, updatedUser);
     }
 
     @Test
     void shouldNotUpdateClient() {
-        client.setId(5L);
         client.setName(new UserName("Uncle", "Bob"));
-        client.setCredentials(new UserCredentials("usersix@gmail.com", "somepassword"));
+        var credentialsWithExistingEmail = new UserCredentials("usersix@gmail.com", "somepassword");
+        client.setCredentials(credentialsWithExistingEmail);
 
+        Long client5Id = clientWithId5.getId();
         assertThrows(IllegalArgumentException.class, () ->
-                clientOperations.update(5L, client));
+                clientOperations.updateClient(
+                        client5Id, client));
     }
 
     @Test
     void shouldDeleteClient() {
         assertEquals(3, clientOperations.findAll().size());
-        clientOperations.delete(5L);
+        clientOperations.delete(clientWithId5.getId());
         List<Client> clients = clientOperations.findAll();
         assertEquals(2, clients.size());
         assertFalse(clients.contains(clientWithId5));
     }
 
-    private void executeQueries(String ... queries){
+    private void executeQueries(String... queries) {
         Arrays.stream(queries).forEach(jdbcTemplate::execute);
     }
 

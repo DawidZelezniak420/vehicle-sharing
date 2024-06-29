@@ -58,10 +58,6 @@ public abstract class Vehicle {
         return vehicleInformation.getRegistrationNumber();
     }
 
-    public String getDescription(){
-        return vehicleInformation.getDescription();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

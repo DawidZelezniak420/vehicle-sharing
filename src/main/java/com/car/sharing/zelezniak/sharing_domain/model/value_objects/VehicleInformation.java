@@ -34,12 +34,14 @@ public class VehicleInformation {
     private final String registrationNumber;
 
     @NotNull(message = "Production year" + MUST_BE_SPECIFIED)
+    @Embedded
     private final Year productionYear;
 
     @NotBlank(message = "Description" + CAN_NOT_BE_BLANK)
     private final String description;
 
     @NotNull(message = "Engine" + MUST_BE_SPECIFIED)
+    @Embedded
     private final Engine engine;
 
     @Enumerated(EnumType.STRING)
