@@ -39,4 +39,9 @@ public class ClientController {
     public void delete(@PathVariable Long id) {
         clientService.delete(id);
     }
+
+    @GetMapping("/email/{email}")
+    public Client findByEmail(@PathVariable String email){
+        return clientService.findByEmail(email);
+    }
 }

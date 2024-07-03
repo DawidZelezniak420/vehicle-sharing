@@ -54,8 +54,17 @@ class AuthenticationControllerTest {
         client.setName(new UserName("Uncle", "Bob"));
         client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
         client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
-        Address address = new Address(null, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        Address address = new Address(null, "teststreet", "5",
+                "150", "Warsaw", "00-001", "Poland");
         client.setAddress(address);
+    }
+
+    @AfterEach
+    void deleteTestData() {
+        jdbcTemplate.execute("delete from clients_roles");
+        jdbcTemplate.execute("delete from roles");
+        jdbcTemplate.execute("delete from clients");
+        jdbcTemplate.execute("delete from addresses");
     }
 
     @Test
@@ -81,12 +90,14 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void shouldRegisterAndLoginUser() throws Exception {
+    void shouldLoginUser() throws Exception {
         authService.register(client);
+        String email = client.getEmail();
+        LoginRequest loginRequest = new LoginRequest(
+               email , "somepassword");
 
-        LoginRequest loginRequest = new LoginRequest(client.getEmail(), "somepassword");
-
-        Client registeredUser = clientRepository.findByCredentialsEmail(client.getEmail());
+        Client registeredUser = clientRepository.findByCredentialsEmail(
+                email);
         UserName name = registeredUser.getName();
         Address address = registeredUser.getAddress();
 
@@ -107,11 +118,5 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.jwt").isNotEmpty());
     }
 
-    @AfterEach
-    void deleteTestData() {
-        jdbcTemplate.execute("delete from clients_roles");
-        jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from clients");
-        jdbcTemplate.execute("delete from addresses");
-    }
+
 }

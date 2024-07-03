@@ -26,13 +26,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("/application-test.properties")
 @Import(TestBeans.class)
 class ClientServiceTest {
+
     private static Client clientWithId5;
 
     @Autowired
     private Client client;
 
     @Autowired
-    private ClientService clientOperations;
+    private ClientService clientService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -69,15 +70,17 @@ class ClientServiceTest {
 
     @AfterEach
     void cleanupDatabase() {
-        executeQueries("delete from clients_roles", "delete from roles",
-                "delete from clients", "delete from addresses");
-        clientWithId5 = null;
+        executeQueries(
+                "delete from clients_roles",
+                "delete from roles",
+                "delete from clients",
+                "delete from addresses");
         client = new Client();
     }
 
     @Test
     void shouldReturnAllClients() {
-        List<Client> clients = clientOperations.findAll();
+        List<Client> clients = clientService.findAll();
         assertTrue(clients.contains(clientWithId5));
         assertEquals(3, clients.size());
 
@@ -91,7 +94,7 @@ class ClientServiceTest {
 
     @Test
     void shouldFindClientById() {
-        Client client = clientOperations.findById(
+        Client client = clientService.findById(
                 clientWithId5.getId());
         assertEquals(clientWithId5, client);
     }
@@ -100,7 +103,7 @@ class ClientServiceTest {
     void shouldNotFindClientById() {
         Long nonExistentId = 20L;
         assertThrows(NoSuchElementException.class, () ->
-                clientOperations.findById(nonExistentId));
+                clientService.findById(nonExistentId));
     }
 
     @Test
@@ -108,10 +111,11 @@ class ClientServiceTest {
         Long client5Id = clientWithId5.getId();
         client.setId(client5Id);
         client.setName(new UserName("Uncle", "Bob"));
-        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setCredentials(new UserCredentials(
+                "bob@gmail.com", "somepassword"));
 
-        clientOperations.update(client5Id, client);
-        Client updatedUser = clientOperations.findById(client5Id);
+        clientService.update(client5Id, client);
+        Client updatedUser = clientService.findById(client5Id);
 
         assertEquals(client, updatedUser);
     }
@@ -119,34 +123,48 @@ class ClientServiceTest {
     @Test
     void shouldNotUpdateClient() {
         client.setName(new UserName("Uncle", "Bob"));
-        var credentialsWithExistingEmail = new UserCredentials("usersix@gmail.com", "somepassword");
-        client.setCredentials(credentialsWithExistingEmail);
+        String existingEmail = "usersix@gmail.com";
+        var credentials = new UserCredentials(
+                existingEmail, "somepassword");
+        client.setCredentials(credentials);
 
         Long client5Id = clientWithId5.getId();
         assertThrows(IllegalArgumentException.class, () ->
-                clientOperations.update(
+                clientService.update(
                         client5Id, client));
     }
 
     @Test
     void shouldDeleteClient() {
-        assertEquals(3, clientOperations.findAll().size());
-        clientOperations.delete(clientWithId5.getId());
-        List<Client> clients = clientOperations.findAll();
+        assertEquals(3, clientService.findAll().size());
+        clientService.delete(clientWithId5.getId());
+        List<Client> clients = clientService.findAll();
         assertEquals(2, clients.size());
         assertFalse(clients.contains(clientWithId5));
     }
 
+    @Test
+    void shouldFindClientByEmail(){
+        String client5Email = clientWithId5.getEmail();
+
+        Client byEmail = clientService.findByEmail(client5Email);
+
+        assertEquals(clientWithId5,byEmail);
+    }
+
     private void executeQueries(String... queries) {
-        Arrays.stream(queries).forEach(jdbcTemplate::execute);
+        Arrays.stream(queries)
+                .forEach(jdbcTemplate::execute);
     }
 
     private static Client createClientWithId5() {
         Client client = new Client();
         client.setId(5L);
         client.setName(new UserName("UserFive", "Five"));
-        client.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
-        Address address = new Address(5L, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        client.setCredentials(new UserCredentials(
+                "userfive@gmail.com", "somepass"));
+        Address address = new Address(5L, "teststreet", "5",
+                "150", "Warsaw", "00-001", "Poland");
         client.setAddress(address);
         return client;
     }

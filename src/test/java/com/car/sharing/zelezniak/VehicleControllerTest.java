@@ -29,11 +29,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,8 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class VehicleControllerTest {
 
-    private static Vehicle vehicleWithId5 = createCarWithId5();
-    private static Vehicle vehicleWithId6 = createMotorcycleWithId6();
+    private static Vehicle vehicleWithId5;
+    private static Vehicle vehicleWithId6;
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
@@ -119,6 +121,16 @@ class VehicleControllerTest {
                 createVehicleSeven, createCarSeven, createVehicleEight,
                 createCarEight, createVehicleNine, createMotorcycleNine);
         adminToken = generateToken(ADMIN);
+        vehicleWithId5 = createCarWithId5();
+        vehicleWithId6 = createMotorcycleWithId6();
+    }
+
+    @AfterEach
+    void cleanupDatabase() {
+        executeQueries(
+                "delete from cars",
+                "delete from motorcycles",
+                "delete from vehicle");
     }
 
     @Test
@@ -129,7 +141,8 @@ class VehicleControllerTest {
         Engine engine = info.getEngine();
         String fuelType = engine.getFuelType().toString();
         String gearType = info.getGearType().toString();
-        double pricePerDay = vehicleWithId5.getPricePerDay().getMoney().setScale(2, RoundingMode.HALF_UP).doubleValue();
+        double pricePerDay = vehicleWithId5.getPricePerDay()
+                .getMoney().setScale(2, RoundingMode.HALF_UP).doubleValue();
         String status = vehicleWithId5.getStatus().toString();
 
         mockMvc.perform(get("/vehicles/")
@@ -161,7 +174,8 @@ class VehicleControllerTest {
         Engine engine = info.getEngine();
         String fuelType = engine.getFuelType().toString();
         String gearType = info.getGearType().toString();
-        double pricePerDay = vehicleWithId5.getPricePerDay().getMoney().setScale(2, RoundingMode.HALF_UP).doubleValue();
+        double pricePerDay = vehicleWithId5.getPricePerDay()
+                .getMoney().setScale(2, RoundingMode.HALF_UP).doubleValue();
         String status = vehicleWithId5.getStatus().toString();
 
         mockMvc.perform(get("/vehicles/{id}", vehicleWithId5.getId())
@@ -191,7 +205,8 @@ class VehicleControllerTest {
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Vehicle with id: " + nonExistentId + " does not exists."));
+                .andExpect(jsonPath("$.message").value(
+                        "Vehicle with id: " + nonExistentId + " does not exists."));
     }
 
     @Test
@@ -217,7 +232,8 @@ class VehicleControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Vehicle with registration number : " + n + " already exists"));
+                .andExpect(jsonPath("$.message").value(
+                        "Vehicle with registration number : " + n + " already exists"));
     }
 
     @Test
@@ -252,7 +268,8 @@ class VehicleControllerTest {
                         .contentType(APPLICATION_JSON)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Vehicle with registration number : " + n + " already exists"));
+                .andExpect(jsonPath("$.message").value(
+                        "Vehicle with registration number : " + n + " already exists"));
     }
 
     @Test
@@ -277,7 +294,8 @@ class VehicleControllerTest {
         mockMvc.perform(delete("/vehicles/delete/{id}", nonExistentId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Vehicle with id: " + nonExistentId + " does not exists."));
+                .andExpect(jsonPath("$.message").value(
+                        "Vehicle with id: " + nonExistentId + " does not exists."));
 
         assertEquals(5, vehicleRepository.count());
     }
@@ -329,21 +347,16 @@ class VehicleControllerTest {
                         .param("value", value)
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Unknown criteria type " + criteria));
-    }
-
-    @AfterEach
-    void cleanupDatabase() {
-        executeQueries("delete from cars",
-                "delete from motorcycles",
-                "delete from vehicle");
+                .andExpect(jsonPath("$.message").value(
+                        "Unknown criteria type " + criteria));
     }
 
     private String generateToken(String role) {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority(role));
         UserDetails userDetails = new User(role.toLowerCase(), "password", authorities);
-        return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(userDetails, null, authorities));
+        return jwtGenerator.generateJWT(new UsernamePasswordAuthenticationToken(
+                userDetails, null, authorities));
     }
 
     private void executeQueries(String... queries) {
@@ -498,7 +511,8 @@ class VehicleControllerTest {
         Engine engine = info.getEngine();
         String fuelType = engine.getFuelType().toString();
         String gearType = info.getGearType().toString();
-        double pricePerDay = result.getPricePerDay().getMoney().setScale(2, RoundingMode.HALF_UP).doubleValue();
+        double pricePerDay = result.getPricePerDay()
+                .getMoney().setScale(2, RoundingMode.HALF_UP).doubleValue();
         String status = result.getStatus().toString();
 
         mockMvc.perform(get("/vehicles/criteria")

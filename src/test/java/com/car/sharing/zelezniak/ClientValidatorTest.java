@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("/application-test.properties")
 class ClientValidatorTest {
 
-    private static Client userWithId5;
+    private static Client clientWithId5;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -50,48 +50,58 @@ class ClientValidatorTest {
         executeQueries(createRoleUser,createAddressFive,
                 createAddressSix,createUserFive,createUserSix,
                 setRoleUserFive,setRoleUserSix);
-        userWithId5 = createClientWithId5();
+        clientWithId5 = createClientWithId5();
     }
 
     @AfterEach
     void deleteDataFromDb(){
-        executeQueries("delete from clients_roles","delete from roles",
-                "delete from clients","delete from addresses");
-        userWithId5 = null;
+        executeQueries(
+                "delete from clients_roles",
+                "delete from roles",
+                "delete from clients",
+                "delete from addresses");
     }
 
     @Test
     void shouldThrowExceptionIfClientExists() {
-        String existingUserEmail = userWithId5.getEmail();
+        String existingEmail = clientWithId5.getEmail();
+
         assertThrows(IllegalArgumentException.class,()->
-           validator.ifUserExistsThrowException(existingUserEmail));
+           validator.ifUserExistsThrowException(existingEmail));
     }
 
     @Test
     void shouldNotThrowExceptionIfClientNotExists() {
         Client c = new Client();
-        c.setCredentials(new UserCredentials("someuser@gmail.com", "somepass"));
+        c.setCredentials(new UserCredentials(
+                "someuser@gmail.com", "somepass"));
 
         assertDoesNotThrow(() -> validator.ifUserExistsThrowException(c.getEmail()));
     }
 
     @Test
     void shouldTestClientCanBeUpdated(){
-        String userFromDbEmail = userWithId5.getEmail();
-        userWithId5.setCredentials(new UserCredentials("newemail@gmail.com","somepass"));
+        String userFromDbEmail = clientWithId5.getEmail();
+        clientWithId5.setCredentials(new UserCredentials(
+                "newemail@gmail.com","somepass"));
+
         assertDoesNotThrow(()->
-                validator.checkIfUserCanBeUpdated(userFromDbEmail,userWithId5));
+                validator.checkIfUserCanBeUpdated(
+                        userFromDbEmail, clientWithId5));
     }
 
     @Test
     void shouldTestClientCanNotBeUpdated(){
-        String userFromDbEmail = "usersix@gmail.com";
+        String existingEmail = "usersix@gmail.com";
+
         assertThrows(IllegalArgumentException.class,()->
-                validator.checkIfUserCanBeUpdated(userFromDbEmail,userWithId5));
+                validator.checkIfUserCanBeUpdated(
+                        existingEmail, clientWithId5));
     }
 
     private void executeQueries(String...queries) {
-        Arrays.stream(queries).forEach(jdbcTemplate::execute);
+        Arrays.stream(queries)
+                .forEach(jdbcTemplate::execute);
     }
 
 
@@ -99,8 +109,10 @@ class ClientValidatorTest {
         Client client = new Client();
         client.setId(5L);
         client.setName(new UserName("UserFive", "Five"));
-        client.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
-        Address address = new Address(5L,"teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        client.setCredentials(new UserCredentials(
+                "userfive@gmail.com", "somepass"));
+        Address address = new Address(5L,"teststreet", "5",
+                "150", "Warsaw", "00-001", "Poland");
         client.setAddress(address);
         return client;
     }

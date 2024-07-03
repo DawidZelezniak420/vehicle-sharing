@@ -8,7 +8,6 @@ import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCreden
 import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
 import com.car.sharing.zelezniak.user_domain.repository.RoleRepository;
 import com.car.sharing.zelezniak.user_domain.service.ClientValidator;
-import com.car.sharing.zelezniak.util.validation.DataValidator;
 import com.car.sharing.zelezniak.util.validation.InputValidator;
 import com.car.sharing.zelezniak.util.TimeFormatter;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,27 +28,27 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class AuthenticationService implements Authenticator {
+public class AuthenticationService implements UserDetailsService {
 
     private final ClientRepository clientRepository;
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
     private final ClientValidator clientValidator;
-    private final DataValidator dataValidator;
+    private final InputValidator inputValidator;
     private final AuthenticationManager authenticationManager;
     private final JWTGenerator jwtGenerator;
 
     public UserDetails loadUserByUsername(
             String username)
             throws UsernameNotFoundException {
-        dataValidator.throwExceptionIfObjectIsNull(
-                username, "Username can not be a null.");
+        inputValidator.throwExceptionIfObjectIsNull(
+                username, "Email can not be a null.");
         return clientRepository.findByCredentialsEmail(username);
     }
 
     public Client register(
             Client client) {
-        dataValidator.throwExceptionIfObjectIsNull(
+        inputValidator.throwExceptionIfObjectIsNull(
                 client, InputValidator.CLIENT_NOT_NULL);
         clientValidator.ifUserExistsThrowException(
                 client.getEmail());

@@ -33,8 +33,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("/application-test.properties")
 class VehicleServiceTest {
 
-    private static Vehicle vehicleWithId5 = createCarWithId5();
-    private static Vehicle vehicleWithId6 = createMotorcycleWithId6();
+    private static Vehicle vehicleWithId5;
+    private static Vehicle vehicleWithId6;
 
     @Autowired
     private VehicleService vehicleOperations;
@@ -92,6 +92,16 @@ class VehicleServiceTest {
                 createVehicleSix, createMotorcycleSix,
                 createVehicleSeven, createCarSeven, createVehicleEight,
                 createCarEight, createVehicleNine, createMotorcycleNine);
+        vehicleWithId5 = createCarWithId5();
+        vehicleWithId6 = createMotorcycleWithId6();
+    }
+
+    @AfterEach
+    void cleanupDatabase() {
+        executeQueries(
+                "delete from cars",
+                "delete from motorcycles",
+                "delete from vehicle");
     }
 
     @Test
@@ -190,7 +200,8 @@ class VehicleServiceTest {
     @Test
     void shouldFindVehiclesByCriteriaModel() {
         var info = vehicleWithId5.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("model", info.getModel());
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
+                "model", info.getModel());
         assertEquals(1, vehicles.size());
         assertTrue(vehicles.contains(vehicleWithId5));
     }
@@ -199,7 +210,8 @@ class VehicleServiceTest {
     void shouldFindVehiclesByCriteriaBrand() {
         Vehicle vehicle7 = vehicleOperations.findById(7L);
         var info = vehicle7.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("brand", info.getBrand());
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
+                "brand", info.getBrand());
         assertTrue(vehicles.contains(vehicle7));
         assertEquals(1,vehicles.size());
     }
@@ -208,7 +220,8 @@ class VehicleServiceTest {
     void shouldFindVehiclesByCriteriaRegistrationNumber() {
         Vehicle vehicle8 = vehicleOperations.findById(8L);
         String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("registration number", vehicle8RegistrationNumber);
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
+                "registration number", vehicle8RegistrationNumber);
         assertEquals(1,vehicles.size());
         assertTrue(vehicles.contains(vehicle8));
     }
@@ -218,7 +231,8 @@ class VehicleServiceTest {
         Vehicle vehicle8 = vehicleOperations.findById(8L);
         Vehicle vehicle9 = vehicleOperations.findById(9L);
         var info = vehicle8.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("production year", info.getProductionYear().getYear());
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
+                "production year", info.getProductionYear().getYear());
         assertEquals(2,vehicles.size());
         assertTrue(vehicles.contains(vehicle8));
         assertTrue(vehicles.contains(vehicle9));
@@ -227,18 +241,13 @@ class VehicleServiceTest {
     @Test
     void shouldNotFindVehiclesByNonExistentCriteria() {
     assertThrows(IllegalArgumentException.class,()->
-            vehicleOperations.findByCriteria("wheels number",4));
-    }
-
-    @AfterEach
-    void cleanupDatabase() {
-        executeQueries("delete from cars",
-                "delete from motorcycles",
-                "delete from vehicle");
+            vehicleOperations.findByCriteria(
+                    "wheels number",4));
     }
 
     private void executeQueries(String... queries) {
-        Arrays.stream(queries).forEach(jdbcTemplate::execute);
+        Arrays.stream(queries)
+                .forEach(jdbcTemplate::execute);
     }
 
     private static Vehicle createCarWithId5() {

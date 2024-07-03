@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 
@@ -28,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthenticationServiceTest {
 
-    private static Client userWithId5;
+    private static Client clientWithId5;
 
     @Autowired
     private ClientRepository clientRepository;
@@ -40,10 +38,7 @@ class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     @Autowired
-    private ClientService clientOperations;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private ClientService clientService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -75,35 +70,37 @@ class AuthenticationServiceTest {
                 createAddressSix, createAddressSeven, createUserFive,
                 createUserSix, createUserSeven, setRoleUserFive,
                 setRoleUserSix, setRoleUserSeven);
-        userWithId5 = createUserWithId5();
+        clientWithId5 = createUserWithId5();
     }
 
     @AfterEach
     void cleanupDatabase() {
-        executeQueries("delete from clients_roles", "delete from roles",
-                "delete from clients", "delete from addresses");
-        userWithId5 = null;
+        executeQueries(
+                "delete from clients_roles",
+                "delete from roles",
+                "delete from clients",
+                "delete from addresses");
         client = new Client();
     }
 
     @Test
-    @Transactional
+    @Order(1)
     void shouldRegisterNewUser() {
-        setClientInfo();
-
+        setDataForClient();
         authenticationService.register(client);
 
         assertEquals(4, clientRepository.count());
-        assertEquals(client, clientOperations.findById(client.getId()));
+        assertEquals(client, clientService.findById(client.getId()));
     }
 
     @Test
-    @Transactional
-    void shouldRegisterAndLoginUser() {
-        setClientInfo();
-
+    @Order(2)
+    void shouldLoginUser() {
+        setDataForClient();
         authenticationService.register(client);
-        LoginRequest loginRequest = new LoginRequest("bob@gmail.com", "somepassword");
+
+        LoginRequest loginRequest = new LoginRequest(
+                client.getEmail(), "somepassword");
         LoginResponse login = authenticationService.login(loginRequest);
 
         assertEquals(client, login.getClient());
@@ -114,29 +111,38 @@ class AuthenticationServiceTest {
 
     @Test
     void shouldLoadUserByEmail() {
-        assertEquals(userWithId5, clientRepository.findByCredentialsEmail("userfive@gmail.com"));
+        assertEquals(clientWithId5,
+                authenticationService.loadUserByUsername(
+                                    "userfive@gmail.com"));
     }
 
     private void executeQueries(String... queries) {
-        Arrays.stream(queries).forEach(jdbcTemplate::execute);
+        Arrays.stream(queries)
+                .forEach(jdbcTemplate::execute);
     }
 
     private static Client createUserWithId5() {
         Client user = new Client();
         user.setId(5L);
         user.setName(new UserName("UserFive", "Five"));
-        user.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
-        Address address = new Address(5L, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        user.setCredentials(new UserCredentials(
+                "userfive@gmail.com", "somepass"));
+        Address address = new Address(5L, "teststreet",
+                "5", "150", "Warsaw",
+                "00-001", "Poland");
         user.setAddress(address);
         return user;
     }
 
-    private void setClientInfo() {
+    private void setDataForClient() {
         client.setId(null);
         client.setName(new UserName("Uncle", "Bob"));
-        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
+        client.setCredentials(new UserCredentials(
+                "bob@gmail.com", "somepassword"));
         client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
-        Address address = new Address(null, "teststreet", "5", "150", "Warsaw", "00-001", "Poland");
+        Address address = new Address(null, "teststreet",
+                "5", "150", "Warsaw",
+                "00-001", "Poland");
         client.setAddress(address);
     }
 }

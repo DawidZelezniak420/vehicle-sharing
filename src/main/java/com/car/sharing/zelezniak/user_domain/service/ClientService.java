@@ -2,7 +2,6 @@ package com.car.sharing.zelezniak.user_domain.service;
 
 import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
-import com.car.sharing.zelezniak.util.validation.DataValidator;
 import com.car.sharing.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,13 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.car.sharing.zelezniak.util.validation.InputValidator.*;
+
 @Service
 @RequiredArgsConstructor
 public class ClientService {
 
     private final ClientRepository clientRepository;
     private final ClientValidator clientValidator;
-    private final DataValidator dataValidator;
+    private final InputValidator inputValidator;
 
     @Transactional(readOnly = true)
     public List<Client> findAll() {
@@ -26,15 +27,15 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public Client findById(Long id) {
-        validateClientId(id);
+        checkIfNotNull(id, CLIENT_ID_NOT_NULL);
         return findClient(id);
     }
 
     @Transactional
     public void update(
             Long id, Client newData) {
-        validateClientId(id);
-        validateClient(newData);
+        checkIfNotNull(id, CLIENT_ID_NOT_NULL);
+        checkIfNotNull(newData, CLIENT_NOT_NULL);
         Client clientFromDb = findClient(id);
         validateAndUpdateClient(
                 clientFromDb, newData);
@@ -42,25 +43,20 @@ public class ClientService {
 
     @Transactional
     public void delete(Long id) {
-        validateClientId(id);
+        checkIfNotNull(id, CLIENT_ID_NOT_NULL);
         Client clientToDelete = findClient(id);
         handleDeleteClient(clientToDelete);
     }
 
-    private void validateClientId(Long id) {
-        dataValidator.throwExceptionIfObjectIsNull(
-                id,InputValidator.CLIENT_ID_NOT_NULL);
+    private <T> void checkIfNotNull(T value, String message) {
+        inputValidator.throwExceptionIfObjectIsNull(
+                value, message);
     }
 
     private Client findClient(Long id) {
         return clientRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException(
                         "User with id: " + id + " does not exist."));
-    }
-
-    private void validateClient(Client client) {
-        dataValidator.throwExceptionIfObjectIsNull(
-                client,InputValidator.CLIENT_NOT_NULL);
     }
 
     private void validateAndUpdateClient(
@@ -86,6 +82,12 @@ public class ClientService {
 
     private void removeRoles(Client userToDelete) {
         userToDelete.setRoles(null);
+    }
+
+    public Client findByEmail(String email) {
+        checkIfNotNull(email,CLIENT_EMAIL_NOT_NULL);
+        return clientRepository.findByCredentialsEmail(
+                email);
     }
 }
 

@@ -4,7 +4,7 @@ import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Year;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Vehicle;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.car.sharing.zelezniak.sharing_domain.repository.VehicleRepository;
-import com.car.sharing.zelezniak.util.validation.DataValidator;
+import com.car.sharing.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +20,11 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleValidator vehicleValidator;
-    private final DataValidator dataValidator;
+    private final InputValidator inputValidator;
     private final VehicleUpdateVisitor updateVisitor;
+    private final Map<CriteriaType,
+            Function<Object, Collection<Vehicle>>> criteriaMap =
+            initializeCriteriaMap();
 
     @Transactional(readOnly = true)
     public Collection<Vehicle> findAll() {
@@ -60,14 +63,14 @@ public class VehicleService {
 
     @Transactional(readOnly = true)
     public <T> Collection<Vehicle> findByCriteria(String criteriaType, T value) {
+        checkIfNotNull(criteriaType, "Criteria can not be a null");
         CriteriaType criteria = CriteriaType.getCriteriaFromString(criteriaType);
-        Map<CriteriaType, Function<T, Collection<Vehicle>>> criteriaMap = initializeCriteriaMap();
-        Function<T, Collection<Vehicle>> queryFunction = criteriaMap.get(criteria);
+        Function<Object, Collection<Vehicle>> queryFunction = criteriaMap.get(criteria);
         return handleExecuteFunction(value, queryFunction);
     }
 
     private <T> void checkIfNotNull(T input, String message) {
-        dataValidator.throwExceptionIfObjectIsNull(
+        inputValidator.throwExceptionIfObjectIsNull(
                 input, message);
     }
 

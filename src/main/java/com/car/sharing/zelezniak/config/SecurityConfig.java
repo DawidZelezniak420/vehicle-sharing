@@ -54,11 +54,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(@Lazy UserDetailsService userDetailsService) {
-        var authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        return new ProviderManager(authenticationProvider);
+    public AuthenticationManager authenticationManager(
+            @Lazy UserDetailsService userDetailsService) {
+        var authProvider = new DaoAuthenticationProvider();
+        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setUserDetailsService(userDetailsService);
+        return new ProviderManager(authProvider);
     }
 
     @Bean
@@ -103,7 +104,8 @@ public class SecurityConfig {
         authoritiesConverter.setAuthoritiesClaimName("roles");
         authoritiesConverter.setAuthorityPrefix("ROLE_");
         var jwtAuthConverter = new JwtAuthenticationConverter();
-        jwtAuthConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        jwtAuthConverter.setJwtGrantedAuthoritiesConverter(
+                authoritiesConverter);
         return jwtAuthConverter;
     }
 }

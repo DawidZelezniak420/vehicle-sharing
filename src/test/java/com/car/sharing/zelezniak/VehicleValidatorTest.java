@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestPropertySource("/application-test.properties")
 class VehicleValidatorTest {
 
-    private static final Vehicle vehicleWithId5 = createCarWithId5();
+    private static Vehicle vehicleWithId5;
 
     @Autowired
     private VehicleValidator validator;
@@ -50,6 +50,15 @@ class VehicleValidatorTest {
     void setupDatabase() {
         executeQueries(createVehicleFive, createCarFive,
                 createVehicleSix, createMotorcycleSix);
+        vehicleWithId5  = createCarWithId5();
+    }
+
+    @AfterEach
+    void cleanupDatabase() {
+        executeQueries(
+                "delete from cars",
+                "delete from motorcycles",
+                "delete from vehicle");
     }
 
     @Test
@@ -83,11 +92,6 @@ class VehicleValidatorTest {
         assertThrows(IllegalArgumentException.class,
                 () -> validator.throwExceptionIfVehicleExists(
                         vehicleWithId5Registration));
-    }
-
-    @AfterEach
-    void cleanupDatabase() {
-        executeQueries("delete from cars", "delete from motorcycles", "delete from vehicle");
     }
 
     private static Vehicle createCarWithId5() {
