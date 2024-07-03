@@ -7,7 +7,7 @@ import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
 import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
-import com.car.sharing.zelezniak.user_domain.service.ClientOperations;
+import com.car.sharing.zelezniak.user_domain.service.ClientService;
 import com.car.sharing.zelezniak.user_domain.service.authentication.AuthenticationService;
 import com.car.sharing.zelezniak.util.TimeFormatter;
 import org.junit.jupiter.api.*;
@@ -40,7 +40,7 @@ class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     @Autowired
-    private ClientOperations clientOperations;
+    private ClientService clientOperations;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

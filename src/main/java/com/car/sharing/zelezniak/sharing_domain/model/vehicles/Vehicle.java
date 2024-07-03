@@ -1,17 +1,21 @@
 package com.car.sharing.zelezniak.sharing_domain.model.vehicles;
 
+import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Engine;
 import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Money;
 import com.car.sharing.zelezniak.sharing_domain.model.value_objects.VehicleInformation;
+import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Year;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
 
+import static com.car.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_BLANK;
 import static com.car.sharing.zelezniak.constants.ValidationMessages.MUST_BE_SPECIFIED;
 
 @JsonTypeInfo(
@@ -31,8 +35,7 @@ import static com.car.sharing.zelezniak.constants.ValidationMessages.MUST_BE_SPE
 @SuperBuilder(toBuilder = true)
 @AttributeOverrides(
         @AttributeOverride(name = "pricePerDay.money",
-                column = @Column(name = "price_per_day"))
-)
+                column = @Column(name = "price_per_day")))
 public abstract class Vehicle {
 
     @Id
@@ -51,12 +54,12 @@ public abstract class Vehicle {
     protected Vehicle() {
     }
 
-    public abstract void update(VehicleUpdateVisitor visitor,
-                                Vehicle newData);
-
-    public String getRegistrationNumber(){
+    public String getRegistrationNumber() {
         return vehicleInformation.getRegistrationNumber();
     }
+
+    public abstract Vehicle update(VehicleUpdateVisitor visitor,
+                                   Vehicle newData);
 
     @Override
     public boolean equals(Object o) {

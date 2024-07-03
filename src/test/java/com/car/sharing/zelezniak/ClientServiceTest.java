@@ -5,7 +5,7 @@ import com.car.sharing.zelezniak.user_domain.model.user.Address;
 import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.user_domain.service.ClientOperations;
+import com.car.sharing.zelezniak.user_domain.service.ClientService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,14 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
 @Import(TestBeans.class)
-class ClientOperationsTest {
+class ClientServiceTest {
     private static Client clientWithId5;
 
     @Autowired
     private Client client;
 
     @Autowired
-    private ClientOperations clientOperations;
+    private ClientService clientOperations;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -110,7 +110,7 @@ class ClientOperationsTest {
         client.setName(new UserName("Uncle", "Bob"));
         client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
 
-        clientOperations.updateClient(client5Id, client);
+        clientOperations.update(client5Id, client);
         Client updatedUser = clientOperations.findById(client5Id);
 
         assertEquals(client, updatedUser);
@@ -124,7 +124,7 @@ class ClientOperationsTest {
 
         Long client5Id = clientWithId5.getId();
         assertThrows(IllegalArgumentException.class, () ->
-                clientOperations.updateClient(
+                clientOperations.update(
                         client5Id, client));
     }
 

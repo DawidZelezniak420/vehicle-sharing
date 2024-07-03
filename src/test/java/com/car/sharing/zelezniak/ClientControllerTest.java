@@ -5,7 +5,6 @@ import com.car.sharing.zelezniak.user_domain.model.user.Client;
 import com.car.sharing.zelezniak.user_domain.model.user.Role;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.user_domain.service.ClientOperations;
 import com.car.sharing.zelezniak.user_domain.service.ClientService;
 import com.car.sharing.zelezniak.user_domain.service.authentication.JWTGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +48,7 @@ class ClientControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ClientOperations clientOperations;
+    private ClientService clientOperations;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

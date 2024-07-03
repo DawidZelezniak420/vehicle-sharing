@@ -23,11 +23,11 @@ public class VehicleUpdateVisitor {
 
     public Motorcycle update(Motorcycle existingMotorcycle,
                              Motorcycle newData) {
-       return existingMotorcycle.toBuilder()
+        return existingMotorcycle.toBuilder()
                 .vehicleInformation(updateVehicleInfo(
                         existingMotorcycle.getVehicleInformation(),
                         newData))
-               .motorcycleType(newData.getMotorcycleType())
+                .motorcycleType(newData.getMotorcycleType())
                 .pricePerDay(newData.getPricePerDay())
                 .build();
     }
@@ -42,8 +42,8 @@ public class VehicleUpdateVisitor {
                 .productionYear(newInfo.getProductionYear())
                 .registrationNumber(newInfo.getRegistrationNumber())
                 .description(newInfo.getDescription())
-                .engine(actual.getEngine())
-                .gearType(actual.getGearType())
+                .engine(newInfo.getEngine())
+                .gearType(newInfo.getGearType())
                 .build();
     }
 }

@@ -31,7 +31,7 @@ public class ClientController {
     public void update(
             @PathVariable Long id,
             @Validated @RequestBody Client newData) {
-        clientService.updateClient(id, newData);
+        clientService.update(id, newData);
     }
 
     @DeleteMapping("/delete/{id}")

@@ -25,11 +25,12 @@ public class Motorcycle extends Vehicle {
     @Enumerated(EnumType.STRING)
     private MotorcycleType motorcycleType;
 
-    public void update(VehicleUpdateVisitor visitor,
-                       Vehicle newData) {
+    public Motorcycle update(VehicleUpdateVisitor visitor,
+                             Vehicle newData) {
         if (newData instanceof Motorcycle updated) {
             visitor.update(this, updated);
         }
+        throw new IllegalArgumentException("Provided data is not an instance of Motorcycle");
     }
 
     @Override

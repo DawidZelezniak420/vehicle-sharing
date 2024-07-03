@@ -8,7 +8,8 @@ import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Car;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Motorcycle;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Vehicle;
 import com.car.sharing.zelezniak.sharing_domain.repository.VehicleRepository;
-import com.car.sharing.zelezniak.sharing_domain.service.VehicleOperations;
+import com.car.sharing.zelezniak.sharing_domain.service.VehicleService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,19 +24,20 @@ import org.springframework.test.context.TestPropertySource;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
-class VehicleOperationsTest {
+class VehicleServiceTest {
 
     private static Vehicle vehicleWithId5 = createCarWithId5();
-    private static Vehicle vehicleSix = createMotorcycleWithId6();
+    private static Vehicle vehicleWithId6 = createMotorcycleWithId6();
 
     @Autowired
-    private VehicleOperations vehicleOperations;
+    private VehicleService vehicleOperations;
 
     @Autowired
     @Qualifier("car")
@@ -51,6 +53,9 @@ class VehicleOperationsTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Value("${create.vehicle.five}")
     private String createVehicleFive;
 
@@ -63,26 +68,46 @@ class VehicleOperationsTest {
     @Value("${create.motorcycle.six}")
     private String createMotorcycleSix;
 
+    @Value("${create.vehicle.seven}")
+    private String createVehicleSeven;
+
+    @Value("${create.car.seven}")
+    private String createCarSeven;
+
+    @Value("${create.vehicle.eight}")
+    private String createVehicleEight;
+
+    @Value("${create.car.eight}")
+    private String createCarEight;
+
+    @Value("${create.vehicle.nine}")
+    private String createVehicleNine;
+
+    @Value("${create.motorcycle.nine}")
+    private String createMotorcycleNine;
+
     @BeforeEach
     void setupDatabase() {
         executeQueries(createVehicleFive, createCarFive,
-                createVehicleSix, createMotorcycleSix);
+                createVehicleSix, createMotorcycleSix,
+                createVehicleSeven, createCarSeven, createVehicleEight,
+                createCarEight, createVehicleNine, createMotorcycleNine);
     }
 
     @Test
     void shouldReturnAllVehicles() {
         Collection<Vehicle> vehicles = vehicleOperations.findAll();
         assertTrue(vehicles.contains(vehicleWithId5));
-        assertTrue(vehicles.contains(vehicleSix));
-        assertEquals(2, vehicles.size());
+        assertTrue(vehicles.contains(vehicleWithId6));
+        assertEquals(5, vehicles.size());
     }
 
     @Test
     void shouldFindVehicleById() {
-        Vehicle vehicle5 = vehicleOperations.findById(5L);
-        Vehicle vehicle6 = vehicleOperations.findById(6L);
+        Vehicle vehicle5 = vehicleOperations.findById(vehicleWithId5.getId());
+        Vehicle vehicle6 = vehicleOperations.findById(vehicleWithId6.getId());
         assertEquals(vehicleWithId5, vehicle5);
-        assertEquals(vehicleSix, vehicle6);
+        assertEquals(vehicleWithId6, vehicle6);
     }
 
     @Test
@@ -95,52 +120,114 @@ class VehicleOperationsTest {
     @Test
     void shouldAddVehicle() {
         Vehicle testCar = createTestCar();
-        VehicleInformation vehicleInformation = testCar.getVehicleInformation();
 
-        vehicleOperations.addVehicle(createTestCar());
+        vehicleOperations.add(createTestCar());
 
-        assertEquals(3, vehicleRepository.count());
+        assertEquals(6, vehicleRepository.count());
         assertTrue(vehicleRepository.existsByVehicleInformationRegistrationNumber(
-                vehicleInformation.getRegistrationNumber()));
+                testCar.getRegistrationNumber()));
     }
 
     @Test
     void shouldNotAddVehicle() {
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleOperations.addVehicle(vehicleWithId5));
+                vehicleOperations.add(vehicleWithId5));
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleOperations.addVehicle(vehicleSix));
+                vehicleOperations.add(vehicleWithId6));
     }
 
     @Test
     void shouldUpdateVehicle() {
-        Vehicle newData = updateVehicleFive();
-        Vehicle updated = vehicleOperations.updateVehicle(5L, newData);
-        Vehicle byId = vehicleOperations.findById(5L);
-        assertEquals(updated, byId);
+        Long vehicle5Id = vehicleWithId5.getId();
+        Vehicle newData = buildVehicle5WithDifferentData();
 
+        vehicleOperations.update(vehicle5Id, newData);
+
+        Vehicle updated = vehicleOperations.findById(vehicle5Id);
+
+        assertEquals(newData, updated);
     }
 
     @Test
     @DisplayName("Should not update vehicle when new data contains an existing registration number")
     void shouldNotUpdateVehicle() {
-        Vehicle newData = updateVehicleFive();
+        String existentRegistration = vehicleWithId6.getRegistrationNumber();
+        Vehicle newData = buildVehicle5WithDifferentData();
         VehicleInformation vehicleInformation = newData.getVehicleInformation();
         VehicleInformation infoWithExistentRegistration = vehicleInformation.toBuilder()
-                .registrationNumber(vehicleSix.getRegistrationNumber())
+                .registrationNumber(existentRegistration)
                 .build();
 
         newData.setVehicleInformation(infoWithExistentRegistration);
         Long vehicleToUpdateId = vehicleWithId5.getId();
 
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleOperations.updateVehicle(vehicleToUpdateId, newData));
+                vehicleOperations.update(vehicleToUpdateId, newData));
 
     }
 
     @Test
     void shouldDeleteVehicle() {
+        Long vehicle5Id = vehicleWithId5.getId();
 
+        assertEquals(5, vehicleRepository.count());
+        vehicleOperations.delete(vehicle5Id);
+        assertEquals(4, vehicleRepository.count());
+
+        List<Vehicle> all = vehicleRepository.findAll();
+        assertFalse(all.contains(vehicleWithId5));
+    }
+
+    @Test
+    void shouldNotDeleteVehicle() {
+        Long nonExistentId = 20L;
+        assertEquals(5, vehicleRepository.count());
+        assertThrows(NoSuchElementException.class, () ->
+                vehicleOperations.delete(nonExistentId));
+        assertEquals(5, vehicleRepository.count());
+    }
+
+    @Test
+    void shouldFindVehiclesByCriteriaModel() {
+        var info = vehicleWithId5.getVehicleInformation();
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("model", info.getModel());
+        assertEquals(1, vehicles.size());
+        assertTrue(vehicles.contains(vehicleWithId5));
+    }
+
+    @Test
+    void shouldFindVehiclesByCriteriaBrand() {
+        Vehicle vehicle7 = vehicleOperations.findById(7L);
+        var info = vehicle7.getVehicleInformation();
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("brand", info.getBrand());
+        assertTrue(vehicles.contains(vehicle7));
+        assertEquals(1,vehicles.size());
+    }
+
+    @Test
+    void shouldFindVehiclesByCriteriaRegistrationNumber() {
+        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("registration number", vehicle8RegistrationNumber);
+        assertEquals(1,vehicles.size());
+        assertTrue(vehicles.contains(vehicle8));
+    }
+
+    @Test
+    void shouldFindVehiclesByCriteriaProductionYear() {
+        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        Vehicle vehicle9 = vehicleOperations.findById(9L);
+        var info = vehicle8.getVehicleInformation();
+        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria("production year", info.getProductionYear().getYear());
+        assertEquals(2,vehicles.size());
+        assertTrue(vehicles.contains(vehicle8));
+        assertTrue(vehicles.contains(vehicle9));
+    }
+
+    @Test
+    void shouldNotFindVehiclesByNonExistentCriteria() {
+    assertThrows(IllegalArgumentException.class,()->
+            vehicleOperations.findByCriteria("wheels number",4));
     }
 
     @AfterEach
@@ -258,10 +345,11 @@ class VehicleOperationsTest {
                 .build();
     }
 
-    private Vehicle updateVehicleFive() {
+    private Vehicle buildVehicle5WithDifferentData() {
         Engine engine = updateEngine();
         VehicleInformation information = updateInformation(engine);
         return Car.builder()
+                .id(5L)
                 .vehicleInformation(information)
                 .bodyType(Car.BodyType.HATCHBACK)
                 .status(Vehicle.Status.AVAILABLE)
