@@ -72,19 +72,22 @@ public class Client implements UserDetails {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Client that = (Client) o;
-        return Objects.equals(name, that.name)
-                && Objects.equals(credentials, that.credentials)
-                && Objects.equals(createdAt, that.createdAt)
-                && Objects.equals(address, that.address);
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Client client = (Client) object;
+        return Objects.equals(id, client.id)
+                && Objects.equals(name, client.name)
+                && Objects.equals(credentials, client.credentials)
+                && Objects.equals(createdAt, client.createdAt)
+                && Objects.equals(address, client.address);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hash(name, credentials
-                , createdAt, address);
+        return Objects.hash(id,
+                name, credentials,
+                createdAt, address);
     }
 
     public String toString() {

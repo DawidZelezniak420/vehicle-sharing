@@ -36,11 +36,12 @@ public class Address {
     private String country;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Address address = (Address) o;
-        return Objects.equals(street, address.street)
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Address address = (Address) object;
+        return Objects.equals(id, address.id)
+                && Objects.equals(street, address.street)
                 && Objects.equals(houseNumber, address.houseNumber)
                 && Objects.equals(flatNumber, address.flatNumber)
                 && Objects.equals(city, address.city)
@@ -50,7 +51,9 @@ public class Address {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, street, houseNumber, flatNumber, city, postalCode, country);
+        return Objects.hash(id, street,
+                houseNumber, flatNumber,
+                city, postalCode, country);
     }
 
     @Override

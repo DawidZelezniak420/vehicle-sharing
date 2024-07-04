@@ -1,6 +1,5 @@
 package com.car.sharing.zelezniak.sharing_domain.service;
 
-import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Year;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Vehicle;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.car.sharing.zelezniak.sharing_domain.repository.VehicleRepository;
@@ -9,9 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.NoSuchElementException;
 
+import static com.car.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
 import static com.car.sharing.zelezniak.util.validation.InputValidator.*;
 
 @Service
@@ -22,9 +22,8 @@ public class VehicleService {
     private final VehicleValidator vehicleValidator;
     private final InputValidator inputValidator;
     private final VehicleUpdateVisitor updateVisitor;
-    private final Map<CriteriaType,
-            Function<Object, Collection<Vehicle>>> criteriaMap =
-            initializeCriteriaMap();
+    private final VehicleCriteriaSearch criteriaSearch;
+
 
     @Transactional(readOnly = true)
     public Collection<Vehicle> findAll() {
@@ -63,10 +62,10 @@ public class VehicleService {
 
     @Transactional(readOnly = true)
     public <T> Collection<Vehicle> findByCriteria(String criteriaType, T value) {
-        checkIfNotNull(criteriaType, "Criteria can not be a null");
-        CriteriaType criteria = CriteriaType.getCriteriaFromString(criteriaType);
-        Function<Object, Collection<Vehicle>> queryFunction = criteriaMap.get(criteria);
-        return handleExecuteFunction(value, queryFunction);
+        checkIfNotNull(criteriaType, "Criteria type" + CAN_NOT_BE_NULL);
+        checkIfNotNull(value, "Searched value" + CAN_NOT_BE_NULL);
+        return criteriaSearch.findVehiclesByCriteria(
+                criteriaType, value);
     }
 
     private <T> void checkIfNotNull(T input, String message) {
@@ -95,34 +94,5 @@ public class VehicleService {
     private void handleDeleteVehicle(Long id) {
         Vehicle toDelete = findVehicle(id);
         vehicleRepository.delete(toDelete);
-    }
-
-    private <T> Map<CriteriaType,
-            Function<T, Collection<Vehicle>>> initializeCriteriaMap() {
-        Map<CriteriaType, Function<T, Collection<Vehicle>>> result = new EnumMap<>(CriteriaType.class);
-        result.put(CriteriaType.BRAND, value -> vehicleRepository.findByVehicleInformationBrand((String) value));
-        result.put(CriteriaType.MODEL, value -> vehicleRepository.findByVehicleInformationModel((String) value));
-        result.put(CriteriaType.REGISTRATION_NUMBER, value -> vehicleRepository.findByVehicleInformationRegistrationNumber((String) value));
-        result.put(CriteriaType.PRODUCTION_YEAR, value -> {
-            Year year = new Year(getYearValue(value));
-            return vehicleRepository.findByVehicleInformationProductionYear(year);
-        });
-        return result;
-    }
-
-    private <T> int getYearValue(T value) {
-        int yearValue = 0;
-        if (value instanceof String s) {
-            yearValue = Integer.parseInt((s));
-        } else if (value instanceof Number) {
-            yearValue = (int) value;
-        }
-        return yearValue;
-    }
-
-    private <T> Collection<Vehicle> handleExecuteFunction(
-            T value, Function<T, Collection<Vehicle>> queryFunction) {
-        checkIfNotNull(queryFunction, "Wrong criteria type");
-        return queryFunction.apply(value);
     }
 }

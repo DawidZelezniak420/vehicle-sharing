@@ -62,18 +62,19 @@ public abstract class Vehicle {
                                    Vehicle newData);
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Vehicle vehicle = (Vehicle) o;
-        return Objects.equals(vehicleInformation, vehicle.vehicleInformation)
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Vehicle vehicle = (Vehicle) object;
+        return Objects.equals(id, vehicle.id)
+                && Objects.equals(vehicleInformation, vehicle.vehicleInformation)
                 && Objects.equals(pricePerDay, vehicle.pricePerDay)
                 && status == vehicle.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
+        return Objects.hash(id,
                 vehicleInformation,
                 pricePerDay, status);
     }
@@ -88,9 +89,22 @@ public abstract class Vehicle {
                 '}';
     }
 
+    @RequiredArgsConstructor
+    @Getter
     public enum Status {
-        AVAILABLE,
-        UNAVAILABLE
+        AVAILABLE("available"),
+        UNAVAILABLE("unavailable");
+
+        private final String value;
+
+        public static Status getStatusFromString(String s) {
+            for (Status status : Status.values()) {
+                if (s.equals(status.getValue())) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Unknown status value: " + s);
+        }
     }
 
 }

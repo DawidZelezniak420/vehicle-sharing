@@ -351,6 +351,30 @@ class VehicleControllerTest {
                         "Unknown criteria type " + criteria));
     }
 
+    @Test
+    void shouldFindVehiclesByCriteriaStatusAvailable() throws Exception {
+        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        vehicle8.setStatus(Vehicle.Status.UNAVAILABLE);
+        vehicleRepository.save(vehicle8);
+
+        String criteria = "status";
+        int resultSize = 4;
+        String value = "available";
+        performCriteriaRequest(criteria, resultSize, vehicleWithId5, value);
+    }
+
+    @Test
+    void shouldFindVehiclesByCriteriaStatusUnavailable() throws Exception {
+        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        vehicle8.setStatus(Vehicle.Status.UNAVAILABLE);
+        vehicleRepository.save(vehicle8);
+
+        String criteria = "status";
+        int resultSize = 1;
+        String value = "unavailable";
+        performCriteriaRequest(criteria, resultSize, vehicle8, value);
+    }
+
     private String generateToken(String role) {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority(role));

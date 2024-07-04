@@ -37,13 +37,15 @@ public class Motorcycle extends Vehicle {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Motorcycle that = (Motorcycle) o;
         return motorcycleType == that.motorcycleType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(motorcycleType);
+        return Objects.hash(super.hashCode(),
+                motorcycleType);
     }
 
     @Override

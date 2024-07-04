@@ -29,16 +29,17 @@ public class Role implements GrantedAuthority {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Role role = (Role) o;
-        return Objects.equals(roleName, role.roleName);
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        Role role = (Role) object;
+        return Objects.equals(id, role.id)
+                && Objects.equals(roleName, role.roleName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(roleName);
+        return Objects.hash(id, roleName);
     }
 
     @Override

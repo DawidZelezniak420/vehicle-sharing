@@ -37,7 +37,7 @@ class VehicleServiceTest {
     private static Vehicle vehicleWithId6;
 
     @Autowired
-    private VehicleService vehicleOperations;
+    private VehicleService vehicleService;
 
     @Autowired
     @Qualifier("car")
@@ -106,16 +106,23 @@ class VehicleServiceTest {
 
     @Test
     void shouldReturnAllVehicles() {
-        Collection<Vehicle> vehicles = vehicleOperations.findAll();
+        Collection<Vehicle> vehicles = vehicleService.findAll();
         assertTrue(vehicles.contains(vehicleWithId5));
+
+        Vehicle byId = vehicleService.findById(
+                vehicleWithId6.getId());
+        System.out.println(byId);
+        System.out.println(vehicleWithId6);
         assertTrue(vehicles.contains(vehicleWithId6));
         assertEquals(5, vehicles.size());
     }
 
     @Test
     void shouldFindVehicleById() {
-        Vehicle vehicle5 = vehicleOperations.findById(vehicleWithId5.getId());
-        Vehicle vehicle6 = vehicleOperations.findById(vehicleWithId6.getId());
+        Vehicle vehicle5 = vehicleService.findById(
+                vehicleWithId5.getId());
+        Vehicle vehicle6 = vehicleService.findById(
+                vehicleWithId6.getId());
         assertEquals(vehicleWithId5, vehicle5);
         assertEquals(vehicleWithId6, vehicle6);
     }
@@ -124,14 +131,14 @@ class VehicleServiceTest {
     void shouldNotFindVehicleById() {
         Long nonExistentId = 20L;
         assertThrows(NoSuchElementException.class, () ->
-                vehicleOperations.findById(nonExistentId));
+                vehicleService.findById(nonExistentId));
     }
 
     @Test
     void shouldAddVehicle() {
         Vehicle testCar = createTestCar();
 
-        vehicleOperations.add(createTestCar());
+        vehicleService.add(createTestCar());
 
         assertEquals(6, vehicleRepository.count());
         assertTrue(vehicleRepository.existsByVehicleInformationRegistrationNumber(
@@ -141,9 +148,9 @@ class VehicleServiceTest {
     @Test
     void shouldNotAddVehicle() {
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleOperations.add(vehicleWithId5));
+                vehicleService.add(vehicleWithId5));
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleOperations.add(vehicleWithId6));
+                vehicleService.add(vehicleWithId6));
     }
 
     @Test
@@ -151,9 +158,9 @@ class VehicleServiceTest {
         Long vehicle5Id = vehicleWithId5.getId();
         Vehicle newData = buildVehicle5WithDifferentData();
 
-        vehicleOperations.update(vehicle5Id, newData);
+        vehicleService.update(vehicle5Id, newData);
 
-        Vehicle updated = vehicleOperations.findById(vehicle5Id);
+        Vehicle updated = vehicleService.findById(vehicle5Id);
 
         assertEquals(newData, updated);
     }
@@ -172,7 +179,7 @@ class VehicleServiceTest {
         Long vehicleToUpdateId = vehicleWithId5.getId();
 
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleOperations.update(vehicleToUpdateId, newData));
+                vehicleService.update(vehicleToUpdateId, newData));
 
     }
 
@@ -181,7 +188,7 @@ class VehicleServiceTest {
         Long vehicle5Id = vehicleWithId5.getId();
 
         assertEquals(5, vehicleRepository.count());
-        vehicleOperations.delete(vehicle5Id);
+        vehicleService.delete(vehicle5Id);
         assertEquals(4, vehicleRepository.count());
 
         List<Vehicle> all = vehicleRepository.findAll();
@@ -193,56 +200,8 @@ class VehicleServiceTest {
         Long nonExistentId = 20L;
         assertEquals(5, vehicleRepository.count());
         assertThrows(NoSuchElementException.class, () ->
-                vehicleOperations.delete(nonExistentId));
+                vehicleService.delete(nonExistentId));
         assertEquals(5, vehicleRepository.count());
-    }
-
-    @Test
-    void shouldFindVehiclesByCriteriaModel() {
-        var info = vehicleWithId5.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
-                "model", info.getModel());
-        assertEquals(1, vehicles.size());
-        assertTrue(vehicles.contains(vehicleWithId5));
-    }
-
-    @Test
-    void shouldFindVehiclesByCriteriaBrand() {
-        Vehicle vehicle7 = vehicleOperations.findById(7L);
-        var info = vehicle7.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
-                "brand", info.getBrand());
-        assertTrue(vehicles.contains(vehicle7));
-        assertEquals(1,vehicles.size());
-    }
-
-    @Test
-    void shouldFindVehiclesByCriteriaRegistrationNumber() {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
-        String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
-                "registration number", vehicle8RegistrationNumber);
-        assertEquals(1,vehicles.size());
-        assertTrue(vehicles.contains(vehicle8));
-    }
-
-    @Test
-    void shouldFindVehiclesByCriteriaProductionYear() {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
-        Vehicle vehicle9 = vehicleOperations.findById(9L);
-        var info = vehicle8.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleOperations.findByCriteria(
-                "production year", info.getProductionYear().getYear());
-        assertEquals(2,vehicles.size());
-        assertTrue(vehicles.contains(vehicle8));
-        assertTrue(vehicles.contains(vehicle9));
-    }
-
-    @Test
-    void shouldNotFindVehiclesByNonExistentCriteria() {
-    assertThrows(IllegalArgumentException.class,()->
-            vehicleOperations.findByCriteria(
-                    "wheels number",4));
     }
 
     private void executeQueries(String... queries) {
@@ -272,6 +231,7 @@ class VehicleServiceTest {
                 .vehicleInformation(information)
                 .motorcycleType(Motorcycle.MotorcycleType.SPORT)
                 .status(Vehicle.Status.AVAILABLE)
+                .pricePerDay(new Money(BigDecimal.valueOf(100)))
                 .build();
     }
 
