@@ -1,10 +1,12 @@
 package com.car.sharing.zelezniak.exception;
 
+import com.car.sharing.zelezniak.sharing_domain.exception.CriteriaAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
@@ -14,6 +16,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorInformation> handleException(
             NoSuchElementException exception) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        return createResponse(status, exception.getMessage());
+    }
+
+    @ExceptionHandler(CriteriaAccessException.class)
+    public ResponseEntity<ErrorInformation> handleException(
+            CriteriaAccessException exception) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
         return createResponse(status, exception.getMessage());
     }
 

@@ -1,32 +1,27 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Engine;
-import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Money;
-import com.car.sharing.zelezniak.sharing_domain.model.value_objects.VehicleInformation;
-import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Year;
-import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Car;
-import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Motorcycle;
+import com.car.sharing.zelezniak.config.*;
+import com.car.sharing.zelezniak.sharing_domain.exception.CriteriaAccessException;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Vehicle;
 import com.car.sharing.zelezniak.sharing_domain.repository.VehicleRepository;
+import com.car.sharing.zelezniak.sharing_domain.service.VehicleCriteriaSearch;
 import com.car.sharing.zelezniak.sharing_domain.service.VehicleService;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.car.sharing.zelezniak.user_domain.model.user.Role;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.TestPropertySource;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @TestPropertySource("/application-test.properties")
@@ -36,64 +31,30 @@ class VehicleCriteriaSearchTest {
 
     @Autowired
     private VehicleService vehicleService;
-
+    @Autowired
+    private VehicleCriteriaSearch criteriaSearch;
     @Autowired
     private VehicleRepository vehicleRepository;
-
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Value("${create.vehicle.five}")
-    private String createVehicleFive;
-
-    @Value("${create.car.five}")
-    private String createCarFive;
-
-    @Value("${create.vehicle.six}")
-    private String createVehicleSix;
-
-    @Value("${create.motorcycle.six}")
-    private String createMotorcycleSix;
-
-    @Value("${create.vehicle.seven}")
-    private String createVehicleSeven;
-
-    @Value("${create.car.seven}")
-    private String createCarSeven;
-
-    @Value("${create.vehicle.eight}")
-    private String createVehicleEight;
-
-    @Value("${create.car.eight}")
-    private String createCarEight;
-
-    @Value("${create.vehicle.nine}")
-    private String createVehicleNine;
-
-    @Value("${create.motorcycle.nine}")
-    private String createMotorcycleNine;
+    private DatabaseSetup databaseSetup;
+    @Autowired
+    private VehicleCreator vehicleCreator;
 
     @BeforeEach
     void setupDatabase() {
-        executeQueries(createVehicleFive, createCarFive,
-                createVehicleSix, createMotorcycleSix,
-                createVehicleSeven, createCarSeven, createVehicleEight,
-                createCarEight, createVehicleNine, createMotorcycleNine);
-        vehicleWithId5 = createCarWithId5();
+        databaseSetup.setupVehicles();
+        vehicleWithId5 = vehicleCreator.createCarWithId5();
     }
 
     @AfterEach
     void cleanupDatabase() {
-        executeQueries(
-                "delete from cars",
-                "delete from motorcycles",
-                "delete from vehicle");
+        databaseSetup.cleanupVehicles();
     }
 
     @Test
     void shouldFindVehiclesByCriteriaModel() {
         var info = vehicleWithId5.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleService.findByCriteria(
+        Collection<Vehicle> vehicles = criteriaSearch.findVehiclesByCriteria(
                 "model", info.getModel());
         assertEquals(1, vehicles.size());
         assertTrue(vehicles.contains(vehicleWithId5));
@@ -103,20 +64,39 @@ class VehicleCriteriaSearchTest {
     void shouldFindVehiclesByCriteriaBrand() {
         Vehicle vehicle7 = vehicleService.findById(7L);
         var info = vehicle7.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleService.findByCriteria(
+        Collection<Vehicle> vehicles = criteriaSearch.findVehiclesByCriteria(
                 "brand", info.getBrand());
         assertTrue(vehicles.contains(vehicle7));
         assertEquals(1, vehicles.size());
     }
 
     @Test
+    @DisplayName("Admin can search vehicles by registration")
     void shouldFindVehiclesByCriteriaRegistrationNumber() {
+        setSecurityContextHolder("ROLE_ADMIN");
+
         Vehicle vehicle8 = vehicleService.findById(8L);
         String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
-        Collection<Vehicle> vehicles = vehicleService.findByCriteria(
+
+        Collection<Vehicle> vehicles = criteriaSearch.findVehiclesByCriteria(
                 "registration number", vehicle8RegistrationNumber);
         assertEquals(1, vehicles.size());
+
         assertTrue(vehicles.contains(vehicle8));
+    }
+
+    @Test
+    @DisplayName("Client can't search vehicles by registration")
+    void shouldNotFindVehiclesByCriteriaRegistrationNumber() {
+        setSecurityContextHolder("ROLE_USER");
+
+        Vehicle vehicle8 = vehicleService.findById(8L);
+        String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
+
+        assertThrows(CriteriaAccessException.class, () ->
+                criteriaSearch.findVehiclesByCriteria(
+                        "registration number",
+                        vehicle8RegistrationNumber));
     }
 
     @Test
@@ -124,7 +104,7 @@ class VehicleCriteriaSearchTest {
         Vehicle vehicle8 = vehicleService.findById(8L);
         Vehicle vehicle9 = vehicleService.findById(9L);
         var info = vehicle8.getVehicleInformation();
-        Collection<Vehicle> vehicles = vehicleService.findByCriteria(
+        Collection<Vehicle> vehicles = criteriaSearch.findVehiclesByCriteria(
                 "production year", info.getProductionYear().getYear());
         assertEquals(2, vehicles.size());
         assertTrue(vehicles.contains(vehicle8));
@@ -134,7 +114,7 @@ class VehicleCriteriaSearchTest {
     @Test
     void shouldNotFindVehiclesByNonExistentCriteria() {
         assertThrows(IllegalArgumentException.class, () ->
-                vehicleService.findByCriteria(
+                criteriaSearch.findVehiclesByCriteria(
                         "wheels number", 4));
     }
 
@@ -146,8 +126,8 @@ class VehicleCriteriaSearchTest {
 
         assertEquals(5, vehicleRepository.count());
 
-        List<Vehicle> vehicles = (List<Vehicle>) vehicleService.findByCriteria(
-                "status","available");
+        List<Vehicle> vehicles = (List<Vehicle>) criteriaSearch.findVehiclesByCriteria(
+                "status", "available");
         assertFalse(vehicles.contains(unavailableVehicle));
         assertEquals(4, vehicles.size());
     }
@@ -160,50 +140,19 @@ class VehicleCriteriaSearchTest {
 
         assertEquals(5, vehicleRepository.count());
 
-        List<Vehicle> vehicles = (List<Vehicle>) vehicleService.findByCriteria(
-                "status","unavailable");
+        List<Vehicle> vehicles = (List<Vehicle>) criteriaSearch.findVehiclesByCriteria(
+                "status", "unavailable");
         assertTrue(vehicles.contains(unavailableVehicle));
         assertEquals(1, vehicles.size());
     }
 
-    private void executeQueries(String... queries) {
-        Arrays.stream(queries)
-                .forEach(jdbcTemplate::execute);
-    }
-
-    private static Vehicle createCarWithId5() {
-        Engine engine = buildCarEngine();
-        var information = buildCarInformation(engine);
-        return Car.builder()
-                .id(5L)
-                .vehicleInformation(information)
-                .bodyType(Car.BodyType.HATCHBACK)
-                .status(Vehicle.Status.AVAILABLE)
-                .driveType(Car.DriveType.FRONT_WHEEL_DRIVE)
-                .pricePerDay(new Money(BigDecimal.valueOf(50.0)))
-                .doorsNumber(5)
-                .build();
-    }
-
-    private static Engine buildCarEngine() {
-        return Engine.builder()
-                .engineType("1.9TDI AVG")
-                .fuelType(Engine.FuelType.DIESEL)
-                .cylinders(4)
-                .displacement(1900)
-                .horsepower(110)
-                .build();
-    }
-
-    private static VehicleInformation buildCarInformation(Engine engine) {
-        return VehicleInformation.builder()
-                .brand("Seat")
-                .model("Leon 1M")
-                .productionYear(new Year(2001))
-                .registrationNumber("ABC55555")
-                .description("Seat Leon car")
-                .engine(engine)
-                .gearType(VehicleInformation.GearType.MANUAL)
-                .build();
+    private void setSecurityContextHolder(String role) {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        Set<Role> authorities = new HashSet<>();
+        authorities.add(new Role(role));
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                "username", "password", authorities);
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
     }
 }

@@ -1,22 +1,18 @@
 package com.car.sharing.zelezniak;
 
+import com.car.sharing.zelezniak.config.DatabaseSetup;
 import com.car.sharing.zelezniak.user_domain.model.login.LoginRequest;
-import com.car.sharing.zelezniak.user_domain.model.user.Address;
-import com.car.sharing.zelezniak.user_domain.model.user.Client;
-import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.user_domain.model.user.*;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.*;
 import com.car.sharing.zelezniak.user_domain.repository.ClientRepository;
 import com.car.sharing.zelezniak.user_domain.service.authentication.AuthenticationService;
 import com.car.sharing.zelezniak.util.TimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,9 +31,6 @@ class AuthenticationControllerTest {
     private Client client;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private AuthenticationService authService;
 
     @Autowired
@@ -48,6 +41,9 @@ class AuthenticationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DatabaseSetup databaseSetup;
 
     @BeforeEach
     void createUser() {
@@ -61,10 +57,7 @@ class AuthenticationControllerTest {
 
     @AfterEach
     void deleteTestData() {
-        jdbcTemplate.execute("delete from clients_roles");
-        jdbcTemplate.execute("delete from roles");
-        jdbcTemplate.execute("delete from clients");
-        jdbcTemplate.execute("delete from addresses");
+        databaseSetup.cleanupClients();
     }
 
     @Test
@@ -117,6 +110,4 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.client.address.country").value(address.getCountry()))
                 .andExpect(jsonPath("$.jwt").isNotEmpty());
     }
-
-
 }

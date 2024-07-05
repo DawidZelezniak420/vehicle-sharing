@@ -1,20 +1,14 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.user_domain.model.user.Address;
-import com.car.sharing.zelezniak.user_domain.model.user.Client;
+import com.car.sharing.zelezniak.config.*;
+import com.car.sharing.zelezniak.user_domain.model.user.*;
 import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
-import com.car.sharing.zelezniak.user_domain.service.ClientValidator;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.car.sharing.zelezniak.user_domain.service.*;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,48 +20,32 @@ class ClientValidatorTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private ClientValidator validator;
-
-    @Value("${create.role.user}")
-    private String createRoleUser;
-    @Value("${create.user.five}")
-    private String createUserFive;
-    @Value("${create.user.six}")
-    private String createUserSix;
-    @Value("${set.role.user.five}")
-    private String setRoleUserFive;
-    @Value("${set.role.user.six}")
-    private String setRoleUserSix;
-    @Value("${create.address.five}")
-    private String createAddressFive;
-    @Value("${create.address.six}")
-    private String createAddressSix;
+    @Autowired
+    private DatabaseSetup databaseSetup;
+    @Autowired
+    private ClientCreator clientCreator;
+    @Autowired
+    private ClientService clientService;
 
     @BeforeEach
-    void createUsers(){
-        executeQueries(createRoleUser,createAddressFive,
-                createAddressSix,createUserFive,createUserSix,
-                setRoleUserFive,setRoleUserSix);
-        clientWithId5 = createClientWithId5();
+    void createUsers() {
+        databaseSetup.setupClients();
+        clientWithId5 = clientCreator.createClientWithId5();
     }
 
     @AfterEach
-    void deleteDataFromDb(){
-        executeQueries(
-                "delete from clients_roles",
-                "delete from roles",
-                "delete from clients",
-                "delete from addresses");
+    void deleteDataFromDb() {
+        databaseSetup.cleanupClients();
     }
 
     @Test
     void shouldThrowExceptionIfClientExists() {
         String existingEmail = clientWithId5.getEmail();
 
-        assertThrows(IllegalArgumentException.class,()->
-           validator.ifUserExistsThrowException(existingEmail));
+        assertThrows(IllegalArgumentException.class, () ->
+                validator.ifUserExistsThrowException(existingEmail));
     }
 
     @Test
@@ -76,44 +54,28 @@ class ClientValidatorTest {
         c.setCredentials(new UserCredentials(
                 "someuser@gmail.com", "somepass"));
 
-        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(c.getEmail()));
+        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(
+                c.getEmail()));
     }
 
     @Test
-    void shouldTestClientCanBeUpdated(){
+    void shouldTestClientCanBeUpdated() {
         String userFromDbEmail = clientWithId5.getEmail();
         clientWithId5.setCredentials(new UserCredentials(
-                "newemail@gmail.com","somepass"));
+                "newemail@gmail.com", "somepass"));
 
-        assertDoesNotThrow(()->
+        assertDoesNotThrow(() ->
                 validator.checkIfUserCanBeUpdated(
                         userFromDbEmail, clientWithId5));
     }
 
     @Test
-    void shouldTestClientCanNotBeUpdated(){
-        String existingEmail = "usersix@gmail.com";
+    void shouldTestClientCanNotBeUpdated() {
+        Client byId = clientService.findById(6L);
+        String existingEmail = byId.getEmail();
 
-        assertThrows(IllegalArgumentException.class,()->
+        assertThrows(IllegalArgumentException.class, () ->
                 validator.checkIfUserCanBeUpdated(
                         existingEmail, clientWithId5));
-    }
-
-    private void executeQueries(String...queries) {
-        Arrays.stream(queries)
-                .forEach(jdbcTemplate::execute);
-    }
-
-
-    private static Client createClientWithId5() {
-        Client client = new Client();
-        client.setId(5L);
-        client.setName(new UserName("UserFive", "Five"));
-        client.setCredentials(new UserCredentials(
-                "userfive@gmail.com", "somepass"));
-        Address address = new Address(5L,"teststreet", "5",
-                "150", "Warsaw", "00-001", "Poland");
-        client.setAddress(address);
-        return client;
     }
 }

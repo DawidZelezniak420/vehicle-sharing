@@ -1,5 +1,6 @@
 package com.car.sharing.zelezniak.sharing_domain.service;
 
+import com.car.sharing.zelezniak.sharing_domain.exception.CriteriaAccessException;
 import com.car.sharing.zelezniak.sharing_domain.model.value_objects.Year;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Vehicle;
 import com.car.sharing.zelezniak.sharing_domain.repository.VehicleRepository;
@@ -7,15 +8,21 @@ import com.car.sharing.zelezniak.util.validation.InputValidator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Component
+@Service
 @RequiredArgsConstructor
+@Slf4j
 public class VehicleCriteriaSearch {
 
     private final Map<CriteriaType,
@@ -27,8 +34,35 @@ public class VehicleCriteriaSearch {
 
     public <T> Collection<Vehicle> findVehiclesByCriteria(String criteriaType, T value) {
         CriteriaType criteria = CriteriaType.getCriteriaFromString(criteriaType);
+        checkIfUserCanUseSuchCriteria(criteria);
         Function<Object, Collection<Vehicle>> queryFunction = criteriaMap.get(criteria);
         return handleExecuteFunction(value, queryFunction);
+    }
+
+    private void checkIfUserCanUseSuchCriteria(CriteriaType criteria) {
+        if (criteria == CriteriaType.REGISTRATION_NUMBER) {
+            validateUserHasAdminRole();
+        }
+    }
+
+    private void validateUserHasAdminRole() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        checkIfUserIsAdmin(isAdmin);
+    }
+
+    private void checkIfUserIsAdmin(boolean isAdmin) {
+        if (!isAdmin) {
+            throwCriteriaAccessException();
+        }
+    }
+
+    @SneakyThrows
+    private void throwCriteriaAccessException() {
+        throw new CriteriaAccessException(
+                "Access denied: Only admins can search by registration number");
     }
 
     private <T> Map<CriteriaType,
@@ -62,13 +96,13 @@ public class VehicleCriteriaSearch {
     private <T> Collection<Vehicle> handleExecuteFunction(
             T value, Function<T, Collection<Vehicle>> queryFunction) {
         validator.throwExceptionIfObjectIsNull(queryFunction
-                ,"The specified criterion is not supported");
+                , "The specified criterion is not supported");
         return queryFunction.apply(value);
     }
 
     @Getter
     @AllArgsConstructor
-    enum CriteriaType {
+    private enum CriteriaType {
 
         BRAND("brand"),
         MODEL("model"),

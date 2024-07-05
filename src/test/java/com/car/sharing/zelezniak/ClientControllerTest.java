@@ -1,38 +1,22 @@
 package com.car.sharing.zelezniak;
 
-import com.car.sharing.zelezniak.user_domain.model.user.Address;
-import com.car.sharing.zelezniak.user_domain.model.user.Client;
-import com.car.sharing.zelezniak.user_domain.model.user.Role;
-import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserCredentials;
-import com.car.sharing.zelezniak.user_domain.model.user.value_objects.UserName;
+import com.car.sharing.zelezniak.config.*;
+import com.car.sharing.zelezniak.user_domain.model.user.*;
+import com.car.sharing.zelezniak.user_domain.model.user.value_objects.*;
 import com.car.sharing.zelezniak.user_domain.service.ClientService;
-import com.car.sharing.zelezniak.user_domain.service.authentication.JWTGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -50,59 +34,32 @@ class ClientControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private JWTGenerator jwtGenerator;
-
-    @Autowired
-    private EntityManager entityManager;
 
     @Autowired
     private ClientService clientService;
 
-    private String adminToken;
+    @Autowired
+    private ClientCreator clientCreator;
 
-    @Value("${create.role.user}")
-    private String createRoleUser;
-    @Value("${create.user.five}")
-    private String createUserFive;
-    @Value("${create.user.six}")
-    private String createUserSix;
-    @Value("${create.user.seven}")
-    private String createUserSeven;
-    @Value("${set.role.user.five}")
-    private String setRoleUserFive;
-    @Value("${set.role.user.six}")
-    private String setRoleUserSix;
-    @Value("${set.role.user.seven}")
-    private String setRoleUserSeven;
-    @Value("${create.address.five}")
-    private String createAddressFive;
-    @Value("${create.address.six}")
-    private String createAddressSix;
-    @Value("${create.address.seven}")
-    private String createAddressSeven;
+    @Autowired
+    private DatabaseSetup databaseSetup;
+
+    @Autowired
+    private TokenGenerator tokenGenerator;
+
+    private String adminToken;
 
     @BeforeEach
     void setupDatabase() {
-        executeQueries(createRoleUser, createAddressFive, createAddressSix,
-                createAddressSeven, createUserFive, createUserSix,
-                createUserSeven, setRoleUserFive, setRoleUserSix, setRoleUserSeven);
-        clientWithId5 = createClientWithId5();
-        adminToken = generateToken(ADMIN);
+        databaseSetup.setupClients();
+        clientWithId5 = clientCreator.createClientWithId5();
+        adminToken = tokenGenerator.generateToken(ADMIN);
     }
 
     @AfterEach
     void cleanupDatabase() {
-        executeQueries(
-                "delete from clients_roles",
-                "delete from roles",
-                "delete from clients",
-                "delete from addresses");
+        databaseSetup.cleanupClients();
     }
 
     @Test
@@ -147,7 +104,7 @@ class ClientControllerTest {
     @Test
     void shouldNotFindClientById() throws Exception {
         Long nonExistentId = 20L;
-        mockMvc.perform(get("/clients/{id}",nonExistentId )
+        mockMvc.perform(get("/clients/{id}", nonExistentId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(
@@ -158,7 +115,7 @@ class ClientControllerTest {
     @Test
     @DisplayName("Run update method with token generated for role USER")
     void shouldUpdateUserWhenRoleUser() throws Exception {
-        String userToken = generateToken(USER);
+        String userToken = tokenGenerator.generateToken(USER);
         Client testData = createTestClient();
 
         performUpdateClient(testData, userToken);
@@ -193,7 +150,7 @@ class ClientControllerTest {
         var credentials = clientWithId5.getCredentials();
         var name = clientWithId5.getName();
         mockMvc.perform(get("/clients/email/{email}", credentials.getEmail())
-                .header("Authorization", "Bearer " + adminToken))
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(clientWithId5.getId()))
@@ -204,16 +161,6 @@ class ClientControllerTest {
                 .andExpect(jsonPath("$.address.street").value(clientWithId5.getAddress().getStreet()))
                 .andExpect(jsonPath("$.roles", hasSize(1)))
                 .andExpect(jsonPath("$.roles[0].roleName").value(USER));
-    }
-
-    private String generateToken(String role) {
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority(role));
-        UserDetails userDetails = new User(
-                role.toLowerCase(), "password", authorities);
-        return jwtGenerator.generateJWT(
-                new UsernamePasswordAuthenticationToken(
-                        userDetails, null, authorities));
     }
 
     private Client createTestClient() {
@@ -231,29 +178,12 @@ class ClientControllerTest {
 
     private void performUpdateClient(
             Client newData, String token)
-                        throws Exception {
+            throws Exception {
         Long existingClientId = 5L;
         mockMvc.perform(put("/clients/update/{id}", existingClientId)
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newData))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
-    }
-
-    private void executeQueries(String... queries) {
-        Arrays.stream(queries).forEach(jdbcTemplate::execute);
-    }
-
-    private static Client createClientWithId5() {
-        Client client = new Client();
-        client.setId(5L);
-        client.setName(new UserName("UserFive", "Five"));
-        client.setCredentials(new UserCredentials(
-                "userfive@gmail.com", "somepass"));
-        Address address = new Address(5L, "teststreet", "5",
-                "150", "Warsaw", "00-001", "Poland");
-        client.setAddress(address);
-        client.setRoles(Set.of(new Role("USER")));
-        return client;
     }
 }
