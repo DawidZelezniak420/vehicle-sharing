@@ -7,6 +7,7 @@ import com.car.sharing.zelezniak.sharing_domain.service.VehicleValidator;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
@@ -36,7 +37,7 @@ class VehicleValidatorTest {
     }
 
     @AfterEach
-    void cleanupDatabase() {
+    void cleanupDatabase() { 
         databaseSetup.cleanupVehicles();
     }
 

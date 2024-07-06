@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = CarSharingApplication.class)
 @AutoConfigureMockMvc
+@TestPropertySource("/application-test.properties")
 class AuthenticationControllerTest {
 
     private static final MediaType APPLICATION_JSON =
@@ -29,19 +31,14 @@ class AuthenticationControllerTest {
 
     @Autowired
     private Client client;
-
     @Autowired
     private AuthenticationService authService;
-
     @Autowired
     private ClientRepository clientRepository;
-
     @Autowired
     private ObjectMapper mapper;
-
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private DatabaseSetup databaseSetup;
 

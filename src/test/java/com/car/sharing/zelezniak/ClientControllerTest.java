@@ -32,19 +32,14 @@ class ClientControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private ClientService clientService;
-
     @Autowired
     private ClientCreator clientCreator;
-
     @Autowired
     private DatabaseSetup databaseSetup;
-
     @Autowired
     private TokenGenerator tokenGenerator;
 

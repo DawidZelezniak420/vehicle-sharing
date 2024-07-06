@@ -31,6 +31,7 @@ public class VehicleCreator {
                 .vehicleInformation(information)
                 .motorcycleType(Motorcycle.MotorcycleType.SPORT)
                 .status(Vehicle.Status.AVAILABLE)
+                .pricePerDay(new Money(BigDecimal.valueOf(100.00)))
                 .build();
     }
 

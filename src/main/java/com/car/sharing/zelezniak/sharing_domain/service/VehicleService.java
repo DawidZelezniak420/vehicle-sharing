@@ -4,6 +4,7 @@ import com.car.sharing.zelezniak.sharing_domain.model.vehicles.Vehicle;
 import com.car.sharing.zelezniak.sharing_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.car.sharing.zelezniak.sharing_domain.repository.VehicleRepository;
 import com.car.sharing.zelezniak.util.validation.InputValidator;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class VehicleService {
     private final InputValidator inputValidator;
     private final VehicleUpdateVisitor updateVisitor;
     private final VehicleCriteriaSearch criteriaSearch;
+    private final EntityManager entityManager;
 
 
     @Transactional(readOnly = true)
@@ -41,7 +43,7 @@ public class VehicleService {
         checkIfNotNull(vehicle, VEHICLE_NOT_NULL);
         vehicleValidator.throwExceptionIfVehicleExists(
                 vehicle.getRegistrationNumber());
-        saveVehicle(vehicle);
+        persistVehicle(vehicle);
     }
 
     @Transactional
@@ -79,8 +81,9 @@ public class VehicleService {
                         "Vehicle with id: " + id + " does not exists."));
     }
 
-    private void saveVehicle(Vehicle vehicle) {
-        vehicleRepository.save(vehicle);
+    private void persistVehicle(Vehicle vehicle) {
+        entityManager.persist(vehicle);
+        entityManager.flush();
     }
 
     private void validateAndUpdateVehicle(
@@ -88,11 +91,16 @@ public class VehicleService {
         vehicleValidator.checkIfVehicleCanBeUpdated(
                 vehicleFromDb.getRegistrationNumber(), newData);
         Vehicle updatedVehicle = vehicleFromDb.update(updateVisitor, newData);
-        saveVehicle(updatedVehicle);
+        mergeVehicle(updatedVehicle);
+    }
+
+    private void mergeVehicle(Vehicle vehicle) {
+        entityManager.merge(vehicle);
+        entityManager.flush();
     }
 
     private void handleDeleteVehicle(Long id) {
-        Vehicle toDelete = findVehicle(id);
-        vehicleRepository.delete(toDelete);
+        Vehicle vehicle = findVehicle(id);
+        entityManager.remove(vehicle);
     }
 }
