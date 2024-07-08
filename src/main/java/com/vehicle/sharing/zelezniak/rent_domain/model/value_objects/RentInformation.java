@@ -1,0 +1,36 @@
+package com.vehicle.sharing.zelezniak.rent_domain.model.value_objects;
+
+import com.vehicle.sharing.zelezniak.value_objects.Money;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Embeddable
+@Getter
+@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
+public class RentInformation {
+
+    private static final String MUST_BE_IN_FUTURE = " must be in future";
+
+    @Embedded
+    @AttributeOverride(
+            name = "value",
+            column = @Column(name = "total_cost"))
+    private final Money totalCost;
+
+    @FutureOrPresent(message = "Rental start" + MUST_BE_IN_FUTURE)
+    private final LocalDateTime rentalStart;
+
+    @Future(message = "Rental end" + MUST_BE_IN_FUTURE)
+    private final LocalDateTime rentalEnd;
+
+}
