@@ -1,11 +1,11 @@
 package com.vehicle.sharing.zelezniak.user_domain.controller;
 
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
-import com.vehicle.sharing.zelezniak.user_domain.model.login.LoginRequest;
-import com.vehicle.sharing.zelezniak.user_domain.model.login.LoginResponse;
+import com.vehicle.sharing.zelezniak.user_domain.model.login.*;
 import com.vehicle.sharing.zelezniak.user_domain.service.authentication.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,7 +18,8 @@ public class AuthenticationController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public Client register(
-            @RequestBody Client client){
+            @RequestBody @Validated
+            Client client){
     return authService.register(client);
     }
 

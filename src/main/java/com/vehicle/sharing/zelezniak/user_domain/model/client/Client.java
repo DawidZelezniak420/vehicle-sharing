@@ -1,7 +1,6 @@
 package com.vehicle.sharing.zelezniak.user_domain.model.client;
 
-import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserCredentials;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserName;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,10 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -71,7 +67,6 @@ public class Client implements UserDetails {
         roles.add(roleUser);
     }
 
-    @Override
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
@@ -83,7 +78,6 @@ public class Client implements UserDetails {
                 && Objects.equals(address, client.address);
     }
 
-    @Override
     public int hashCode() {
         return Objects.hash(id,
                 name, credentials,

@@ -1,24 +1,17 @@
 package com.vehicle.sharing.zelezniak.user_domain.service.authentication;
 
-import com.vehicle.sharing.zelezniak.user_domain.model.login.LoginRequest;
-import com.vehicle.sharing.zelezniak.user_domain.model.login.LoginResponse;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Role;
+import com.vehicle.sharing.zelezniak.user_domain.model.login.*;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.*;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserCredentials;
-import com.vehicle.sharing.zelezniak.user_domain.repository.ClientRepository;
-import com.vehicle.sharing.zelezniak.user_domain.repository.RoleRepository;
+import com.vehicle.sharing.zelezniak.user_domain.repository.*;
 import com.vehicle.sharing.zelezniak.user_domain.service.ClientValidator;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.util.TimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.*;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,12 +41,17 @@ public class AuthenticationService implements UserDetailsService {
 
     public Client register(
             Client client) {
-        inputValidator.throwExceptionIfObjectIsNull(
-                client, InputValidator.CLIENT_NOT_NULL);
-        clientValidator.ifUserExistsThrowException(
-                client.getEmail());
+        validateData(client);
         saveClient(client);
         return client;
+    }
+
+    private void validateData(Client client) {
+        inputValidator.throwExceptionIfObjectIsNull(
+                client, InputValidator.CLIENT_NOT_NULL);
+        EmailPatternValidator.validate(client.getEmail());
+        clientValidator.ifUserExistsThrowException(
+                client.getEmail());
     }
 
     public LoginResponse login(LoginRequest loginRequest) {

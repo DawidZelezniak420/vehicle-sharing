@@ -1,9 +1,9 @@
 package com.vehicle.sharing.zelezniak.config;
 
+import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Car;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Motorcycle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;

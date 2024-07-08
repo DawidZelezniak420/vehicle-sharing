@@ -111,4 +111,16 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.client.address.country.countryName").value(address.getCountry().getCountryName()))
                 .andExpect(jsonPath("$.jwt").isNotEmpty());
     }
+
+    @Test
+    void shouldTestInvalidEmailPattern() throws Exception {
+        client.setCredentials(new UserCredentials(
+                "wrongemail@com","somepassword"));
+        String email = client.getEmail();
+        mockMvc.perform(post("/auth/register")
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsString(client)))
+                .andExpect(jsonPath("$.message").value(
+                        "Email " + email + " has invalid pattern."));
+    }
 }

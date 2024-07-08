@@ -1,7 +1,6 @@
 package com.vehicle.sharing.zelezniak.user_domain.service.authentication;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
 import java.security.KeyPair;

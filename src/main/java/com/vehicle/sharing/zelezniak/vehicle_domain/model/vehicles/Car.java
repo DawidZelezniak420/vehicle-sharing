@@ -4,10 +4,7 @@ import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleU
 import com.vehicle.sharing.zelezniak.constants.ValidationMessages;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;

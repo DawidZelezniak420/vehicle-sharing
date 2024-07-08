@@ -1,16 +1,15 @@
 package com.vehicle.sharing.zelezniak.user_domain.model.client;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Objects;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @Table(name = "roles")
+@EqualsAndHashCode
+@ToString
 public class Role implements GrantedAuthority {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,24 +27,4 @@ public class Role implements GrantedAuthority {
         return roleName;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Role role = (Role) object;
-        return Objects.equals(id, role.id)
-                && Objects.equals(roleName, role.roleName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, roleName);
-    }
-
-    @Override
-    public String toString() {
-        return "Role{" +
-                "roleName='" + roleName + '\'' +
-                '}';
-    }
 }

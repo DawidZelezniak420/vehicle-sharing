@@ -3,8 +3,7 @@ package com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles;
 import com.vehicle.sharing.zelezniak.value_objects.Money;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -29,9 +28,6 @@ import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.MUST_BE
 @AllArgsConstructor
 @Table(name = "vehicles")
 @SuperBuilder(toBuilder = true)
-@AttributeOverrides(
-        @AttributeOverride(name = "pricePerDay.money",
-                column = @Column(name = "price_per_day")))
 public abstract class Vehicle {
 
     @Id
@@ -42,7 +38,9 @@ public abstract class Vehicle {
     private VehicleInformation vehicleInformation;
 
     @NotNull(message = "Price per day" + MUST_BE_SPECIFIED)
-    @AttributeOverride(name = "value",column = @Column(name = "price_per_day"))
+    @AttributeOverride(
+            name = "value",
+            column = @Column(name = "price_per_day"))
     private Money pricePerDay;
 
     @Enumerated(EnumType.STRING)

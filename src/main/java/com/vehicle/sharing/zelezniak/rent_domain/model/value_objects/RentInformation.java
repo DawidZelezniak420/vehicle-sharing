@@ -1,15 +1,9 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model.value_objects;
 
 import com.vehicle.sharing.zelezniak.value_objects.Money;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -32,5 +26,8 @@ public class RentInformation {
 
     @Future(message = "Rental end" + MUST_BE_IN_FUTURE)
     private final LocalDateTime rentalEnd;
+
+    @Embedded
+    private final Location pickUpLocation;
 
 }

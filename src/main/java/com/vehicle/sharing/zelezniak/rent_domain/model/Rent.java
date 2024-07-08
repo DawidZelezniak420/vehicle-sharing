@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -26,6 +26,9 @@ public class Rent {
     @Embedded
     private RentInformation rentInformation;
 
+    @Enumerated(EnumType.STRING)
+    private RentStatus rentStatus;
+
     @ManyToMany(
             cascade = {
                     CascadeType.MERGE, CascadeType.DETACH,
@@ -34,7 +37,7 @@ public class Rent {
             name = "clients_rents",
             joinColumns = @JoinColumn(name = "rent_id"),
             inverseJoinColumns = @JoinColumn(name = "client_id"))
-    private List<Client> clients;
+    private Set<Client> clients;
 
     @ManyToMany(
             cascade = {
@@ -44,7 +47,7 @@ public class Rent {
             name = "rented_vehicles",
             joinColumns = @JoinColumn(name = "rent_id"),
             inverseJoinColumns = @JoinColumn(name = "vehicle_id"))
-    private List<Vehicle> vehicles;
+    private Set<Vehicle> vehicles;
 
     public enum RentStatus {
         ACTIVE,

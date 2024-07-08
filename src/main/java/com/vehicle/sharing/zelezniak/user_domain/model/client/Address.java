@@ -1,12 +1,8 @@
 package com.vehicle.sharing.zelezniak.user_domain.model.client;
 
-import com.vehicle.sharing.zelezniak.value_objects.City;
-import com.vehicle.sharing.zelezniak.value_objects.Country;
-import com.vehicle.sharing.zelezniak.value_objects.Street;
+import com.vehicle.sharing.zelezniak.value_objects.*;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -15,6 +11,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table(name = "addresses")
 @Builder
+@EqualsAndHashCode
+@ToString
 public class Address {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,38 +45,4 @@ public class Address {
             name = "countryName",
             column = @Column(name = "country"))
     private Country country;
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Address address = (Address) object;
-        return Objects.equals(id, address.id)
-                && Objects.equals(street, address.street)
-                && Objects.equals(houseNumber, address.houseNumber)
-                && Objects.equals(flatNumber, address.flatNumber)
-                && Objects.equals(city, address.city)
-                && Objects.equals(postalCode, address.postalCode)
-                && Objects.equals(country, address.country);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, street,
-                houseNumber, flatNumber,
-                city, postalCode, country);
-    }
-
-    @Override
-    public String toString() {
-        return "Address{" +
-                "id=" + id +
-                ", street='" + street + '\'' +
-                ", flatNumber='" + flatNumber + '\'' +
-                ", houseNumber='" + houseNumber + '\'' +
-                ", city='" + city + '\'' +
-                ", country='" + country + '\'' +
-                ", postalCode='" + postalCode + '\'' +
-                '}';
-    }
 }

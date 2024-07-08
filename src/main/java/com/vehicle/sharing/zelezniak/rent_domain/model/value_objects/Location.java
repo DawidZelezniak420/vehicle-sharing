@@ -1,10 +1,8 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model.value_objects;
 
-import jakarta.persistence.Embeddable;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import com.vehicle.sharing.zelezniak.value_objects.*;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Embeddable
 @Getter
@@ -13,9 +11,29 @@ import lombok.RequiredArgsConstructor;
 @Builder(toBuilder = true)
 public class Location {
 
-    private final String country;
-    private final String district;
-    private final String city;
-    private final String street;
+    @Embedded
+    @AttributeOverride(
+            name = "countryName",
+            column = @Column(name = "country"))
+    private final Country country;
+
+    @Embedded
+    @AttributeOverride(
+            name = "districtName",
+            column = @Column(name = "district"))
+    private final District district;
+
+    @Embedded
+    @AttributeOverride(
+            name = "cityName",
+            column = @Column(name = "city"))
+    private final City city;
+
+    @Embedded
+    @AttributeOverride(
+            name = "streetName",
+            column = @Column(name = "street"))
+    private final Street street;
+
     private final String additionalInformation;
 }

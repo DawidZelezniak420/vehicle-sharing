@@ -1,16 +1,15 @@
 package com.vehicle.sharing.zelezniak.value_objects;
 
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Objects;
+import java.math.*;
 
 @Embeddable
 @Getter
 @NoArgsConstructor(force = true)
+@EqualsAndHashCode
+@ToString
 public class Money {
 
     private static final BigDecimal ZERO = BigDecimal.ZERO;
@@ -19,26 +18,6 @@ public class Money {
     public Money(BigDecimal money) {
         validate(money);
         this.value = format(money);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Money money1 = (Money) o;
-        return Objects.equals(value, money1.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value);
-    }
-
-    @Override
-    public String toString() {
-        return "Money{" +
-                "money=" + value +
-                '}';
     }
 
     private void validate(BigDecimal money) {
@@ -53,7 +32,7 @@ public class Money {
 
     private void throwException() {
         throw new IllegalArgumentException(
-                "Money value in incorrect");
+                "Money value is incorrect");
     }
 
     private BigDecimal format(BigDecimal money) {
