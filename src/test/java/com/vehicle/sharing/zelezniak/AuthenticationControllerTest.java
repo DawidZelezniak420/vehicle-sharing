@@ -7,11 +7,11 @@ import com.vehicle.sharing.zelezniak.user_domain.service.authentication.Authenti
 import com.vehicle.sharing.zelezniak.util.TimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.*;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserCredentials;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserName;
-import com.vehicle.sharing.zelezniak.value_objects.City;
-import com.vehicle.sharing.zelezniak.value_objects.Country;
-import com.vehicle.sharing.zelezniak.value_objects.Street;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserCredentials;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserName;
+import com.vehicle.sharing.zelezniak.common_value_objects.City;
+import com.vehicle.sharing.zelezniak.common_value_objects.Country;
+import com.vehicle.sharing.zelezniak.common_value_objects.Street;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

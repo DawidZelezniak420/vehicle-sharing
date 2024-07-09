@@ -1,4 +1,4 @@
-package com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects;
+package com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Size;

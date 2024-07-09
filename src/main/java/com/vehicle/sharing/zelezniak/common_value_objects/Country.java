@@ -1,4 +1,4 @@
-package com.vehicle.sharing.zelezniak.value_objects;
+package com.vehicle.sharing.zelezniak.common_value_objects;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
@@ -12,8 +12,8 @@ import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT
 @NoArgsConstructor(force = true)
 @EqualsAndHashCode
 @ToString
-public class District {
+public class Country {
 
-    @NotBlank(message = "District name" + CAN_NOT_BE_BLANK)
-    private final String districtName;
+    @NotBlank(message = "Country name" + CAN_NOT_BE_BLANK)
+    private final String countryName;
 }

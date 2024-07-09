@@ -2,7 +2,7 @@ package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.VehicleInformation;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleValidator;
 import org.junit.jupiter.api.AfterEach;

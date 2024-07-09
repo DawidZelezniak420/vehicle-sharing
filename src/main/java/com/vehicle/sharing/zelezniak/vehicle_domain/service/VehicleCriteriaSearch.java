@@ -1,7 +1,7 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.service;
 
 import com.vehicle.sharing.zelezniak.vehicle_domain.exception.CriteriaAccessException;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.Year;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;

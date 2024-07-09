@@ -1,13 +1,10 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model;
 
-import com.vehicle.sharing.zelezniak.rent_domain.model.value_objects.RentInformation;
+import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 

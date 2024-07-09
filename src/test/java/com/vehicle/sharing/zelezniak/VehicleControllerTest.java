@@ -2,13 +2,13 @@ package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.Engine;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
 import com.vehicle.sharing.zelezniak.user_domain.service.authentication.JWTGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.Year;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

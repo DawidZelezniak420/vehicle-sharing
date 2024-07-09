@@ -1,7 +1,7 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles;
 
-import com.vehicle.sharing.zelezniak.value_objects.Money;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.VehicleInformation;
+import com.vehicle.sharing.zelezniak.common_value_objects.Money;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;

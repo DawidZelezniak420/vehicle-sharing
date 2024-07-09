@@ -1,6 +1,6 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util;
 
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.VehicleInformation;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.*;
 import org.springframework.stereotype.Component;
 

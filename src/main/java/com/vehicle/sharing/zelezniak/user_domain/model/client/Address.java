@@ -1,6 +1,6 @@
 package com.vehicle.sharing.zelezniak.user_domain.model.client;
 
-import com.vehicle.sharing.zelezniak.value_objects.*;
+import com.vehicle.sharing.zelezniak.common_value_objects.*;
 import jakarta.persistence.*;
 import lombok.*;
 

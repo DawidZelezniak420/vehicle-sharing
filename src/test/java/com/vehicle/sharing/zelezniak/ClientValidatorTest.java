@@ -1,7 +1,7 @@
 package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.ClientCreator;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserCredentials;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserCredentials;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;

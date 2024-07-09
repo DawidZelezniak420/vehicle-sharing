@@ -1,6 +1,6 @@
-package com.vehicle.sharing.zelezniak.rent_domain.model.value_objects;
+package com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects;
 
-import com.vehicle.sharing.zelezniak.value_objects.Money;
+import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;

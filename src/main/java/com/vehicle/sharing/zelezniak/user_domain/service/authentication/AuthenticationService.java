@@ -2,7 +2,7 @@ package com.vehicle.sharing.zelezniak.user_domain.service.authentication;
 
 import com.vehicle.sharing.zelezniak.user_domain.model.login.*;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.*;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.value_objects.UserCredentials;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserCredentials;
 import com.vehicle.sharing.zelezniak.user_domain.repository.*;
 import com.vehicle.sharing.zelezniak.user_domain.service.ClientValidator;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;

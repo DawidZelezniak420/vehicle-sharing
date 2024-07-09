@@ -2,8 +2,8 @@ package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.Engine;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects.Year;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;

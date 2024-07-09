@@ -1,4 +1,4 @@
-package com.vehicle.sharing.zelezniak.vehicle_domain.model.value_objects;
+package com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
