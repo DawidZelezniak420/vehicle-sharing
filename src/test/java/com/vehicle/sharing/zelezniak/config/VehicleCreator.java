@@ -2,6 +2,7 @@ package com.vehicle.sharing.zelezniak.config;
 
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Car;
@@ -82,7 +83,7 @@ public class VehicleCreator {
                 .brand("Seat")
                 .model("Leon 1M")
                 .productionYear(new Year(2001))
-                .registrationNumber("ABC55555")
+                .registrationNumber(new RegistrationNumber("ABC55555"))
                 .description("Seat Leon car")
                 .engine(engine)
                 .gearType(VehicleInformation.GearType.MANUAL)
@@ -106,7 +107,7 @@ public class VehicleCreator {
                 .brand("Yamaha")
                 .model("YZF-R125")
                 .productionYear(new Year(2015))
-                .registrationNumber("ABC66666")
+                .registrationNumber(new RegistrationNumber("ABC66666"))
                 .description("Legendary Yamaha 125")
                 .engine(engine)
                 .gearType(VehicleInformation.GearType.MANUAL)
@@ -128,7 +129,7 @@ public class VehicleCreator {
                 .brand("Seat")
                 .model("Leon 1M")
                 .productionYear(new Year(2001))
-                .registrationNumber("ABC55555")
+                .registrationNumber(new RegistrationNumber("ABC55555"))
                 .description("Tuned Seat Leon")
                 .engine(engine)
                 .gearType(VehicleInformation.GearType.MANUAL)
@@ -150,7 +151,7 @@ public class VehicleCreator {
                 .brand("Nissan")
                 .model("GT-R R35")
                 .productionYear(new Year(2021))
-                .registrationNumber("GTR54321")
+                .registrationNumber(new RegistrationNumber("GTR54321"))
                 .description("Nissan GT-R R35 high-performance sports car")
                 .engine(engine)
                 .gearType(VehicleInformation.GearType.AUTOMATIC)

@@ -57,6 +57,13 @@ public class DatabaseSetup {
     @Value("${create.motorcycle.nine}")
     private String createMotorcycleNine;
 
+    //rent queries
+    @Value("${create.rent.five}")
+    private String createRentFive;
+    @Value("${insert.clients_rents.client5.rent5}")
+    private String insertClientRentsClient5Rent5;
+    @Value("${insert.rented_vehicles.rent5.vehicle5}")
+    private String insertRentedVehiclesRent5Vehicle5;
 
     public void setupClients(){
         executeQueries(createRoleUser, createAddressFive, createAddressSix,
@@ -69,6 +76,12 @@ public class DatabaseSetup {
                 createVehicleSix, createMotorcycleSix,
                 createVehicleSeven, createCarSeven, createVehicleEight,
                 createCarEight, createVehicleNine, createMotorcycleNine);
+    }
+
+    public void setupRents(){
+        executeQueries(createRentFive,
+                insertClientRentsClient5Rent5,
+                insertRentedVehiclesRent5Vehicle5);
     }
 
     public void cleanupClients(){
@@ -84,6 +97,13 @@ public class DatabaseSetup {
                 "delete from cars",
                 "delete from motorcycles",
                 "delete from vehicles");
+    }
+
+    public void cleanupRents(){
+        executeQueries(
+                "delete from clients_rents",
+                "delete from rented_vehicles",
+                "delete from rents");
     }
 
     private void executeQueries(String... queries) {

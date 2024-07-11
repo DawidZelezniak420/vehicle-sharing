@@ -57,7 +57,8 @@ public class ClientService {
 
     private Client findClient(Long id) {
         return clientRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(
+                        () -> new NoSuchElementException(
                         "User with id: " + id + " does not exist."));
     }
 

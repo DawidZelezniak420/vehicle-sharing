@@ -42,7 +42,7 @@ public class Client implements UserDetails {
     @JoinTable(name = "clients_roles", joinColumns =
     @JoinColumn(name = "user_id"), inverseJoinColumns =
     @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
     public String getEmail() {
         return credentials.getEmail();
@@ -62,8 +62,6 @@ public class Client implements UserDetails {
     }
 
     public void addRole(Role roleUser) {
-        if (roles == null)
-            roles = new HashSet<>();
         roles.add(roleUser);
     }
 

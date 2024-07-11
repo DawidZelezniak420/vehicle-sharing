@@ -1,17 +1,22 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
 
-import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.MUST_BE_SPECIFIED;
+import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -37,7 +42,7 @@ public abstract class Vehicle {
     @Embedded
     private VehicleInformation vehicleInformation;
 
-    @NotNull(message = "Price per day" + MUST_BE_SPECIFIED)
+    @NotNull(message = "Price per day" + CAN_NOT_BE_NULL)
     @AttributeOverride(
             name = "value",
             column = @Column(name = "price_per_day"))
@@ -49,7 +54,7 @@ public abstract class Vehicle {
     protected Vehicle() {
     }
 
-    public String getRegistrationNumber() {
+    public RegistrationNumber getRegistrationNumber() {
         return vehicleInformation.getRegistrationNumber();
     }
 

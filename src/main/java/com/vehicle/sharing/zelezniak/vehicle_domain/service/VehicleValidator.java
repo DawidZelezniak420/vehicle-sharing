@@ -1,9 +1,12 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.service;
 
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 @Component
 @RequiredArgsConstructor
@@ -12,36 +15,65 @@ public class VehicleValidator {
     private final VehicleRepository vehicleRepository;
 
     public void throwExceptionIfVehicleExists(
-            String registrationNumber) {
+            RegistrationNumber registrationNumber) {
         if (vehicleRepository.existsByVehicleInformationRegistrationNumber(
                 registrationNumber)) {
-            throw new IllegalArgumentException(
-                    createMessage(registrationNumber));
+            String message = createMessage(registrationNumber);
+            throwException(message);
         }
     }
 
     public void checkIfVehicleCanBeUpdated(
-            String registrationNumber,
+            RegistrationNumber registrationNumber,
             Vehicle newData) {
-        String newDataRegistrationNumber = newData.getRegistrationNumber();
+        RegistrationNumber newDataRegistrationNumber = newData.getRegistrationNumber();
         if (registrationsAreNotSame(
                 registrationNumber, newDataRegistrationNumber)
-                && vehicleByRegistrationExists(newDataRegistrationNumber)) {
-            throw new IllegalArgumentException(createMessage(newDataRegistrationNumber));
+                && vehicleRegistrationNumberExists(newDataRegistrationNumber)) {
+            String message = createMessage(newDataRegistrationNumber);
+            throwException(message);
         }
     }
 
-    private String createMessage(String n) {
-        return "Vehicle with registration number : " + n + " already exists";
+    public void checkIfVehiclesAreActive(
+            Collection<Vehicle> vehicles) {
+        checkVehiclesStatus(vehicles);
+    }
+
+    private void throwException(String message) {
+        throw new IllegalArgumentException(message);
+    }
+
+    private String createMessage(RegistrationNumber n) {
+        return "Vehicle with registration number : " + n.getRegistration() + " already exists";
     }
 
     private boolean registrationsAreNotSame(
-            String registrationNumber, String newDataRegistrationNumber) {
+            RegistrationNumber registrationNumber,
+            RegistrationNumber newDataRegistrationNumber) {
         return !registrationNumber.equals(newDataRegistrationNumber);
     }
 
-    private boolean vehicleByRegistrationExists(String newDataRegistrationNumber) {
+    private boolean vehicleRegistrationNumberExists(
+            RegistrationNumber newDataRegistrationNumber) {
         return vehicleRepository.existsByVehicleInformationRegistrationNumber(
                 newDataRegistrationNumber);
+    }
+
+    private void checkVehiclesStatus(Collection<Vehicle> vehiclesFromDb) {
+        for (Vehicle vehicle : vehiclesFromDb) {
+            if (statusIsUnavailable(vehicle)) {
+                var information = vehicle.getVehicleInformation();
+                throwException("Vehicle " + information.getBrand()
+                        + " " + information.getModel()
+                        + ",with registration number:"
+                        + vehicle.getRegistrationNumber()
+                        + " is unavailable.");
+            }
+        }
+    }
+
+    private boolean statusIsUnavailable(Vehicle vehicle) {
+        return vehicle.getStatus() == Vehicle.Status.UNAVAILABLE;
     }
 }

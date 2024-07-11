@@ -2,6 +2,7 @@ package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.exception.CriteriaAccessException;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleCriteriaSearch;
@@ -77,7 +78,7 @@ class VehicleCriteriaSearchTest {
         setSecurityContextHolder("ROLE_ADMIN");
 
         Vehicle vehicle8 = vehicleService.findById(8L);
-        String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
+        RegistrationNumber vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
 
         Collection<Vehicle> vehicles = criteriaSearch.findVehiclesByCriteria(
                 "registration number", vehicle8RegistrationNumber);
@@ -92,7 +93,7 @@ class VehicleCriteriaSearchTest {
         setSecurityContextHolder("ROLE_USER");
 
         Vehicle vehicle8 = vehicleService.findById(8L);
-        String vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
+        RegistrationNumber vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
 
         assertThrows(CriteriaAccessException.class, () ->
                 criteriaSearch.findVehiclesByCriteria(

@@ -1,13 +1,20 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles;
 
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
-import com.vehicle.sharing.zelezniak.constants.ValidationMessages;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
+
+import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
 
 @Entity
 @Getter
@@ -18,7 +25,7 @@ import java.util.Objects;
 @Table(name = "cars")
 public class Car extends Vehicle {
 
-    @NotNull(message = "Number of doors" + ValidationMessages.MUST_BE_SPECIFIED)
+    @NotNull(message = "Number of doors" + CAN_NOT_BE_NULL)
     private Integer doorsNumber;
 
     @Enumerated(EnumType.STRING)

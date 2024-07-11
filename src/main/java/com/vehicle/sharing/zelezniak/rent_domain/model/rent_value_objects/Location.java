@@ -9,6 +9,8 @@ import lombok.*;
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
 @Builder(toBuilder = true)
+@EqualsAndHashCode
+@ToString
 public class Location {
 
     @Embedded

@@ -21,8 +21,11 @@ public class VehicleInformation {
     @NotBlank(message = "Model" + CAN_NOT_BE_BLANK)
     private final String model;
 
-    @NotBlank(message = "Registration number" + CAN_NOT_BE_BLANK)
-    private final String registrationNumber;
+    @Embedded
+    @AttributeOverride(
+            name = "registration",
+            column = @Column(name = "registration_number"))
+    private final RegistrationNumber registrationNumber;
 
     @Embedded
     @AttributeOverride(

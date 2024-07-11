@@ -3,6 +3,7 @@ package com.vehicle.sharing.zelezniak;
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
 import com.vehicle.sharing.zelezniak.user_domain.service.authentication.JWTGenerator;
@@ -91,7 +92,7 @@ class VehicleControllerTest {
                 .andExpect(jsonPath("$.[0].id").value(vehicleWithId5.getId()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.brand").value(info.getBrand()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.model").value(info.getModel()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.registrationNumber").value(info.getRegistrationNumber()))
+                .andExpect(jsonPath("$.[0].vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.productionYear.year").value(productionYear.getYear()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.description").value(info.getDescription()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.engine.cylinders").value(engine.getCylinders()))
@@ -122,7 +123,7 @@ class VehicleControllerTest {
                 .andExpect(jsonPath("$.id").value(vehicleWithId5.getId()))
                 .andExpect(jsonPath("$.vehicleInformation.brand").value(info.getBrand()))
                 .andExpect(jsonPath("$.vehicleInformation.model").value(info.getModel()))
-                .andExpect(jsonPath("$.vehicleInformation.registrationNumber").value(info.getRegistrationNumber()))
+                .andExpect(jsonPath("$.vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
                 .andExpect(jsonPath("$.vehicleInformation.productionYear.year").value(productionYear.getYear()))
                 .andExpect(jsonPath("$.vehicleInformation.description").value(info.getDescription()))
                 .andExpect(jsonPath("$.vehicleInformation.engine.cylinders").value(engine.getCylinders()))
@@ -163,14 +164,14 @@ class VehicleControllerTest {
 
     @Test
     void shouldNotAddVehicle() throws Exception {
-        String n = vehicleWithId5.getRegistrationNumber();
+        RegistrationNumber n = vehicleWithId5.getRegistrationNumber();
         mockMvc.perform(post("/vehicles/add")
                         .content(objectMapper.writeValueAsString(vehicleWithId5))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
-                        "Vehicle with registration number : " + n + " already exists"));
+                        "Vehicle with registration number : " + n.getRegistration() + " already exists"));
     }
 
     @Test
@@ -191,7 +192,7 @@ class VehicleControllerTest {
     @Test
     @DisplayName("Should not update vehicle when new data contains an existing registration number")
     void shouldNotUpdateVehicle() throws Exception {
-        String n = vehicleWithId6.getRegistrationNumber();
+        RegistrationNumber n = vehicleWithId6.getRegistrationNumber();
         Vehicle newData = vehicleCreator.buildVehicle5WithDifferentData();
         var vehicleInformation = newData.getVehicleInformation();
         var infoWithExistentRegistration = vehicleInformation.toBuilder()
@@ -206,7 +207,7 @@ class VehicleControllerTest {
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
-                        "Vehicle with registration number : " + n + " already exists"));
+                        "Vehicle with registration number : " + n.getRegistration() + " already exists"));
     }
 
     @Test

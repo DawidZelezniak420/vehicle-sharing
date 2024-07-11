@@ -1,6 +1,7 @@
 package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
@@ -109,7 +110,7 @@ class VehicleServiceTest {
     @Test
     @DisplayName("Should not update vehicle when new data contains an existing registration number")
     void shouldNotUpdateVehicle() {
-        String existentRegistration = vehicleWithId6.getRegistrationNumber();
+        RegistrationNumber existentRegistration = vehicleWithId6.getRegistrationNumber();
         Vehicle newData = vehicleCreator.buildVehicle5WithDifferentData();
         VehicleInformation vehicleInformation = newData.getVehicleInformation();
         VehicleInformation infoWithExistentRegistration = vehicleInformation.toBuilder()

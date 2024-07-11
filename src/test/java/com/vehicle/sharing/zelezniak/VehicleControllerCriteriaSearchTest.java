@@ -3,6 +3,7 @@ package com.vehicle.sharing.zelezniak;
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
@@ -80,7 +81,8 @@ class VehicleControllerCriteriaSearchTest {
         Vehicle vehicle8 = vehicleOperations.findById(8L);
         String criteria = "registration number";
         int resultSize = 1;
-        String value = vehicle8.getRegistrationNumber();
+        RegistrationNumber registrationNumber = vehicle8.getRegistrationNumber();
+        String value = registrationNumber.getRegistration();
         performCriteriaRequest(criteria, resultSize, vehicle8, value, ADMIN);
     }
 
@@ -89,7 +91,8 @@ class VehicleControllerCriteriaSearchTest {
     void shouldNotFindVehiclesByCriteriaRegistrationNumber() throws Exception {
         Vehicle vehicle8 = vehicleOperations.findById(8L);
         String criteria = "registration number";
-        String value = vehicle8.getRegistrationNumber();
+        RegistrationNumber registrationNumber = vehicle8.getRegistrationNumber();
+        String value = registrationNumber.getRegistration();
         performCriteriaRegistrationNumber(criteria, value);
     }
 
@@ -165,7 +168,7 @@ class VehicleControllerCriteriaSearchTest {
                 .andExpect(jsonPath("$.[0].id").value(result.getId()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.brand").value(info.getBrand()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.model").value(info.getModel()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.registrationNumber").value(info.getRegistrationNumber()))
+                .andExpect(jsonPath("$.[0].vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.productionYear.year").value(productionYear.getYear()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.description").value(info.getDescription()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.engine.cylinders").value(engine.getCylinders()))

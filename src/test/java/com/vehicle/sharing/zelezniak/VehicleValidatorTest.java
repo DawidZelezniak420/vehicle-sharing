@@ -2,6 +2,7 @@ package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleValidator;
@@ -54,7 +55,7 @@ class VehicleValidatorTest {
 
     @Test
     void shouldTestVehicleCanNotBeUpdated() {
-        String existingRegistration = vehicleWithId6.getRegistrationNumber();
+        RegistrationNumber existingRegistration = vehicleWithId6.getRegistrationNumber();
         Vehicle newCarData = vehicleCreator.createTestCar();
         VehicleInformation information = newCarData
                 .getVehicleInformation()
@@ -63,7 +64,7 @@ class VehicleValidatorTest {
                 .build();
         newCarData.setVehicleInformation(information);
 
-        String vehicleWithId5Registration = vehicleWithId5.getRegistrationNumber();
+        RegistrationNumber vehicleWithId5Registration = vehicleWithId5.getRegistrationNumber();
         assertThrows(IllegalArgumentException.class,
                 () -> validator.checkIfVehicleCanBeUpdated(
                         vehicleWithId5Registration, newCarData));
@@ -71,7 +72,7 @@ class VehicleValidatorTest {
 
     @Test
     void shouldThrowExceptionIfVehicleExists() {
-        String vehicleWithId5Registration = vehicleWithId5.getRegistrationNumber();
+        RegistrationNumber vehicleWithId5Registration = vehicleWithId5.getRegistrationNumber();
         assertThrows(IllegalArgumentException.class,
                 () -> validator.throwExceptionIfVehicleExists(
                         vehicleWithId5Registration));

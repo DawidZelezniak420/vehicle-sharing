@@ -1,6 +1,8 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects;
 
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
+import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentUpdateVisitor;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -11,6 +13,9 @@ import java.time.LocalDateTime;
 @Getter
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
+@Builder
+@EqualsAndHashCode
+@ToString
 public class RentInformation {
 
     private static final String MUST_BE_IN_FUTURE = " must be in future";
