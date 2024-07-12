@@ -1,15 +1,15 @@
 package com.vehicle.sharing.zelezniak.rent_domain.service;
 
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
-import com.vehicle.sharing.zelezniak.rent_domain.model.util.*;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentCreationRequest;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentUpdateVisitor;
 import com.vehicle.sharing.zelezniak.rent_domain.repository.RentRepository;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
-import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleRetrievalService;
+import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleValidator;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,8 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 
 import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
-import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.*;
+import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.RENT_ID_NOT_NULL;
+import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.RENT_NOT_NULL;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +27,10 @@ public class RentService {
 
     private final RentRepository rentRepository;
     private final InputValidator inputValidator;
-    private final EntityManager entityManager;
     private final RentUpdateVisitor updateVisitor;
     private final ClientService clientService;
     private final VehicleValidator vehicleValidator;
-    private final VehicleRetrievalService retrievalService;
+    private final VehicleService vehicleService;
 
     @Transactional(readOnly = true)
     public Collection<Rent> findAll() {
@@ -78,13 +78,13 @@ public class RentService {
 
     private void handleAddRent(
             RentCreationRequest request) {
-        Collection<Vehicle> vehicles = retrievalService.findVehiclesByIDs(
+        Collection<Vehicle> vehicles = vehicleService.findVehiclesByIDs(
                 request.getVehiclesIds());
         vehicleValidator.checkIfVehiclesAreActive(
                 vehicles);
         Rent rent = addClientAndVehiclesToRent(
                 vehicles, request);
-        persistRent(rent);
+        save(rent);
     }
 
     private Rent addClientAndVehiclesToRent(
@@ -98,13 +98,8 @@ public class RentService {
         return rent;
     }
 
-    private void persistRent(Rent rent) {
-        entityManager.persist(rent);
-        flushEntityManager();
-    }
-
-    private void flushEntityManager() {
-        entityManager.flush();
+    private void save(Rent rent) {
+    rentRepository.save(rent);
     }
 
     private void handleUpdateRent(
@@ -112,11 +107,6 @@ public class RentService {
             Rent newData) {
         Rent updated = existing.updateRent(
                 updateVisitor, newData);
-        mergeRent(updated);
-    }
-
-    private void mergeRent(Rent updated) {
-        entityManager.merge(updated);
-        flushEntityManager();
+        save(updated);
     }
 }

@@ -1,17 +1,15 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.service;
 
+import com.vehicle.sharing.zelezniak.constants.ValidationMessages;
+import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
-import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
-import com.vehicle.sharing.zelezniak.constants.ValidationMessages;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +20,6 @@ public class VehicleService {
     private final InputValidator inputValidator;
     private final VehicleUpdateVisitor updateVisitor;
     private final VehicleCriteriaSearch criteriaSearch;
-    private final EntityManager entityManager;
 
 
     @Transactional(readOnly = true)
@@ -41,7 +38,7 @@ public class VehicleService {
         checkIfNotNull(vehicle, InputValidator.VEHICLE_NOT_NULL);
         vehicleValidator.throwExceptionIfVehicleExists(
                 vehicle.getRegistrationNumber());
-        persistVehicle(vehicle);
+        save(vehicle);
     }
 
     @Transactional
@@ -61,14 +58,29 @@ public class VehicleService {
     }
 
     @Transactional(readOnly = true)
-    public <T> Collection<Vehicle> findByCriteria(String criteriaType, T value) {
-        checkIfNotNull(criteriaType, "Criteria type" + ValidationMessages.CAN_NOT_BE_NULL);
-        checkIfNotNull(value, "Searched value" + ValidationMessages.CAN_NOT_BE_NULL);
+    public <T> Collection<Vehicle> findByCriteria(
+            String criteriaType, T value) {
+        checkIfNotNull(criteriaType,
+                "Criteria type" + ValidationMessages.CAN_NOT_BE_NULL);
+        checkIfNotNull(value,
+                "Searched value" + ValidationMessages.CAN_NOT_BE_NULL);
         return criteriaSearch.findVehiclesByCriteria(
                 criteriaType, value);
     }
 
-    private <T> void checkIfNotNull(T input, String message) {
+    @Transactional(readOnly = true)
+    public Collection<Vehicle> findVehiclesByIDs(
+            Set<Long> vehiclesIds) {
+        Set<Vehicle> vehiclesFromDb = new HashSet<>();
+        for (Long id : vehiclesIds) {
+            Vehicle vehicle = findVehicle(id);
+            vehiclesFromDb.add(vehicle);
+        }
+        return vehiclesFromDb;
+    }
+
+    private <T> void checkIfNotNull(
+            T input, String message) {
         inputValidator.throwExceptionIfObjectIsNull(
                 input, message);
     }
@@ -77,12 +89,11 @@ public class VehicleService {
         return vehicleRepository.findById(id)
                 .orElseThrow(
                         () -> new NoSuchElementException(
-                        "Vehicle with id: " + id + " does not exists."));
+                                "Vehicle with id: " + id + " does not exists."));
     }
 
-    private void persistVehicle(Vehicle vehicle) {
-        entityManager.persist(vehicle);
-        entityManager.flush();
+    private void save(Vehicle vehicle) {
+        vehicleRepository.save(vehicle);
     }
 
     private void validateAndUpdateVehicle(
@@ -90,17 +101,12 @@ public class VehicleService {
         vehicleValidator.checkIfVehicleCanBeUpdated(
                 vehicleFromDb.getRegistrationNumber(), newData);
         Vehicle updatedVehicle = vehicleFromDb.update(updateVisitor, newData);
-        mergeVehicle(updatedVehicle);
+        save(updatedVehicle);
     }
 
-    private void mergeVehicle(Vehicle vehicle) {
-        entityManager.merge(vehicle);
-        entityManager.flush();
-    }
-
-    private void handleDeleteVehicle(Long id) {
+    private void handleDeleteVehicle(
+            Long id) {
         Vehicle vehicle = findVehicle(id);
-        entityManager.remove(vehicle);
-        entityManager.flush();
+        vehicleRepository.delete(vehicle);
     }
 }

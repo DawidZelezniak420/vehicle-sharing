@@ -3,7 +3,6 @@ package com.vehicle.sharing.zelezniak.user_domain.service;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.repository.ClientRepository;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,6 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ClientValidator clientValidator;
     private final InputValidator inputValidator;
-    private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public List<Client> findAll() {
@@ -70,18 +68,17 @@ public class ClientService {
         clientFromDb.setName(newData.getName());
         clientFromDb.setCredentials(newData.getCredentials());
         clientFromDb.setAddress(newData.getAddress());
-        mergeClient(clientFromDb);
+        save(clientFromDb);
     }
 
-    private void mergeClient(Client client) {
-        entityManager.merge(client);
-        entityManager.flush();
+    private void save(Client client) {
+    clientRepository.save(client);
     }
 
     private void handleDeleteClient(
             Client clientToDelete) {
         removeRoles(clientToDelete);
-        entityManager.remove(clientToDelete);
+        clientRepository.delete(clientToDelete);
     }
 
     private void removeRoles(Client userToDelete) {
