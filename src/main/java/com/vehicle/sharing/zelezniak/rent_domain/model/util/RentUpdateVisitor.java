@@ -13,7 +13,7 @@ public class RentUpdateVisitor {
                 .totalCost(newData.getTotalCost())
                 .rentInformation(newData.getRentInformation())
                 .rentStatus(newData.getRentStatus())
-                .clients(newData.getClients())
+                .client(newData.getClient())
                 .vehicles(newData.getVehicles())
                 .build();
     }

@@ -1,7 +1,9 @@
 package com.vehicle.sharing.zelezniak;
 
+import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.RentCreator;
+import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.service.RentService;
 import org.junit.jupiter.api.*;
@@ -10,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,8 +32,11 @@ class RentServiceTest {
     @Autowired
     private RentService rentService;
 
+    @Autowired
+    private VehicleCreator vehicleCreator;
+
     @BeforeEach
-    void setupDatabase(){
+    void setupDatabase() {
         databaseSetup.setupClients();
         databaseSetup.setupVehicles();
         databaseSetup.setupRents();
@@ -38,28 +44,36 @@ class RentServiceTest {
     }
 
     @AfterEach
-    void cleanupDatabase(){
+    void cleanupDatabase() {
         databaseSetup.cleanupRents();
         databaseSetup.cleanupClients();
         databaseSetup.cleanupVehicles();
     }
 
     @Test
-    void shouldReturnAllRents(){
+    void shouldReturnAllRents() {
         List<Rent> all = (List<Rent>) rentService.findAll();
         Rent rentFromDb = all.get(0);
-        assertEquals(rentWithId5,rentFromDb);
-        assertEquals(1,all.size());
+        assertEquals(rentWithId5, rentFromDb);
+        assertEquals(1, all.size());
     }
 
     @Test
-    void shouldFindRentById(){
-        Rent byId = rentService.findById(rentWithId5.getId());
-        assertEquals(rentWithId5,byId);
+    void shouldFindRentById() {
+        Rent byId = rentService.findById(
+                rentWithId5.getId());
+        assertEquals(rentWithId5, byId);
     }
 
     @Test
-    void shouldAddRent(){
+    void shouldAddRent() {
+        rentWithId5.setVehicles(vehicleCreator.createSetWithVehicle5And6());
+        rentWithId5.setId(1L);
+        rentWithId5.setTotalCost(new Money(BigDecimal.valueOf(450.00)));
+        rentService.add(rentCreator.createRentCreationRequest());
+        Rent byId = rentService.findById(1L);
 
+        assertNotNull(byId);
+        assertEquals(rentWithId5, byId);
     }
 }

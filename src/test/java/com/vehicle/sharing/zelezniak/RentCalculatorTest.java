@@ -2,6 +2,7 @@ package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.config.RentCreator;
+import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
 import com.vehicle.sharing.zelezniak.rent_domain.service.RentCalculator;
@@ -28,14 +29,18 @@ class RentCalculatorTest {
     @Autowired
     private RentCalculator calculator;
 
+    @Autowired
+    private VehicleCreator vehicleCreator;
+
     @BeforeEach
     void setupDatabase() {
         rentWithId5 = rentCreator.createRentWithId5();
+        rentWithId5.setVehicles(vehicleCreator.createSetWithVehicle5And6());
     }
 
     @Test
     void shouldCalculateTotalCost() {
-        Money givenValue = rentWithId5.getTotalCost();
+        Money givenValue = new Money(BigDecimal.valueOf(450.00));
         rentWithId5.setTotalCost(null);
 
         Money totalCost = calculator.calculateTotalCost(
@@ -45,10 +50,10 @@ class RentCalculatorTest {
 
     @Test
     void shouldCalculateTotalCostWith5PercentDiscount() {
-        Money given = new Money(BigDecimal.valueOf(380.00));
+        Money given = new Money(BigDecimal.valueOf(1140.00));
         LocalDateTime start = LocalDateTime.of(2024, 7, 7, 10, 0, 0);
         LocalDateTime end = LocalDateTime.of(2024, 7, 15, 10, 0, 0);
-        updateRentWithId5Duration(start,end);
+        updateDurationRentWithId5(start,end);
 
         Money totalCost = calculator.calculateTotalCost(
                 rentWithId5);
@@ -57,17 +62,17 @@ class RentCalculatorTest {
 
     @Test
     void shouldCalculateTotalCostWith10PercentDiscount() {
-        Money given = new Money(BigDecimal.valueOf(495.00));
+        Money given = new Money(BigDecimal.valueOf(1485.00));
         LocalDateTime start = LocalDateTime.of(2024, 7, 7, 10, 0, 0);
         LocalDateTime end = LocalDateTime.of(2024, 7, 18, 10, 0, 0);
-        updateRentWithId5Duration(start,end);
+        updateDurationRentWithId5(start,end);
 
         Money totalCost = calculator.calculateTotalCost(
                 rentWithId5);
         assertEquals(given,totalCost);
     }
 
-    private static void updateRentWithId5Duration(
+    private void updateDurationRentWithId5(
             LocalDateTime start,LocalDateTime end){
         RentInformation rentInformation = rentWithId5.getRentInformation();
         RentInformation updated = rentInformation.toBuilder()

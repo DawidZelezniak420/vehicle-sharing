@@ -11,6 +11,8 @@ import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class VehicleCreator {
@@ -66,6 +68,13 @@ public class VehicleCreator {
                 .pricePerDay(new Money(BigDecimal.valueOf(1000.0)))
                 .doorsNumber(3)
                 .build();
+    }
+
+    public Set<Vehicle> createSetWithVehicle5And6(){
+        Set<Vehicle> vehicles = new HashSet<>();
+        vehicles.add(createCarWithId5());
+        vehicles.add(createMotorcycleWithId6());
+        return vehicles;
     }
 
     private Engine buildCarEngine() {

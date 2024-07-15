@@ -11,6 +11,7 @@ import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class RentCreationRequest {
 
     @NotNull(message = "Rent" + CAN_NOT_BE_NULL)

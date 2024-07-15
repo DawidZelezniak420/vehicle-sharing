@@ -10,6 +10,8 @@ import lombok.*;
 
 import java.util.*;
 
+import static java.util.Objects.isNull;
+
 @Entity
 @Getter
 @Setter
@@ -36,15 +38,12 @@ public class Rent {
     @Enumerated(EnumType.STRING)
     private RentStatus rentStatus;
 
-    @ManyToMany(
+    @ManyToOne(
             cascade = {
                     CascadeType.MERGE, CascadeType.DETACH,
                     CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinTable(
-            name = "clients_rents",
-            joinColumns = @JoinColumn(name = "rent_id"),
-            inverseJoinColumns = @JoinColumn(name = "client_id"))
-    private Set<Client> clients = new HashSet<>();
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     @ManyToMany(
             cascade = {
@@ -54,20 +53,16 @@ public class Rent {
             name = "rented_vehicles",
             joinColumns = @JoinColumn(name = "rent_id"),
             inverseJoinColumns = @JoinColumn(name = "vehicle_id"))
-    private Set<Vehicle> vehicles = new HashSet<>();
-
-    public void addClient(Client client) {
-        clients.add(client);
-    }
+    private Set<Vehicle> vehicles;
 
     public void addVehicle(Vehicle vehicle) {
+       initializeVehiclesIfNull();
         vehicles.add(vehicle);
     }
 
     public void addVehicles(Collection<Vehicle> vehicles) {
-        if (vehicles != null) {
-            this.vehicles.addAll(vehicles);
-        }
+        initializeVehiclesIfNull();
+        this.vehicles.addAll(vehicles);
     }
 
     public Rent updateRent(
@@ -82,7 +77,6 @@ public class Rent {
         COMPLETED
     }
 
-    @Override
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
@@ -90,14 +84,20 @@ public class Rent {
         return Objects.equals(id, rent.id)
                 && Objects.equals(rentInformation, rent.rentInformation)
                 && Objects.equals(totalCost, rent.totalCost)
-                && rentStatus == rent.rentStatus;
+                && rentStatus == rent.rentStatus
+                && Objects.equals(client, rent.client);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id,
-                rentInformation,
-                totalCost,
-                rentStatus);
+        return Objects.hash(
+                id, rentInformation,
+                totalCost, rentStatus,
+                client);
+    }
+
+    private void initializeVehiclesIfNull() {
+        if (isNull(vehicles)) {
+            vehicles = new HashSet<>();
+        }
     }
 }

@@ -60,8 +60,6 @@ public class DatabaseSetup {
     //rent queries
     @Value("${create.rent.five}")
     private String createRentFive;
-    @Value("${insert.clients_rents.client5.rent5}")
-    private String insertClientRentsClient5Rent5;
     @Value("${insert.rented_vehicles.rent5.vehicle5}")
     private String insertRentedVehiclesRent5Vehicle5;
 
@@ -80,7 +78,6 @@ public class DatabaseSetup {
 
     public void setupRents(){
         executeQueries(createRentFive,
-                insertClientRentsClient5Rent5,
                 insertRentedVehiclesRent5Vehicle5);
     }
 
@@ -101,7 +98,6 @@ public class DatabaseSetup {
 
     public void cleanupRents(){
         executeQueries(
-                "delete from clients_rents",
                 "delete from rented_vehicles",
                 "delete from rents");
     }

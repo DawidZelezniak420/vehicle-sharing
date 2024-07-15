@@ -4,6 +4,7 @@ import com.vehicle.sharing.zelezniak.common_value_objects.*;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.Location;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentCreationRequest;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,15 @@ public class RentCreator {
                 .totalCost(new Money(BigDecimal.valueOf(150.00)))
                 .rentInformation(buildRentInformation())
                 .vehicles(addVehicleWithId5())
-                .clients(addClientWithId5())
+                .client(clientCreator.createClientWithId5())
+                .build();
+    }
+
+    public RentCreationRequest createRentCreationRequest() {
+        return RentCreationRequest.builder()
+                .rent(buildTestRent())
+                .clientId(5L)
+                .vehiclesIds(createVehiclesIds())
                 .build();
     }
 
@@ -58,10 +67,16 @@ public class RentCreator {
         return vehicles;
     }
 
-    private Set<Client> addClientWithId5() {
-        Set<Client> clients = new HashSet<>();
-        clients.add(clientCreator.createClientWithId5());
-        return clients;
+    private Rent buildTestRent() {
+        return Rent.builder()
+                .rentInformation(buildRentInformation())
+                .build();
     }
 
+    private Set<Long> createVehiclesIds() {
+        Set<Long> ids = new HashSet<>();
+        ids.add(5L);
+        ids.add(6L);
+        return ids;
+    }
 }
