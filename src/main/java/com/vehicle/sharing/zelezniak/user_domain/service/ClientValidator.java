@@ -11,33 +11,40 @@ public class ClientValidator {
 
     private final ClientRepository userRepository;
 
-    public void ifUserExistsThrowException(String email) {
+    public void ifUserExistsThrowException(
+            String email) {
         if (userByEmailExists(email))
             throw new IllegalArgumentException(
-                   createMessage(email));
+                    createMessage(email));
     }
 
-    public void checkIfUserCanBeUpdated(String userFromDbEmail,
-                                        Client newData) {
+    public void checkIfUserCanBeUpdated(
+            String userFromDbEmail,
+            Client newData) {
         String newEmail = newData.getEmail();
-        if(emailsAreNotSame(userFromDbEmail,newEmail)
-        && userByEmailExists(newEmail)){
+        if (emailsAreNotSame(userFromDbEmail, newEmail)
+                && userByEmailExists(newEmail)) {
             throw new IllegalArgumentException(
                     createMessage(newEmail));
         }
     }
 
-    private String createMessage(String email) {
-        return  "User with email : " + email + " already exist";
+    private String createMessage(
+            String email) {
+        return "User with email : " + email + " already exist";
     }
 
-    private boolean emailsAreNotSame(String userFromDbEmail,
-                                     String newEmail) {
-        return !userFromDbEmail.equals(newEmail);
+    private boolean emailsAreNotSame(
+            String userFromDbEmail,
+            String newEmail) {
+        return !userFromDbEmail.equals(
+                newEmail);
     }
 
-    private boolean userByEmailExists(String newEmail) {
-       return userRepository.existsByCredentialsEmail(newEmail);
+    private boolean userByEmailExists(
+            String newEmail) {
+        return userRepository.existsByCredentialsEmail(
+                newEmail);
     }
 
 

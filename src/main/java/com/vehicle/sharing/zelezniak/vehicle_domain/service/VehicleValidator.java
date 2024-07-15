@@ -63,16 +63,17 @@ public class VehicleValidator {
     }
 
     private void checkVehiclesStatus(Collection<Vehicle> vehiclesFromDb) {
-        for (Vehicle vehicle : vehiclesFromDb) {
-            if (statusIsUnavailable(vehicle)) {
-                var information = vehicle.getVehicleInformation();
-                throwException("Vehicle " + information.getBrand()
-                        + " " + information.getModel()
-                        + ",with registration number:"
-                        + vehicle.getRegistrationNumber()
-                        + " is unavailable.");
-            }
-        }
+        vehiclesFromDb.stream()
+                .filter(this::statusIsUnavailable)
+                .findFirst()
+                .ifPresent(vehicle -> {
+                    var information = vehicle.getVehicleInformation();
+                    throwException("Vehicle " + information.getBrand()
+                            + " " + information.getModel()
+                            + ",with registration number:"
+                            + vehicle.getRegistrationNumber()
+                            + " is unavailable.");
+                });
     }
 
     private boolean statusIsUnavailable(Vehicle vehicle) {

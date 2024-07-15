@@ -10,6 +10,7 @@ public class RentUpdateVisitor {
             Rent existingRent,
             Rent newData) {
         return existingRent.toBuilder()
+                .totalCost(newData.getTotalCost())
                 .rentInformation(newData.getRentInformation())
                 .rentStatus(newData.getRentStatus())
                 .clients(newData.getClients())

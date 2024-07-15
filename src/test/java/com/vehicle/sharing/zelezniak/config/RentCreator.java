@@ -27,6 +27,7 @@ public class RentCreator {
         return Rent.builder()
                 .id(5L)
                 .rentStatus(Rent.RentStatus.ACTIVE)
+                .totalCost(new Money(BigDecimal.valueOf(150.00)))
                 .rentInformation(buildRentInformation())
                 .vehicles(addVehicleWithId5())
                 .clients(addClientWithId5())
@@ -35,7 +36,6 @@ public class RentCreator {
 
     private RentInformation buildRentInformation() {
         return RentInformation.builder()
-                .totalCost(new Money(BigDecimal.valueOf(150.00)))
                 .rentalStart(LocalDateTime.of(2024, 7, 7, 10, 0, 0))
                 .rentalEnd(LocalDateTime.of(2024, 7, 10, 10, 0, 0))
                 .pickUpLocation(buildLocation())

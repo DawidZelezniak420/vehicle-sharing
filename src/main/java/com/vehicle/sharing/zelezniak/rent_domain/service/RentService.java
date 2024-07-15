@@ -1,5 +1,6 @@
 package com.vehicle.sharing.zelezniak.rent_domain.service;
 
+import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentCreationRequest;
 import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentUpdateVisitor;
@@ -31,6 +32,7 @@ public class RentService {
     private final ClientService clientService;
     private final VehicleValidator vehicleValidator;
     private final VehicleService vehicleService;
+    private final RentCalculator rentCalculator;
 
     @Transactional(readOnly = true)
     public Collection<Rent> findAll() {
@@ -84,6 +86,8 @@ public class RentService {
                 vehicles);
         Rent rent = addClientAndVehiclesToRent(
                 vehicles, request);
+        Money totalCost = rentCalculator.calculateTotalCost(rent);
+        rent.setTotalCost(totalCost);
         save(rent);
     }
 
@@ -99,7 +103,7 @@ public class RentService {
     }
 
     private void save(Rent rent) {
-    rentRepository.save(rent);
+        rentRepository.save(rent);
     }
 
     private void handleUpdateRent(

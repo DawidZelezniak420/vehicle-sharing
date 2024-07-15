@@ -68,6 +68,7 @@ public class VehicleService {
                 criteriaType, value);
     }
 
+    //add tests and method in controller
     @Transactional(readOnly = true)
     public Collection<Vehicle> findVehiclesByIDs(
             Set<Long> vehiclesIds) {

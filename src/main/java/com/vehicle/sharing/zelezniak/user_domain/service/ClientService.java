@@ -48,7 +48,8 @@ public class ClientService {
         handleDeleteClient(clientToDelete);
     }
 
-    private <T> void checkIfNotNull(T value, String message) {
+    private <T> void checkIfNotNull(
+            T value, String message) {
         inputValidator.throwExceptionIfObjectIsNull(
                 value, message);
     }
@@ -64,10 +65,14 @@ public class ClientService {
             Client clientFromDb,
             Client newData) {
         String clientEmail = clientFromDb.getEmail();
-        clientValidator.checkIfUserCanBeUpdated(clientEmail, newData);
-        clientFromDb.setName(newData.getName());
-        clientFromDb.setCredentials(newData.getCredentials());
-        clientFromDb.setAddress(newData.getAddress());
+        clientValidator.checkIfUserCanBeUpdated(
+                clientEmail, newData);
+        clientFromDb.setName(
+                newData.getName());
+        clientFromDb.setCredentials(
+                newData.getCredentials());
+        clientFromDb.setAddress(
+                newData.getAddress());
         save(clientFromDb);
     }
 
@@ -81,7 +86,8 @@ public class ClientService {
         clientRepository.delete(clientToDelete);
     }
 
-    private void removeRoles(Client userToDelete) {
+    private void removeRoles(
+            Client userToDelete) {
         userToDelete.setRoles(null);
     }
 

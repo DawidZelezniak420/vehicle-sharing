@@ -1,5 +1,6 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model;
 
+import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
 import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentUpdateVisitor;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
@@ -25,6 +26,12 @@ public class Rent {
 
     @Embedded
     private RentInformation rentInformation;
+
+    @Embedded
+    @AttributeOverride(
+            name = "value",
+            column = @Column(name = "total_cost"))
+    private Money totalCost;
 
     @Enumerated(EnumType.STRING)
     private RentStatus rentStatus;
@@ -65,10 +72,10 @@ public class Rent {
 
     public Rent updateRent(
             RentUpdateVisitor updateVisitor,
-            Rent newData){
+            Rent newData) {
         return updateVisitor.updateRent(
-                this,newData);
-    } 
+                this, newData);
+    }
 
     public enum RentStatus {
         ACTIVE,
@@ -82,6 +89,7 @@ public class Rent {
         Rent rent = (Rent) object;
         return Objects.equals(id, rent.id)
                 && Objects.equals(rentInformation, rent.rentInformation)
+                && Objects.equals(totalCost, rent.totalCost)
                 && rentStatus == rent.rentStatus;
     }
 
@@ -89,6 +97,7 @@ public class Rent {
     public int hashCode() {
         return Objects.hash(id,
                 rentInformation,
+                totalCost,
                 rentStatus);
     }
 }
