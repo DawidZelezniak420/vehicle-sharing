@@ -1,20 +1,21 @@
 package com.vehicle.sharing.zelezniak;
 
+import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
-import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -144,5 +145,14 @@ class VehicleServiceTest {
         assertThrows(NoSuchElementException.class, () ->
                 vehicleService.delete(nonExistentId));
         assertEquals(5, vehicleRepository.count());
+    }
+
+    @Test
+    void shouldFindVehiclesByIDsSet(){
+        Set<Long> ids = new HashSet<>(Arrays.asList(5L,6L));
+        Collection<Vehicle> vehicles = vehicleService.findVehiclesByIDs(ids);
+
+        assertTrue(vehicles.contains(vehicleWithId5));
+        assertTrue(vehicles.contains(vehicleWithId6));
     }
 }

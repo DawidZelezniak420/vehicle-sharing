@@ -1,5 +1,6 @@
 package com.vehicle.sharing.zelezniak;
 
+import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
@@ -8,8 +9,10 @@ import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
-import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

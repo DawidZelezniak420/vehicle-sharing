@@ -1,5 +1,9 @@
 package com.vehicle.sharing.zelezniak;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vehicle.sharing.zelezniak.common_value_objects.City;
+import com.vehicle.sharing.zelezniak.common_value_objects.Country;
+import com.vehicle.sharing.zelezniak.common_value_objects.Street;
 import com.vehicle.sharing.zelezniak.config.ClientCreator;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
@@ -9,11 +13,10 @@ import com.vehicle.sharing.zelezniak.user_domain.model.client.Role;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserCredentials;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserName;
 import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vehicle.sharing.zelezniak.common_value_objects.City;
-import com.vehicle.sharing.zelezniak.common_value_objects.Country;
-import com.vehicle.sharing.zelezniak.common_value_objects.Street;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;

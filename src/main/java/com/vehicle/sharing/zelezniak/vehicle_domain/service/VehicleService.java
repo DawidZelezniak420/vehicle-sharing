@@ -70,7 +70,7 @@ public class VehicleService {
 
     //add tests and method in controller
     @Transactional(readOnly = true)
-    public Collection<Vehicle> findVehiclesByIDs(
+    public Set<Vehicle> findVehiclesByIDs(
             Set<Long> vehiclesIds) {
         Set<Vehicle> vehiclesFromDb = new HashSet<>();
         for (Long id : vehiclesIds) {

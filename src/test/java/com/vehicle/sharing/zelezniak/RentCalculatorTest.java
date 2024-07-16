@@ -5,7 +5,7 @@ import com.vehicle.sharing.zelezniak.config.RentCreator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
-import com.vehicle.sharing.zelezniak.rent_domain.service.RentCalculator;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

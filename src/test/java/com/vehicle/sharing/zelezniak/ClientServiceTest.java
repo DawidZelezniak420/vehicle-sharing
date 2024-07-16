@@ -1,13 +1,15 @@
 package com.vehicle.sharing.zelezniak;
 
 import com.vehicle.sharing.zelezniak.config.ClientCreator;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
-import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.TestBeans;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserCredentials;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserName;
-import org.junit.jupiter.api.*;
+import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;

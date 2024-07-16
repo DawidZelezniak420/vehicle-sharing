@@ -1,24 +1,20 @@
 package com.vehicle.sharing.zelezniak.rent_domain.service;
 
-import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
-import com.vehicle.sharing.zelezniak.rent_domain.model.util.*;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentCreationRequest;
+import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentUpdateVisitor;
 import com.vehicle.sharing.zelezniak.rent_domain.repository.RentRepository;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
-import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
-import com.vehicle.sharing.zelezniak.vehicle_domain.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
-import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.*;
+import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.RENT_ID_NOT_NULL;
+import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.RENT_NOT_NULL;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +23,7 @@ public class RentService {
     private final RentRepository rentRepository;
     private final InputValidator inputValidator;
     private final RentUpdateVisitor updateVisitor;
-    private final ClientService clientService;
-    private final VehicleValidator vehicleValidator;
-    private final VehicleService vehicleService;
-    private final RentCalculator rentCalculator;
+    private final RentBuilder rentBuilder;
 
     @Transactional(readOnly = true)
     public Collection<Rent> findAll() {
@@ -78,33 +71,9 @@ public class RentService {
 
     private void handleAddRent(
             RentCreationRequest request) {
-        Collection<Vehicle> vehicles = vehicleService.findVehiclesByIDs(
-                request.getVehiclesIds());
-        System.out.println("XXXXXXXXX");
-        System.out.println("XXXXXXXXX");
-        System.out.println("XXXXXXXXX");
-        System.out.println("XXXXXXXXX");
-        System.out.println("XXXXXXXXX");
-        System.out.println(vehicles);
-        vehicleValidator.checkIfVehiclesAreActive(
-                vehicles);
-        Rent rent = addClientAndVehiclesToRent(
-                vehicles, request);
-        Money totalCost = rentCalculator.calculateTotalCost(rent);
-        rent.setTotalCost(totalCost);
-        rent.setRentStatus(Rent.RentStatus.ACTIVE);
+        Rent rent = rentBuilder.buildRent(
+                request);
         save(rent);
-    }
-
-    private Rent addClientAndVehiclesToRent(
-            Collection<Vehicle> vehicles,
-            RentCreationRequest request) {
-        Rent rent = request.getRent();
-        Client client = clientService.findById(
-                request.getClientId());
-        rent.addVehicles(vehicles);
-        rent.setClient(client);
-        return rent;
     }
 
     private void save(Rent rent) {

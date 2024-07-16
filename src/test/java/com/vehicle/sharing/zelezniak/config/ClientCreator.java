@@ -1,13 +1,13 @@
 package com.vehicle.sharing.zelezniak.config;
 
+import com.vehicle.sharing.zelezniak.common_value_objects.City;
+import com.vehicle.sharing.zelezniak.common_value_objects.Country;
+import com.vehicle.sharing.zelezniak.common_value_objects.Street;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Address;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Role;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserCredentials;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.user_value_objects.UserName;
-import com.vehicle.sharing.zelezniak.common_value_objects.City;
-import com.vehicle.sharing.zelezniak.common_value_objects.Country;
-import com.vehicle.sharing.zelezniak.common_value_objects.Street;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;

@@ -55,11 +55,6 @@ public class Rent {
             inverseJoinColumns = @JoinColumn(name = "vehicle_id"))
     private Set<Vehicle> vehicles;
 
-    public void addVehicle(Vehicle vehicle) {
-       initializeVehiclesIfNull();
-        vehicles.add(vehicle);
-    }
-
     public void addVehicles(Collection<Vehicle> vehicles) {
         initializeVehiclesIfNull();
         this.vehicles.addAll(vehicles);

@@ -5,7 +5,6 @@ import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.Location;
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
 import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentCreationRequest;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

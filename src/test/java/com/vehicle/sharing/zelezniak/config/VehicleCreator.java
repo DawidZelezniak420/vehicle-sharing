@@ -1,7 +1,7 @@
 package com.vehicle.sharing.zelezniak.config;
 
-import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;

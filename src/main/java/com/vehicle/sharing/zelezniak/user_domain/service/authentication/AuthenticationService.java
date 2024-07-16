@@ -91,8 +91,8 @@ public class AuthenticationService implements UserDetailsService {
         return role;
     }
 
-    private LoginResponse tryLoginUser(String email
-            , String password) {
+    private LoginResponse tryLoginUser(
+            String email, String password) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

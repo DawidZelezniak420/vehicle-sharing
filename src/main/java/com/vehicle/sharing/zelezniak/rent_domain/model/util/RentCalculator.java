@@ -1,4 +1,4 @@
-package com.vehicle.sharing.zelezniak.rent_domain.service;
+package com.vehicle.sharing.zelezniak.rent_domain.model.util;
 
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
