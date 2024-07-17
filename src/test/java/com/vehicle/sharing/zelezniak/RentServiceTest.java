@@ -7,6 +7,7 @@ import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import com.vehicle.sharing.zelezniak.rent_domain.service.RentService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +57,10 @@ class RentServiceTest {
     void shouldReturnAllRents() {
         List<Rent> all = (List<Rent>) rentService.findAll();
         Rent rentFromDb = all.get(0);
+
+        all.forEach(Assertions::assertNotNull);
         assertEquals(rentWithId5, rentFromDb);
-        assertEquals(1, all.size());
+        assertEquals(3, all.size());
     }
 
     @Test

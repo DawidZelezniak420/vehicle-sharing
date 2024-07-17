@@ -62,6 +62,18 @@ public class DatabaseSetup {
     private String createRentFive;
     @Value("${insert.rented_vehicles.rent5.vehicle5}")
     private String insertRentedVehiclesRent5Vehicle5;
+    @Value("${create.rent.six}")
+    private String createRentSix;
+    @Value("${insert.rented_vehicles.rent6.vehicle6}")
+    private String insertRentedVehiclesRent6Vehicle6;
+    @Value("${insert.rented_vehicles.rent6.vehicle7}")
+    private String insertRentedVehiclesRent6Vehicle7;
+    @Value("${create.rent.seven}")
+    private String createRentSeven;
+    @Value("${insert.rented_vehicles.rent7.vehicle8}")
+    private String insertRentedVehiclesRent7Vehicle8;
+    @Value("${insert.rented_vehicles.rent7.vehicle9}")
+    private String insertRentedVehiclesRent7Vehicle9;
 
     public void setupClients(){
         executeQueries(createRoleUser, createAddressFive, createAddressSix,
@@ -77,8 +89,11 @@ public class DatabaseSetup {
     }
 
     public void setupRents(){
-        executeQueries(createRentFive,
-                insertRentedVehiclesRent5Vehicle5);
+        executeQueries(createRentFive, insertRentedVehiclesRent5Vehicle5,
+                createRentSix,insertRentedVehiclesRent6Vehicle6,
+                insertRentedVehiclesRent6Vehicle7,
+                createRentSeven,insertRentedVehiclesRent7Vehicle8,
+                insertRentedVehiclesRent7Vehicle9);
     }
 
     public void cleanupClients(){
