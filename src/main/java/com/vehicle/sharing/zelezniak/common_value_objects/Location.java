@@ -1,10 +1,11 @@
-package com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects;
+package com.vehicle.sharing.zelezniak.common_value_objects;
 
 import com.vehicle.sharing.zelezniak.common_value_objects.address.City;
-import com.vehicle.sharing.zelezniak.common_value_objects.address.Country;
-import com.vehicle.sharing.zelezniak.common_value_objects.address.District;
 import com.vehicle.sharing.zelezniak.common_value_objects.address.Street;
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import lombok.*;
 
 @Embeddable
@@ -15,18 +16,6 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class Location {
-
-    @Embedded
-    @AttributeOverride(
-            name = "countryName",
-            column = @Column(name = "country"))
-    private final Country country;
-
-    @Embedded
-    @AttributeOverride(
-            name = "districtName",
-            column = @Column(name = "district"))
-    private final District district;
 
     @Embedded
     @AttributeOverride(
