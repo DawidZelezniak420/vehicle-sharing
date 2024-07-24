@@ -26,7 +26,8 @@ public class VehicleCreator {
                 .bodyType(Car.BodyType.HATCHBACK)
                 .status(Vehicle.Status.AVAILABLE)
                 .driveType(Car.DriveType.FRONT_WHEEL_DRIVE)
-                .pricePerDay(new Money(BigDecimal.valueOf(50.0)))
+                .pricePerDay(new Money(BigDecimal.valueOf(50.00)))
+                .deposit(new Money(BigDecimal.valueOf(1000.00)))
                 .doorsNumber(5)
                 .build();
     }
@@ -40,6 +41,7 @@ public class VehicleCreator {
                 .motorcycleType(Motorcycle.MotorcycleType.SPORT)
                 .status(Vehicle.Status.AVAILABLE)
                 .pricePerDay(new Money(BigDecimal.valueOf(100.00)))
+                .deposit(new Money(BigDecimal.valueOf(1500.00)))
                 .build();
     }
 
@@ -52,7 +54,8 @@ public class VehicleCreator {
                 .bodyType(Car.BodyType.HATCHBACK)
                 .status(Vehicle.Status.AVAILABLE)
                 .driveType(Car.DriveType.FOUR_WHEEL_DRIVE)
-                .pricePerDay(new Money(BigDecimal.valueOf(150.0)))
+                .pricePerDay(new Money(BigDecimal.valueOf(150.00)))
+                .deposit(new Money(BigDecimal.valueOf(1000.00)))
                 .doorsNumber(5)
                 .build();
     }
@@ -65,7 +68,7 @@ public class VehicleCreator {
                 .bodyType(Car.BodyType.COUPE)
                 .status(Vehicle.Status.AVAILABLE)
                 .driveType(Car.DriveType.FOUR_WHEEL_DRIVE)
-                .pricePerDay(new Money(BigDecimal.valueOf(1000.0)))
+                .pricePerDay(new Money(BigDecimal.valueOf(1000.00)))
                 .doorsNumber(3)
                 .build();
     }
@@ -91,6 +94,7 @@ public class VehicleCreator {
         return VehicleInformation.builder()
                 .brand("Seat")
                 .model("Leon 1M")
+                .seatsNumber(5)
                 .productionYear(new Year(2001))
                 .registrationNumber(new RegistrationNumber("ABC55555"))
                 .description("Seat Leon car")
@@ -115,6 +119,7 @@ public class VehicleCreator {
         return VehicleInformation.builder()
                 .brand("Yamaha")
                 .model("YZF-R125")
+                .seatsNumber(2)
                 .productionYear(new Year(2015))
                 .registrationNumber(new RegistrationNumber("ABC66666"))
                 .description("Legendary Yamaha 125")
@@ -159,6 +164,7 @@ public class VehicleCreator {
         return VehicleInformation.builder()
                 .brand("Nissan")
                 .model("GT-R R35")
+                .seatsNumber(5)
                 .productionYear(new Year(2021))
                 .registrationNumber(new RegistrationNumber("GTR54321"))
                 .description("Nissan GT-R R35 high-performance sports car")
