@@ -1,6 +1,6 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.service;
 
-import com.vehicle.sharing.zelezniak.constants.ValidationMessages;
+import com.vehicle.sharing.zelezniak.common_value_objects.RentDuration;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
@@ -9,7 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
+import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +24,7 @@ public class VehicleService {
     private final InputValidator inputValidator;
     private final VehicleUpdateVisitor updateVisitor;
     private final VehicleCriteriaSearch criteriaSearch;
-
+    private final AvailableVehiclesRetriever vehiclesRetriever;
 
     @Transactional(readOnly = true)
     public Collection<Vehicle> findAll() {
@@ -61,23 +65,27 @@ public class VehicleService {
     public <T> Collection<Vehicle> findByCriteria(
             String criteriaType, T value) {
         checkIfNotNull(criteriaType,
-                "Criteria type" + ValidationMessages.CAN_NOT_BE_NULL);
+                "Criteria type" + CAN_NOT_BE_NULL);
         checkIfNotNull(value,
-                "Searched value" + ValidationMessages.CAN_NOT_BE_NULL);
+                "Searched value" + CAN_NOT_BE_NULL);
         return criteriaSearch.findVehiclesByCriteria(
                 criteriaType, value);
     }
 
-    //add tests and method in controller
     @Transactional(readOnly = true)
-    public Set<Vehicle> findVehiclesByIDs(
+    public Collection<Vehicle> findVehiclesByIDs(
             Set<Long> vehiclesIds) {
-        Set<Vehicle> vehiclesFromDb = new HashSet<>();
-        for (Long id : vehiclesIds) {
-            Vehicle vehicle = findVehicle(id);
-            vehiclesFromDb.add(vehicle);
-        }
-        return vehiclesFromDb;
+        return vehicleRepository.findVehiclesByIdIn(
+                vehiclesIds);
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Vehicle> findAvailableVehicles(
+            RentDuration duration) {
+        checkIfNotNull(duration,
+                "Duration"+ CAN_NOT_BE_NULL);
+             return vehiclesRetriever.findAvailableVehiclesInPeriod(
+                     duration);
     }
 
     private <T> void checkIfNotNull(
@@ -99,6 +107,8 @@ public class VehicleService {
 
     private void validateAndUpdateVehicle(
             Vehicle vehicleFromDb, Vehicle newData) {
+        vehicleValidator.checkIfVehiclesHasSameTypes(
+                vehicleFromDb,newData);
         vehicleValidator.checkIfVehicleCanBeUpdated(
                 vehicleFromDb.getRegistrationNumber(), newData);
         Vehicle updatedVehicle = vehicleFromDb.update(updateVisitor, newData);

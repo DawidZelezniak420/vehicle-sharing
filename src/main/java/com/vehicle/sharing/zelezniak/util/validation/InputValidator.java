@@ -15,6 +15,8 @@ public class InputValidator {
     public static final String CLIENT_EMAIL_NOT_NULL = "Client email" + CAN_NOT_BE_NULL;
     public static final String RENT_ID_NOT_NULL = "Rent id" + CAN_NOT_BE_NULL;
     public static final String RENT_NOT_NULL = "Rent" + CAN_NOT_BE_NULL;
+    public static final String RESERVATION_NOT_NULL = "Reservation" + CAN_NOT_BE_NULL;
+    public static final String RESERVATION_ID_NOT_NULL = "Reservation id" + CAN_NOT_BE_NULL;
 
     public <T> void throwExceptionIfObjectIsNull(T input, String message) {
         if (isNull(input)) {

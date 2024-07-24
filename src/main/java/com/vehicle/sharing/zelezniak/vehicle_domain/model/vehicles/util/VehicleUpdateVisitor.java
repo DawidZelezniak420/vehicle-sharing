@@ -13,6 +13,8 @@ public class VehicleUpdateVisitor {
                 .bodyType(newData.getBodyType())
                 .driveType(newData.getDriveType())
                 .pricePerDay(newData.getPricePerDay())
+                .status(newData.getStatus())
+                .deposit(newData.getDeposit())
                 .build();
     }
 
@@ -22,6 +24,8 @@ public class VehicleUpdateVisitor {
                 .vehicleInformation(newData.getVehicleInformation())
                 .motorcycleType(newData.getMotorcycleType())
                 .pricePerDay(newData.getPricePerDay())
+                .status(newData.getStatus())
+                .deposit(newData.getDeposit())
                 .build();
     }
 }

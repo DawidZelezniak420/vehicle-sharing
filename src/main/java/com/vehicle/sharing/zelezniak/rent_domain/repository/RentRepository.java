@@ -1,7 +1,29 @@
 package com.vehicle.sharing.zelezniak.rent_domain.repository;
 
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface RentRepository extends JpaRepository<Rent,Long> {
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Set;
+
+public interface RentRepository extends JpaRepository<Rent, Long> {
+
+    @Query("SELECT r FROM Rent r WHERE r.client.id = :id")
+    Collection<Rent> findAllByClientId(@Param("id") Long id);
+
+    @Query("SELECT v FROM Rent r JOIN r.vehicles v WHERE r.id = :id")
+    Collection<Vehicle> findVehiclesByRentId(@Param("id") Long id);
+
+    @Query("SELECT v.id FROM Rent r " +
+            "JOIN r.vehicles v " +
+            "WHERE r.rentInformation.rentDuration.rentalStart <= :end " +
+            "AND r.rentInformation.rentDuration.rentalEnd >= :start " +
+            "AND r.rentStatus = 'ACTIVE'")
+    Set<Long> unavailableVehicleIdsForRentInPeriod(
+            @Param("start") LocalDateTime start,
+            @Param("end")LocalDateTime end);
 }

@@ -43,10 +43,11 @@ public class CriteriaSearchExecutor {
                 year);
     }
 
-    public Collection<Vehicle> findByStatus(Object statusValue) {
+    public Collection<Vehicle> findByStatus(
+            Object statusValue) {
         String status = (String) statusValue;
         Vehicle.Status s = Vehicle.Status.getStatusFromString(
-                status.toLowerCase());
+                status);
         return vehicleRepository.findByStatus(s);
     }
 

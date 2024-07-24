@@ -1,7 +1,8 @@
-package com.vehicle.sharing.zelezniak.rent_domain.model.util;
+package com.vehicle.sharing.zelezniak.reservation_domain.service;
 
+import com.vehicle.sharing.zelezniak.common_value_objects.RentDuration;
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
-import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
+import com.vehicle.sharing.zelezniak.reservation_domain.model.Reservation;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.springframework.stereotype.Component;
 
@@ -11,27 +12,28 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 @Component
-public class RentCalculator {
+public class ReservationCalculator {
 
     private static final BigDecimal FIVE_PERCENT = BigDecimal.valueOf(0.05);
     private static final BigDecimal TEN_PERCENT = BigDecimal.valueOf(0.1);
     private static final int FIVE_DAYS = 5;
     private static final int TEN_DAYS = 10;
 
-    public Money calculateTotalCost(Rent rent) {
-        long duration = calculateRentDuration(rent);
+    public Money calculateCost(Reservation reservation) {
+        long duration = calculateRentDuration(reservation);
         BigDecimal discountPercentage = determineDiscountPercentage(
                 duration);
         Money basicRentalCost = calculateBasicCost(
-                duration, rent.getVehicles());
+                duration, reservation.getVehicles());
         return applyDiscount(basicRentalCost,
                 discountPercentage);
     }
 
-    private long calculateRentDuration(Rent rent) {
-        var information = rent.getRentInformation();
-        LocalDateTime rentalStart = information.getRentalStart();
-        LocalDateTime rentalEnd = information.getRentalEnd();
+    private long calculateRentDuration(Reservation reservation) {
+        var information = reservation.getRentInformation();
+        RentDuration rentDuration = information.getRentDuration();
+        LocalDateTime rentalStart = rentDuration.getRentalStart();
+        LocalDateTime rentalEnd = rentDuration.getRentalEnd();
         return ChronoUnit.DAYS.between(
                 rentalStart,rentalEnd);
     }

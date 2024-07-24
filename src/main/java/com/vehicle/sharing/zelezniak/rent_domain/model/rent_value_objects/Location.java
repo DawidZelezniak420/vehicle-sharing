@@ -1,6 +1,9 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects;
 
-import com.vehicle.sharing.zelezniak.common_value_objects.*;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.City;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.Country;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.District;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.Street;
 import jakarta.persistence.*;
 import lombok.*;
 

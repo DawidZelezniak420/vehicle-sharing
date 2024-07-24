@@ -40,6 +40,13 @@ public class VehicleValidator {
         checkVehiclesStatus(vehicles);
     }
 
+    public void checkIfVehiclesHasSameTypes(
+            Vehicle vehicleFromDb, Vehicle newData) {
+        if (typesAreDifferent(vehicleFromDb, newData)) {
+            throwException("Provided data does not match the vehicle type.");
+        }
+    }
+
     private void throwException(
             String message) {
         throw new IllegalArgumentException(message);
@@ -78,5 +85,12 @@ public class VehicleValidator {
 
     private boolean statusIsUnavailable(Vehicle vehicle) {
         return vehicle.getStatus() == Vehicle.Status.UNAVAILABLE;
+    }
+
+    private boolean typesAreDifferent(
+            Vehicle vehicleFromDb,
+            Vehicle newData) {
+        return !vehicleFromDb.getClass()
+                .equals(newData.getClass());
     }
 }
