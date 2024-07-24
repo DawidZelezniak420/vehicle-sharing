@@ -1,0 +1,42 @@
+package com.vehicle.sharing.zelezniak.vehicle_domain.service;
+
+import com.vehicle.sharing.zelezniak.common_value_objects.RentDuration;
+import com.vehicle.sharing.zelezniak.rent_domain.repository.RentRepository;
+import com.vehicle.sharing.zelezniak.reservation_domain.repository.ReservationRepository;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
+import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Set;
+
+@Component
+@RequiredArgsConstructor
+public class AvailableVehiclesRetriever {
+
+    private final RentRepository rentRepository;
+    private final ReservationRepository reservationRepository;
+    private final VehicleRepository vehicleRepository;
+
+    public Collection<Vehicle> findAvailableVehiclesInPeriod(
+            RentDuration duration) {
+        Set<Long> unavailableVehiclesIdsInPeriod = findUnavailableVehiclesIdsInPeriod(duration);
+        return vehicleRepository.findVehiclesByIdNotIn(
+                unavailableVehiclesIdsInPeriod);
+    }
+
+    private Set<Long> findUnavailableVehiclesIdsInPeriod(
+            RentDuration duration) {
+        LocalDateTime start = duration.getRentalStart();
+        LocalDateTime end = duration.getRentalEnd();
+        System.out.println("AAAAAAAAAAAAAAAAAAA" + duration);
+        Set<Long> unavailableForRents = rentRepository.unavailableVehicleIdsForRentInPeriod(start, end);
+        System.out.println("XXXXX"+unavailableForRents);
+        Set<Long> unavailableForReservations = reservationRepository.unavailableVehicleIdsForReservationInPeriod(start, end);
+        System.out.println("XXXXX"+unavailableForReservations);
+        unavailableForRents.addAll(unavailableForReservations);
+        return unavailableForRents;
+    }
+}
