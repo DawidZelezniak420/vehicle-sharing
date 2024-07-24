@@ -3,7 +3,7 @@ package com.vehicle.sharing.zelezniak.config;
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.common_value_objects.RentDuration;
 import com.vehicle.sharing.zelezniak.common_value_objects.address.*;
-import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.Location;
+import com.vehicle.sharing.zelezniak.common_value_objects.Location;
 import com.vehicle.sharing.zelezniak.common_value_objects.RentInformation;
 import com.vehicle.sharing.zelezniak.reservation_domain.model.Reservation;
 import com.vehicle.sharing.zelezniak.reservation_domain.model.util.ReservationCreationRequest;
@@ -51,13 +51,12 @@ public class ReservationCreator {
                         .rentalEnd(LocalDateTime.of(2024, 7, 10, 10, 0, 0))
                         .build())
                 .pickUpLocation(buildLocation())
+                .dropOffLocation(buildLocation())
                 .build();
     }
 
     private Location buildLocation() {
         return Location.builder()
-                .country(new Country("Poland"))
-                .district(new District("Lubelskie"))
                 .city(new City("Lublin"))
                 .street(new Street("Turystyczna"))
                 .additionalInformation("Next to the Leclerc mall")
