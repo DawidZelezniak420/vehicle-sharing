@@ -1,6 +1,6 @@
 package com.vehicle.sharing.zelezniak.reservation_domain.model.util;
 
-import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
+import com.vehicle.sharing.zelezniak.reservation_domain.model.Reservation;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -14,8 +14,8 @@ import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT
 @Builder
 public class ReservationCreationRequest {
 
-    @NotNull(message = "Rent" + CAN_NOT_BE_NULL)
-    private Rent rent;
+    @NotNull(message = "Reservation" + CAN_NOT_BE_NULL)
+    private Reservation reservation;
 
     @Min(value = 1, message = "Client id can not be lower than 1")
     private Long clientId;

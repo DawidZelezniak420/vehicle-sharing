@@ -1,18 +1,18 @@
-package com.vehicle.sharing.zelezniak.rent_domain.model.util;
+package com.vehicle.sharing.zelezniak.reservation_domain.model.util;
 
-import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
+import com.vehicle.sharing.zelezniak.reservation_domain.model.Reservation;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RentUpdateVisitor {
+public class ReservationUpdateVisitor {
 
-    public Rent updateRent(
-            Rent existingRent,
-            Rent newData) {
+    public Reservation updateReservation(
+            Reservation existingRent,
+            Reservation newData) {
         return existingRent.toBuilder()
-                .totalCost(newData.getTotalCost())
-                .rentInformation(newData.getRentInformation())
-                .rentStatus(newData.getRentStatus())
+                .estimatedCost(newData.getEstimatedCost())
+                .reservationStatus(newData.getReservationStatus())
+                .reservationStatus(newData.getReservationStatus())
                 .client(newData.getClient())
                 .vehicles(newData.getVehicles())
                 .build();
