@@ -1,16 +1,14 @@
 package com.vehicle.sharing.zelezniak.rent_domain.model;
 
 import com.vehicle.sharing.zelezniak.common_value_objects.Money;
-import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.RentInformation;
-import com.vehicle.sharing.zelezniak.rent_domain.model.util.RentUpdateVisitor;
+import com.vehicle.sharing.zelezniak.common_value_objects.RentInformation;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.*;
-
-import static java.util.Objects.isNull;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -19,7 +17,6 @@ import static java.util.Objects.isNull;
 @NoArgsConstructor
 @Table(name = "rents")
 @Builder(toBuilder = true)
-@ToString
 public class Rent {
 
     @Id
@@ -55,21 +52,10 @@ public class Rent {
             inverseJoinColumns = @JoinColumn(name = "vehicle_id"))
     private Set<Vehicle> vehicles;
 
-    public void addVehicles(Collection<Vehicle> vehicles) {
-        initializeVehiclesIfNull();
-        this.vehicles.addAll(vehicles);
-    }
-
-    public Rent updateRent(
-            RentUpdateVisitor updateVisitor,
-            Rent newData) {
-        return updateVisitor.updateRent(
-                this, newData);
-    }
-
     public enum RentStatus {
         ACTIVE,
-        COMPLETED
+        CANCELLED,
+        COMPLETED,
     }
 
     public boolean equals(Object object) {
@@ -90,9 +76,13 @@ public class Rent {
                 client);
     }
 
-    private void initializeVehiclesIfNull() {
-        if (isNull(vehicles)) {
-            vehicles = new HashSet<>();
-        }
+    public String toString() {
+        return "Rent{" +
+                "client=" + client +
+                ", id=" + id +
+                ", totalCost=" + totalCost +
+                ", rentInformation=" + rentInformation +
+                ", rentStatus=" + rentStatus +
+                '}';
     }
 }
