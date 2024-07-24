@@ -77,4 +77,11 @@ class VehicleValidatorTest {
                 () -> validator.throwExceptionIfVehicleExists(
                         vehicleWithId5Registration));
     }
+
+    @Test
+    void shouldTestVehicleTypesAreNotSame(){
+       assertThrows(IllegalArgumentException.class, ()->
+               validator.checkIfVehiclesHasSameTypes(
+                       vehicleWithId5,vehicleWithId6));
+    }
 }

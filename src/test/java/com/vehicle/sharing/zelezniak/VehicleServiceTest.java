@@ -1,6 +1,9 @@
 package com.vehicle.sharing.zelezniak;
 
+import com.vehicle.sharing.zelezniak.common_value_objects.Money;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
+import com.vehicle.sharing.zelezniak.config.RentDurationCreator;
+import com.vehicle.sharing.zelezniak.config.ReservationCreator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,6 +38,10 @@ class VehicleServiceTest {
     private DatabaseSetup databaseSetup;
     @Autowired
     private VehicleCreator vehicleCreator;
+    @Autowired
+    private ReservationCreator reservationCreator;
+    @Autowired
+    private RentDurationCreator durationCreator;
 
     @BeforeEach
     void setupDatabase() {
@@ -97,7 +105,7 @@ class VehicleServiceTest {
     }
 
     @Test
-    void shouldUpdateVehicle() {
+    void shouldUpdateCar() {
         Long vehicle5Id = vehicleWithId5.getId();
         Vehicle newData = vehicleCreator.buildVehicle5WithDifferentData();
 
@@ -123,7 +131,19 @@ class VehicleServiceTest {
 
         assertThrows(IllegalArgumentException.class, () ->
                 vehicleService.update(vehicleToUpdateId, newData));
+    }
 
+    @Test
+    void shouldUpdateMotorcycle() {
+        Long vehicle6Id = vehicleWithId6.getId();
+        Vehicle newData = vehicleWithId6;
+        newData.setStatus(Vehicle.Status.UNAVAILABLE);
+        newData.setDeposit(new Money(BigDecimal.valueOf(1000)));
+
+        vehicleService.update(vehicle6Id, newData);
+        Vehicle updated = vehicleService.findById(vehicle6Id);
+
+        assertEquals(newData, updated);
     }
 
     @Test
@@ -148,11 +168,15 @@ class VehicleServiceTest {
     }
 
     @Test
-    void shouldFindVehiclesByIDsSet(){
-        Set<Long> ids = new HashSet<>(Arrays.asList(5L,6L));
+    void shouldFindAvailableVehiclesByIDsSet() {
+        vehicleWithId5.setStatus(Vehicle.Status.UNAVAILABLE);
+        vehicleService.update(5L, vehicleWithId5);
+        Set<Long> ids = new HashSet<>(Arrays.asList(5L, 6L));
+
         Collection<Vehicle> vehicles = vehicleService.findVehiclesByIDs(ids);
 
-        assertTrue(vehicles.contains(vehicleWithId5));
+        assertEquals(1, vehicles.size());
+        assertFalse(vehicles.contains(vehicleWithId5));
         assertTrue(vehicles.contains(vehicleWithId6));
     }
 }

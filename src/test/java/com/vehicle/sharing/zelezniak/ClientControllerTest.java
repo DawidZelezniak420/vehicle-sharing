@@ -1,9 +1,9 @@
 package com.vehicle.sharing.zelezniak;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vehicle.sharing.zelezniak.common_value_objects.City;
-import com.vehicle.sharing.zelezniak.common_value_objects.Country;
-import com.vehicle.sharing.zelezniak.common_value_objects.Street;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.City;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.Country;
+import com.vehicle.sharing.zelezniak.common_value_objects.address.Street;
 import com.vehicle.sharing.zelezniak.config.ClientCreator;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;

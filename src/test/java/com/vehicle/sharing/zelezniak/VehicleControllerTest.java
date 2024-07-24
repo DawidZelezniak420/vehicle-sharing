@@ -104,6 +104,7 @@ class VehicleControllerTest {
                 .andExpect(jsonPath("$.[0].vehicleInformation.engine.displacement").value(engine.getDisplacement()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.engine.horsepower").value(engine.getHorsepower()))
                 .andExpect(jsonPath("$.[0].vehicleInformation.gearType").value(gearType))
+                .andExpect(jsonPath("$.[0].vehicleInformation.seatsNumber").value(info.getSeatsNumber()))
                 .andExpect(jsonPath("$.[0].pricePerDay.value").value(pricePerDay))
                 .andExpect(jsonPath("$.[0].status").value(status));
     }
@@ -135,6 +136,7 @@ class VehicleControllerTest {
                 .andExpect(jsonPath("$.vehicleInformation.engine.displacement").value(engine.getDisplacement()))
                 .andExpect(jsonPath("$.vehicleInformation.engine.horsepower").value(engine.getHorsepower()))
                 .andExpect(jsonPath("$.vehicleInformation.gearType").value(gearType))
+                .andExpect(jsonPath("$.vehicleInformation.seatsNumber").value(info.getSeatsNumber()))
                 .andExpect(jsonPath("$.pricePerDay.value").value(pricePerDay))
                 .andExpect(jsonPath("$.status").value(status));
     }
