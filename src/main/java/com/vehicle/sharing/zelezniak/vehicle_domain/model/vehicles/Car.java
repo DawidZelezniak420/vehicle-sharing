@@ -34,11 +34,10 @@ public class Car extends Vehicle {
     @Enumerated(EnumType.STRING)
     private BodyType bodyType;
 
-    public Car update(VehicleUpdateVisitor visitor,
-                      Vehicle newData) {
-        if (newData instanceof Car updated)
-            return visitor.update(this, updated);
-        throw new IllegalArgumentException("Provided data is not an instance of Car");
+    public  Car update(
+            VehicleUpdateVisitor visitor, Vehicle newData) {
+        return  visitor.update(
+                this, (Car) newData);
     }
 
     @Override

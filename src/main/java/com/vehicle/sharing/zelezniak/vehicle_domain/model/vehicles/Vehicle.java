@@ -48,6 +48,12 @@ public abstract class Vehicle {
             column = @Column(name = "price_per_day"))
     private Money pricePerDay;
 
+    @NotNull(message = "Deposit" + CAN_NOT_BE_NULL)
+    @AttributeOverride(
+            name = "value",
+            column = @Column(name = "deposit"))
+    private Money deposit;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -58,8 +64,8 @@ public abstract class Vehicle {
         return vehicleInformation.getRegistrationNumber();
     }
 
-    public abstract Vehicle update(VehicleUpdateVisitor visitor,
-                                   Vehicle newData);
+    public abstract  Vehicle update(
+            VehicleUpdateVisitor visitor, Vehicle newData);
 
     @Override
     public boolean equals(Object object) {
@@ -69,14 +75,16 @@ public abstract class Vehicle {
         return Objects.equals(id, vehicle.id)
                 && Objects.equals(vehicleInformation, vehicle.vehicleInformation)
                 && Objects.equals(pricePerDay, vehicle.pricePerDay)
+                && Objects.equals(deposit, vehicle.deposit)
                 && status == vehicle.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id,
-                vehicleInformation,
-                pricePerDay, status);
+        return Objects.hash(
+                id, vehicleInformation,
+                pricePerDay, deposit,
+                status);
     }
 
     @Override
@@ -85,6 +93,7 @@ public abstract class Vehicle {
                 "id=" + id +
                 ", vehicleInformation=" + vehicleInformation +
                 ", pricePerDay=" + pricePerDay +
+                ", deposit=" + deposit +
                 ", status=" + status +
                 '}';
     }
@@ -99,7 +108,7 @@ public abstract class Vehicle {
 
         public static Status getStatusFromString(String s) {
             for (Status status : Status.values()) {
-                if (s.equals(status.getValue())) {
+                if (s.equalsIgnoreCase(status.getValue())) {
                     return status;
                 }
             }

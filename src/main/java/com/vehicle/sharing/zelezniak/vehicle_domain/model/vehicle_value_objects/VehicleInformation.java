@@ -21,6 +21,9 @@ public class VehicleInformation {
     @NotBlank(message = "Model" + CAN_NOT_BE_BLANK)
     private final String model;
 
+    @Min(value = 1, message = "Seats number can not be lower than 1")
+    private final int seatsNumber;
+
     @Embedded
     @AttributeOverride(
             name = "registration",
