@@ -1,8 +1,7 @@
 package com.vehicle.sharing.zelezniak.common_value_objects;
 
 import com.vehicle.sharing.zelezniak.rent_domain.model.rent_value_objects.Location;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Embeddable
@@ -18,5 +17,18 @@ public class RentInformation {
     private final RentDuration rentDuration;
 
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city.cityName", column = @Column(name = "pick_up_city")),
+            @AttributeOverride(name = "street.streetName", column = @Column(name = "pick_up_street")),
+            @AttributeOverride(name = "additionalInformation", column = @Column(name = "pick_up_additional_info"))
+    })
     private final Location pickUpLocation;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city.cityName", column = @Column(name = "drop_off_city")),
+            @AttributeOverride(name = "street.streetName", column = @Column(name = "drop_off_street")),
+            @AttributeOverride(name = "additionalInformation", column = @Column(name = "drop_off_additional_info"))
+    })
+    private final Location dropOffLocation;
 }
