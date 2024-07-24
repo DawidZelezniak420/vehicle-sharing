@@ -1,4 +1,4 @@
-package com.vehicle.sharing.zelezniak.common_value_objects;
+package com.vehicle.sharing.zelezniak.common_value_objects.address;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
