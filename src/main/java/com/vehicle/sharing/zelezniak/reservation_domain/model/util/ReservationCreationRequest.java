@@ -1,4 +1,4 @@
-package com.vehicle.sharing.zelezniak.rent_domain.model.util;
+package com.vehicle.sharing.zelezniak.reservation_domain.model.util;
 
 import com.vehicle.sharing.zelezniak.rent_domain.model.Rent;
 import jakarta.validation.constraints.*;
@@ -12,7 +12,7 @@ import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RentCreationRequest {
+public class ReservationCreationRequest {
 
     @NotNull(message = "Rent" + CAN_NOT_BE_NULL)
     private Rent rent;
