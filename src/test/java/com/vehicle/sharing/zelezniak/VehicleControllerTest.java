@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
@@ -25,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.RoundingMode;
 import java.util.Collection;
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +51,7 @@ class VehicleControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private VehicleService vehicleOperations;
+    private VehicleService vehicleService;
     @Autowired
     private VehicleRepository vehicleRepository;
     @Autowired
@@ -88,25 +92,27 @@ class VehicleControllerTest {
         String status = vehicleWithId5.getStatus().toString();
 
         mockMvc.perform(get("/vehicles/")
-                        .header("Authorization", "Bearer " + userToken))
+                        .header("Authorization", "Bearer " + userToken)
+                        .param("page","0")
+                        .param("size","5"))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
-                .andExpect(jsonPath("$.[0].id").value(vehicleWithId5.getId()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.brand").value(info.getBrand()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.model").value(info.getModel()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.productionYear.year").value(productionYear.getYear()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.description").value(info.getDescription()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.cylinders").value(engine.getCylinders()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.engineType").value(engine.getEngineType()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.fuelType").value(fuelType))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.displacement").value(engine.getDisplacement()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.horsepower").value(engine.getHorsepower()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.gearType").value(gearType))
-                .andExpect(jsonPath("$.[0].vehicleInformation.seatsNumber").value(info.getSeatsNumber()))
-                .andExpect(jsonPath("$.[0].pricePerDay.value").value(pricePerDay))
-                .andExpect(jsonPath("$.[0].status").value(status));
+                .andExpect(jsonPath("$.content", hasSize(5)))
+                .andExpect(jsonPath("$.content[0].id").value(vehicleWithId5.getId()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.model").value(info.getModel()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.brand").value(info.getBrand()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.productionYear.year").value(productionYear.getYear()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.description").value(info.getDescription()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.cylinders").value(engine.getCylinders()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.engineType").value(engine.getEngineType()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.fuelType").value(fuelType))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.displacement").value(engine.getDisplacement()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.horsepower").value(engine.getHorsepower()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.gearType").value(gearType))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.seatsNumber").value(info.getSeatsNumber()))
+                .andExpect(jsonPath("$.content[0].pricePerDay.value").value(pricePerDay))
+                .andExpect(jsonPath("$.content[0].status").value(status));
     }
 
     @Test
@@ -190,7 +196,7 @@ class VehicleControllerTest {
                 .header("Authorization", "Bearer " + adminToken)
         ).andExpect(status().isOk());
 
-        Vehicle updated = vehicleOperations.findById(vehicle5Id);
+        Vehicle updated = vehicleService.findById(vehicle5Id);
         assertEquals(newData, updated);
     }
 
@@ -225,8 +231,11 @@ class VehicleControllerTest {
                 .andExpect(status().isNoContent());
 
         assertEquals(4, vehicleRepository.count());
-        Collection<Vehicle> all = vehicleOperations.findAll();
-        assertFalse(all.contains(vehicleWithId5));
+
+        Pageable pageable = PageRequest.of(0,5);
+        Page<Vehicle> page = vehicleService.findAll(pageable);
+        List<Vehicle> list = page.get().toList();
+        assertFalse(list.contains(vehicleWithId5));
     }
 
     @Test

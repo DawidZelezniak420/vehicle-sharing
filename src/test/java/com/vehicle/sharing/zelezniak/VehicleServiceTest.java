@@ -16,6 +16,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
@@ -56,14 +59,21 @@ class VehicleServiceTest {
     }
 
     @Test
+    void shouldReturnPageOf2Vehicles() {
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<Vehicle> page = vehicleService.findAll(pageable);
+        List<Vehicle> vehicles = page.get().toList();
+
+        assertEquals(2, vehicles.size());
+    }
+
+    @Test
     void shouldReturnAllVehicles() {
-        Collection<Vehicle> vehicles = vehicleService.findAll();
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Vehicle> page = vehicleService.findAll(pageable);
+        List<Vehicle> vehicles = page.get().toList();
         assertTrue(vehicles.contains(vehicleWithId5));
 
-        Vehicle byId = vehicleService.findById(
-                vehicleWithId6.getId());
-        System.out.println(byId);
-        System.out.println(vehicleWithId6);
         assertTrue(vehicles.contains(vehicleWithId6));
         assertEquals(5, vehicles.size());
     }
