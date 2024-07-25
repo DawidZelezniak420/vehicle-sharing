@@ -3,8 +3,11 @@ package com.vehicle.sharing.zelezniak.vehicle_domain.service;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.exception.CriteriaAccessException;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.CriteriaSearchRequest;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +23,7 @@ public class VehicleCriteriaSearch {
     private final InputValidator validator;
     private final CriteriaSearchExecutor searchExecutor;
     private final Map<CriteriaType,
-            Function<Object, Collection<Vehicle>>> criteriaMap;
+            Function<Object, Page<Vehicle>>> criteriaMap;
 
     public VehicleCriteriaSearch(
             InputValidator validator,
@@ -30,12 +33,17 @@ public class VehicleCriteriaSearch {
         criteriaMap = initializeCriteriaMap();
     }
 
-    public <T> Collection<Vehicle> findVehiclesByCriteria(
-            String criteriaType, T value) {
-        CriteriaType criteria = CriteriaType.getCriteriaFromString(criteriaType);
+    public <T> Page<Vehicle> findVehiclesByCriteria(
+            CriteriaSearchRequest<T> searchRequest,
+            Pageable pageable) {
+        CriteriaType criteria = CriteriaType.getCriteriaFromString(
+                searchRequest.getCriteriaName());
         checkIfUserCanUseSuchCriteria(criteria);
-        Function<Object, Collection<Vehicle>> queryFunction = criteriaMap.get(criteria);
-        return handleExecuteFunction(value, queryFunction);
+        Function<Object, Page<Vehicle>> queryFunction = criteriaMap.get(criteria);
+        searchExecutor.setPageable(pageable);
+        return handleExecuteFunction(
+                searchRequest.getValue(),
+                queryFunction);
     }
 
     private void checkIfUserCanUseSuchCriteria(CriteriaType criteria) {
@@ -60,22 +68,22 @@ public class VehicleCriteriaSearch {
         }
     }
 
-    @SneakyThrows
     private void throwCriteriaAccessException() {
         throw new CriteriaAccessException(
                 "Access denied: Only admins can search by registration number");
     }
 
-    private <T> Collection<Vehicle> handleExecuteFunction(
-            T value, Function<T, Collection<Vehicle>> queryFunction) {
+    private <T> Page<Vehicle> handleExecuteFunction(
+            T value, Function<T, Page<Vehicle>> queryFunction) {
         validator.throwExceptionIfObjectIsNull(queryFunction
                 , "The specified criterion is not supported");
         return queryFunction.apply(value);
     }
 
-    private <T> Map<CriteriaType,
-            Function<T, Collection<Vehicle>>> initializeCriteriaMap() {
-        Map<CriteriaType, Function<T, Collection<Vehicle>>> result = new EnumMap<>(CriteriaType.class);
+    private <T> Map<
+            CriteriaType,
+            Function<T, Page<Vehicle>>> initializeCriteriaMap() {
+        Map<CriteriaType, Function<T, Page<Vehicle>>> result = new EnumMap<>(CriteriaType.class);
         assert searchExecutor != null;
         result.put(CriteriaType.BRAND, searchExecutor::findByBrand);
         result.put(CriteriaType.MODEL, searchExecutor::findByModel);

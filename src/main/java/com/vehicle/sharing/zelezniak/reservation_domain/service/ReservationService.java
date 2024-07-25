@@ -39,7 +39,7 @@ public class ReservationService {
         checkIfNotNull(clientId,CLIENT_ID_NOT_NULL);
         newReservationService.addNewReservation(clientId);
     }
-    
+
     private <T> void checkIfNotNull(
             T input, String message) {
         inputValidator.throwExceptionIfObjectIsNull(

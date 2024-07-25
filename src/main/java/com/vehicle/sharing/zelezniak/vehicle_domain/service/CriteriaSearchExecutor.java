@@ -5,50 +5,52 @@ import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
-import java.util.Collection;
 
 @RequiredArgsConstructor
 @Component
+@Setter
 public class CriteriaSearchExecutor {
-
+    //to do: add method with try catch block to handle unexpected exceptions
+    public Pageable pageable;
     private static final String CAN_NOT_CONVERT = "Can not convert value to ";
-
     private final VehicleRepository vehicleRepository;
 
-    public Collection<Vehicle> findByBrand(
+    public Page<Vehicle> findByBrand(
             Object brand) {
         return vehicleRepository.findByVehicleInformationBrand(
-                (String) brand);
+                (String) brand,pageable);
     }
 
-    public Collection<Vehicle> findByModel(
+    public Page<Vehicle> findByModel(
             Object model) {
         return vehicleRepository.findByVehicleInformationModel(
-                (String) model);
+                (String) model,pageable);
     }
 
-    public Collection<Vehicle> findByRegistrationNumber(
+    public Page<Vehicle> findByRegistrationNumber(
             Object registration) {
         RegistrationNumber number = getRegistrationValue(registration);
         return vehicleRepository.findByVehicleInformationRegistrationNumber(
-                number);
+                number,pageable);
     }
 
-    public Collection<Vehicle> findByProductionYear(
+    public Page<Vehicle> findByProductionYear(
             Object productionYear) {
         Year year = new Year(getYearValue(productionYear));
         return vehicleRepository.findByVehicleInformationProductionYear(
-                year);
+                year,pageable);
     }
 
-    public Collection<Vehicle> findByStatus(
+    public Page<Vehicle> findByStatus(
             Object statusValue) {
         String status = (String) statusValue;
         Vehicle.Status s = Vehicle.Status.getStatusFromString(
                 status);
-        return vehicleRepository.findByStatus(s);
+        return vehicleRepository.findByStatus(s,pageable);
     }
 
     private <T> RegistrationNumber getRegistrationValue(

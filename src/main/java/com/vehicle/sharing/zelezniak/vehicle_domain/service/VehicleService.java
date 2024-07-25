@@ -3,9 +3,13 @@ package com.vehicle.sharing.zelezniak.vehicle_domain.service;
 import com.vehicle.sharing.zelezniak.common_value_objects.RentDuration;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.CriteriaSearchRequest;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +31,9 @@ public class VehicleService {
     private final AvailableVehiclesRetriever vehiclesRetriever;
 
     @Transactional(readOnly = true)
-    public Collection<Vehicle> findAll() {
-        return vehicleRepository.findAll();
+    public Page<Vehicle> findAll(
+            Pageable pageable) {
+        return vehicleRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -62,14 +67,14 @@ public class VehicleService {
     }
 
     @Transactional(readOnly = true)
-    public <T> Collection<Vehicle> findByCriteria(
-            String criteriaType, T value) {
-        checkIfNotNull(criteriaType,
-                "Criteria type" + CAN_NOT_BE_NULL);
-        checkIfNotNull(value,
-                "Searched value" + CAN_NOT_BE_NULL);
+    public <T> Page<Vehicle> findByCriteria(
+            CriteriaSearchRequest<T> searchRequest,
+            Pageable pageable) {
+        checkIfNotNull(searchRequest,
+                "Criteria search request"
+                        + CAN_NOT_BE_NULL);
         return criteriaSearch.findVehiclesByCriteria(
-                criteriaType, value);
+                searchRequest,pageable);
     }
 
     @Transactional(readOnly = true)
