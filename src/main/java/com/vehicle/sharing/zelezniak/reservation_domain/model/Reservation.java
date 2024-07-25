@@ -64,6 +64,7 @@ public class Reservation {
     private Set<Vehicle> vehicles;
 
     public enum ReservationStatus {
+        NEW,
         ACTIVE,
         CANCELLED,
         COMPLETED
