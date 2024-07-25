@@ -2,18 +2,20 @@ package com.vehicle.sharing.zelezniak.reservation_domain.service;
 
 import com.vehicle.sharing.zelezniak.rent_domain.service.RentService;
 import com.vehicle.sharing.zelezniak.reservation_domain.model.Reservation;
-import com.vehicle.sharing.zelezniak.reservation_domain.model.util.ReservationCreationRequest;
 import com.vehicle.sharing.zelezniak.reservation_domain.model.util.ReservationUpdateVisitor;
 import com.vehicle.sharing.zelezniak.reservation_domain.repository.ReservationRepository;
+import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
+import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
+import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.CLIENT_ID_NOT_NULL;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +24,10 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RentService rentService;
     private final ReservationUpdateVisitor updateVisitor;
-    private final ReservationBuilder reservationBuilder;
+    private final NewReservationService reservationBuilder;
     private final InputValidator inputValidator;
+    private final NewReservationService newReservationService;
+
 
     @Transactional(readOnly = true)
     public Collection<Reservation> findAll() {
@@ -31,21 +35,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void createReservation(
-            ReservationCreationRequest request) {
-        checkIfNotNull(request,
-                "Reservation creation request"
-                        + CAN_NOT_BE_NULL);
-        handleAddReservation(request);
+    public void createReservation(Long clientId) {
+        checkIfNotNull(clientId,CLIENT_ID_NOT_NULL);
+        newReservationService.addNewReservation(clientId);
     }
-
-    private void handleAddReservation(
-            ReservationCreationRequest request) {
-        Reservation reservation = reservationBuilder.buildReservation(
-                request);
-        reservationRepository.save(reservation);
-    }
-
+    
     private <T> void checkIfNotNull(
             T input, String message) {
         inputValidator.throwExceptionIfObjectIsNull(
