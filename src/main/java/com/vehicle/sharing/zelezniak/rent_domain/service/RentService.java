@@ -5,10 +5,11 @@ import com.vehicle.sharing.zelezniak.rent_domain.repository.RentRepository;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.NoSuchElementException;
 
 import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.*;
@@ -21,8 +22,8 @@ public class RentService {
     private final InputValidator inputValidator;
 
     @Transactional(readOnly = true)
-    public Collection<Rent> findAll() {
-        return rentRepository.findAll();
+    public Page<Rent> findAll(Pageable pageable) {
+        return rentRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
@@ -41,19 +42,21 @@ public class RentService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Rent> findAllByClientId(
-            Long id){
+    public Page<Rent> findAllByClientId(
+            Long id,
+            Pageable pageable){
         checkIfNotNull(id,
                 CLIENT_ID_NOT_NULL);
-        return rentRepository.findAllByClientId(id);
+        return rentRepository.findAllByClientId(id,pageable);
     }
 
     @Transactional(readOnly = true)
-    public Collection<Vehicle> findVehiclesByRentId(
-            Long id){
+    public Page<Vehicle> findVehiclesByRentId(
+            Long id,
+            Pageable pageable){
         checkIfNotNull(id,
                 RENT_ID_NOT_NULL);
-        return rentRepository.findVehiclesByRentId(id);
+        return rentRepository.findVehiclesByRentId(id,pageable);
     }
 
     private <T> void checkIfNotNull(
