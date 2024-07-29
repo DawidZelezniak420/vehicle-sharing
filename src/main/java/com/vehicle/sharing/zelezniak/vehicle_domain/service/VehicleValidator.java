@@ -35,11 +35,6 @@ public class VehicleValidator {
         }
     }
 
-    public void checkIfVehiclesAreActive(
-            Collection<Vehicle> vehicles) {
-        checkVehiclesStatus(vehicles);
-    }
-
     public void checkIfVehiclesHasSameTypes(
             Vehicle vehicleFromDb, Vehicle newData) {
         if (typesAreDifferent(vehicleFromDb, newData)) {
@@ -67,24 +62,6 @@ public class VehicleValidator {
             RegistrationNumber newDataRegistrationNumber) {
         return vehicleRepository.existsByVehicleInformationRegistrationNumber(
                 newDataRegistrationNumber);
-    }
-
-    private void checkVehiclesStatus(Collection<Vehicle> vehiclesFromDb) {
-        vehiclesFromDb.stream()
-                .filter(this::statusIsUnavailable)
-                .findFirst()
-                .ifPresent(vehicle -> {
-                    var information = vehicle.getVehicleInformation();
-                    throwException("Vehicle " + information.getBrand()
-                            + " " + information.getModel()
-                            + ",with registration number:"
-                            + vehicle.getRegistrationNumber()
-                            + " is unavailable.");
-                });
-    }
-
-    private boolean statusIsUnavailable(Vehicle vehicle) {
-        return vehicle.getStatus() == Vehicle.Status.UNAVAILABLE;
     }
 
     private boolean typesAreDifferent(
