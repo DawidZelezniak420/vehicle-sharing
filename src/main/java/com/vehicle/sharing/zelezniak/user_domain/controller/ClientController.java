@@ -3,11 +3,11 @@ package com.vehicle.sharing.zelezniak.user_domain.controller;
 import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
 
 @RestController
 @RequestMapping("/clients")
@@ -17,8 +17,8 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping("/")
-    public Collection<Client> findAll() {
-        return clientService.findAll();
+    public Page<Client> findAll(Pageable pageable) {
+        return clientService.findAll(pageable);
     }
 
     @GetMapping("/{id}")

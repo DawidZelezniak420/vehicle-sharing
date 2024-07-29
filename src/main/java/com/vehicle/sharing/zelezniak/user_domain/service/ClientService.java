@@ -4,10 +4,11 @@ import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
 import com.vehicle.sharing.zelezniak.user_domain.repository.ClientRepository;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.*;
@@ -21,8 +22,8 @@ public class ClientService {
     private final InputValidator inputValidator;
 
     @Transactional(readOnly = true)
-    public List<Client> findAll() {
-        return clientRepository.findAll();
+    public Page<Client> findAll(Pageable pageable) {
+        return clientRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
