@@ -12,10 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AvailableVehiclesRetrieverTest {
 
     private static Map<Long, Vehicle> vehicleMap;
+    private static Pageable pageable = PageRequest.of(0, 5);
 
     @Autowired
     private DatabaseSetup databaseSetup;
@@ -62,7 +67,9 @@ class AvailableVehiclesRetrieverTest {
     void shouldFindAvailableVehiclesAvailableInPeriod1() {
         RentDuration duration = durationCreator.createDuration1();
 
-        Collection<Vehicle> availableVehicles = vehiclesRetriever.findAvailableVehiclesInPeriod(duration);
+        Page<Vehicle> page = vehiclesRetriever.findAvailableVehiclesInPeriod(duration, pageable);
+        List<Vehicle> availableVehicles = page.get().toList();
+
         assertEquals(0, availableVehicles.size());
     }
 
@@ -70,10 +77,11 @@ class AvailableVehiclesRetrieverTest {
     void shouldFindAvailableVehiclesAvailableInPeriod2() {
         Vehicle motorcycle = vehicleCreator.createMotorcycleWithId6();
         motorcycle.setStatus(Vehicle.Status.UNAVAILABLE);
-        vehicleService.update(6L,motorcycle);
+        vehicleService.update(6L, motorcycle);
         RentDuration duration = durationCreator.createDuration2();
 
-        Collection<Vehicle> availableVehicles = vehiclesRetriever.findAvailableVehiclesInPeriod(duration);
+        Page<Vehicle> page = vehiclesRetriever.findAvailableVehiclesInPeriod(duration, pageable);
+        List<Vehicle> availableVehicles = page.get().toList();
 
         assertEquals(3, availableVehicles.size());
         assertFalse(availableVehicles.contains(vehicleMap.get(5L)));
@@ -87,7 +95,8 @@ class AvailableVehiclesRetrieverTest {
     void shouldFindAvailableVehiclesAvailableInPeriod3() {
         RentDuration duration = durationCreator.createDuration3();
 
-        Collection<Vehicle> availableVehicles = vehiclesRetriever.findAvailableVehiclesInPeriod(duration);
+        Page<Vehicle> page = vehiclesRetriever.findAvailableVehiclesInPeriod(duration, pageable);
+        List<Vehicle> availableVehicles = page.get().toList();
 
         assertEquals(1, availableVehicles.size());
         assertTrue(availableVehicles.contains(vehicleMap.get(5L)));

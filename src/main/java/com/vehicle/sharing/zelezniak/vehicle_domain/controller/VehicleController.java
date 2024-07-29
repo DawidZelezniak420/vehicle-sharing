@@ -1,13 +1,14 @@
 package com.vehicle.sharing.zelezniak.vehicle_domain.controller;
 
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.CriteriaSearchRequest;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collection;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,8 +18,10 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     @GetMapping("/")
-    public Collection<Vehicle> findAll() {
-        return vehicleService.findAll();
+    public Page<Vehicle> findAll(
+            Pageable pageable) {
+        return vehicleService.findAll(
+                pageable);
     }
 
     @GetMapping("/{id}")
@@ -48,11 +51,11 @@ public class VehicleController {
         vehicleService.delete(id);
     }
 
-    @GetMapping("/criteria")
-    public <T> Collection<Vehicle> findByCriteria(
-                 @RequestParam String criteriaName,
-                    @RequestParam T value) {
+    @PostMapping("/criteria")
+    public <T> Page<Vehicle> findByCriteria(
+            @RequestBody CriteriaSearchRequest<T> searchRequest,
+            Pageable pageable) {
         return vehicleService.findByCriteria(
-                         criteriaName, value);
+                searchRequest,pageable);
     }
 }

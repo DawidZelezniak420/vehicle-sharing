@@ -8,14 +8,11 @@ import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.VehicleU
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import static com.vehicle.sharing.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
 
@@ -78,19 +75,13 @@ public class VehicleService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Vehicle> findVehiclesByIDs(
-            Set<Long> vehiclesIds) {
-        return vehicleRepository.findVehiclesByIdIn(
-                vehiclesIds);
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<Vehicle> findAvailableVehicles(
-            RentDuration duration) {
+    public Page<Vehicle> findAvailableVehicles(
+            RentDuration duration,
+            Pageable pageable) {
         checkIfNotNull(duration,
                 "Duration"+ CAN_NOT_BE_NULL);
              return vehiclesRetriever.findAvailableVehiclesInPeriod(
-                     duration);
+                     duration,pageable);
     }
 
     private <T> void checkIfNotNull(

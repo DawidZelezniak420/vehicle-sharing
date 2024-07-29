@@ -12,10 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,19 +28,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReservationServiceTest {
 
     private static Reservation reservationWithId5;
+    private static Pageable pageable = PageRequest.of(0,5);
 
     @Autowired
     private DatabaseSetup databaseSetup;
-
     @Autowired
     private ReservationCreator reservationCreator;
-
     @Autowired
     private ReservationService reservationService;
-
     @Autowired
     private ReservationRepository reservationRepository;
-
     @Autowired
     private RentDurationCreator durationCreator;
 
@@ -53,9 +54,10 @@ class ReservationServiceTest {
 
     @Test
     void shouldFindAllReservations() {
-        Collection<Reservation> all = reservationService.findAll();
-        assertTrue(all.contains(reservationWithId5));
-        assertEquals(5, all.size());
+        Page<Reservation> all = reservationService.findAll(pageable);
+        List<Reservation> reservations = all.get().toList();
+        assertTrue(reservations.contains(reservationWithId5));
+        assertEquals(5, reservations.size());
     }
 
     @Test
