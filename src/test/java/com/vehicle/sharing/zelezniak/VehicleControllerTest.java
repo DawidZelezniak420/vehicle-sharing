@@ -42,6 +42,7 @@ class VehicleControllerTest {
 
     private static Vehicle vehicleWithId5;
     private static Vehicle vehicleWithId6;
+    private static Pageable pageable = PageRequest.of(0,5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
@@ -93,8 +94,8 @@ class VehicleControllerTest {
 
         mockMvc.perform(get("/vehicles/")
                         .header("Authorization", "Bearer " + userToken)
-                        .param("page","0")
-                        .param("size","5"))
+                .param("page",String.valueOf(pageable.getPageNumber()))
+                .param("size",String.valueOf(pageable.getPageSize())))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(5)))

@@ -15,6 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collection;
@@ -28,22 +31,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RentServiceTest {
 
     private static Rent rentWithId5;
+    private static Pageable pageable = PageRequest.of(0, 5);
 
     @Autowired
     private DatabaseSetup databaseSetup;
-
     @Autowired
     private RentCreator rentCreator;
-
     @Autowired
     private RentService rentService;
-
     @Autowired
     private VehicleCreator vehicleCreator;
-
     @Autowired
     private RentRepository rentRepository;
-
     @Autowired
     private RentDurationCreator durationCreator;
 
@@ -60,12 +59,13 @@ class RentServiceTest {
 
     @Test
     void shouldReturnAllRents() {
-        List<Rent> all = (List<Rent>) rentService.findAll();
-        Rent rentFromDb = all.get(0);
+        Page<Rent> page =  rentService.findAll(pageable);
+        List<Rent> rents = page.get().toList();
+        Rent rentFromDb = rents.get(0);
 
-        all.forEach(Assertions::assertNotNull);
+        rents.forEach(Assertions::assertNotNull);
         assertEquals(rentWithId5, rentFromDb);
-        assertEquals(3, all.size());
+        assertEquals(3, rents.size());
     }
 
     @Test
@@ -91,8 +91,9 @@ class RentServiceTest {
     void shouldFindAllClientRentsByClientId() {
         Long client5Id = 5L;
 
-        List<Rent> allByClient5Id = (List<Rent>)
-                rentService.findAllByClientId(client5Id);
+        Page<Rent> page = rentService.findAllByClientId(
+                client5Id,pageable);
+        List<Rent> allByClient5Id = page.get().toList();
 
         assertEquals(rentWithId5, allByClient5Id.get(0));
     }
@@ -102,10 +103,13 @@ class RentServiceTest {
         Long rent5Id = 5L;
         Long rent6Id = 6L;
 
-        List<Vehicle> vehiclesByRent5Id = (List<Vehicle>)
-                rentService.findVehiclesByRentId(rent5Id);
-        List<Vehicle> vehiclesByRent6Id = (List<Vehicle>)
-                rentService.findVehiclesByRentId(rent6Id);
+        Page<Vehicle> p1 = rentService.findVehiclesByRentId(
+                rent5Id,pageable);
+        List<Vehicle> vehiclesByRent5Id = p1.get().toList();
+
+        Page<Vehicle> p2 = rentService.findVehiclesByRentId(
+                rent6Id,pageable);
+        List<Vehicle> vehiclesByRent6Id = p2.get().toList();
 
         assertEquals(vehicleCreator.createCarWithId5(),
                 vehiclesByRent5Id.get(0));

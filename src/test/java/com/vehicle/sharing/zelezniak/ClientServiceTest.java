@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
@@ -27,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientServiceTest {
 
     private static Client clientWithId5;
+    private static Pageable pageable = PageRequest.of(0, 5);
 
     @Autowired
     private Client client;
@@ -53,7 +57,9 @@ class ClientServiceTest {
 
     @Test
     void shouldReturnAllClients() {
-        List<Client> clients = clientService.findAll();
+        Page<Client> page = clientService.findAll(pageable);
+        List<Client> clients = page.get().toList();
+
         assertTrue(clients.contains(clientWithId5));
         assertEquals(3, clients.size());
 
@@ -110,9 +116,14 @@ class ClientServiceTest {
 
     @Test
     void shouldDeleteClient() {
-        assertEquals(3, clientService.findAll().size());
+        Page<Client> page = clientService.findAll(pageable);
+        List<Client> clients = page.get().toList();
+        assertEquals(3, clients.size());
+
         clientService.delete(clientWithId5.getId());
-        List<Client> clients = clientService.findAll();
+
+        page = clientService.findAll(pageable);
+        clients = page.get().toList();
         assertEquals(2, clients.size());
         assertFalse(clients.contains(clientWithId5));
     }

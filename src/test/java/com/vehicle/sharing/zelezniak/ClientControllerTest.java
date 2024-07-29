@@ -20,10 +20,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -36,10 +40,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class ClientControllerTest {
 
+    private static Client clientWithId5;
+    private static Pageable pageable = PageRequest.of(0, 5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
-    private static Client clientWithId5;
 
     @Autowired
     private MockMvc mockMvc;
@@ -73,18 +78,20 @@ class ClientControllerTest {
         var credentials = clientWithId5.getCredentials();
         var name = clientWithId5.getName();
         mockMvc.perform(get("/clients/")
+                        .param("page",String.valueOf(pageable.getPageNumber()))
+                        .param("size",String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(3)))
-                .andExpect(jsonPath("$.[0].id").value(clientWithId5.getId()))
-                .andExpect(jsonPath("$.[0].credentials.email").value(credentials.getEmail()))
-                .andExpect(jsonPath("$.[0].credentials.password").value(credentials.getPassword()))
-                .andExpect(jsonPath("$.[0].name.firstName").value(name.getFirstName()))
-                .andExpect(jsonPath("$.[0].name.lastName").value(name.getLastName()))
-                .andExpect(jsonPath("$.[0].address.street.streetName").value(clientWithId5.getAddress().getStreet().getStreetName()))
-                .andExpect(jsonPath("$.[0].roles", hasSize(1)))
-                .andExpect(jsonPath("$.[0].roles[0].roleName").value(USER));
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].id").value(clientWithId5.getId()))
+                .andExpect(jsonPath("$.content[0].credentials.email").value(credentials.getEmail()))
+                .andExpect(jsonPath("$.content[0].credentials.password").value(credentials.getPassword()))
+                .andExpect(jsonPath("$.content[0].name.firstName").value(name.getFirstName()))
+                .andExpect(jsonPath("$.content[0].name.lastName").value(name.getLastName()))
+                .andExpect(jsonPath("$.content[0].address.street.streetName").value(clientWithId5.getAddress().getStreet().getStreetName()))
+                .andExpect(jsonPath("$.content[0].roles", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].roles[0].roleName").value(USER));
 
     }
 
@@ -144,11 +151,17 @@ class ClientControllerTest {
     @Test
     void shouldDeleteClient() throws Exception {
         Long existingClientId = 5L;
-        assertEquals(3, clientService.findAll().size());
+        Page<Client> page = clientService.findAll(pageable);
+        List<Client> clients = page.get().toList();
+
+        assertEquals(3, clients.size());
         mockMvc.perform(delete("/clients/delete/{id}", existingClientId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNoContent());
-        assertEquals(2, clientService.findAll().size());
+
+        page = clientService.findAll(pageable);
+        clients = page.get().toList();
+        assertEquals(2, clients.size());
     }
 
     @Test

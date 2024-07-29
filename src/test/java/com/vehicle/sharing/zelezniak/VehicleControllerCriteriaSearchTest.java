@@ -1,5 +1,6 @@
 package com.vehicle.sharing.zelezniak;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vehicle.sharing.zelezniak.config.DatabaseSetup;
 import com.vehicle.sharing.zelezniak.config.TokenGenerator;
 import com.vehicle.sharing.zelezniak.config.VehicleCreator;
@@ -7,6 +8,7 @@ import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
 import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.Vehicle;
+import com.vehicle.sharing.zelezniak.vehicle_domain.model.vehicles.util.CriteriaSearchRequest;
 import com.vehicle.sharing.zelezniak.vehicle_domain.repository.VehicleRepository;
 import com.vehicle.sharing.zelezniak.vehicle_domain.service.VehicleService;
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.RoundingMode;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -32,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class VehicleControllerCriteriaSearchTest {
 
     private static Vehicle vehicleWithId5;
+    private static Pageable pageable = PageRequest.of(0, 5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String USER = "USER";
     private static final String ADMIN = "ADMIN";
@@ -39,7 +44,7 @@ class VehicleControllerCriteriaSearchTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private VehicleService vehicleOperations;
+    private VehicleService vehicleService;
     @Autowired
     private VehicleRepository vehicleRepository;
     @Autowired
@@ -48,6 +53,8 @@ class VehicleControllerCriteriaSearchTest {
     private VehicleCreator vehicleCreator;
     @Autowired
     private TokenGenerator tokenGenerator;
+    @Autowired
+    private ObjectMapper mapper;
 
     @BeforeEach
     void setupDatabase() {
@@ -65,48 +72,52 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "model";
         int resultSize = 1;
         String value = vehicleWithId5.getVehicleInformation().getModel();
-        performCriteriaRequest(criteria, resultSize, vehicleWithId5, value, USER);
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+                resultSize, vehicleWithId5, USER);
     }
 
     @Test
     void shouldFindVehiclesByCriteriaBrand() throws Exception {
-        Vehicle vehicle7 = vehicleOperations.findById(7L);
+        Vehicle vehicle7 = vehicleService.findById(7L);
         var info = vehicle7.getVehicleInformation();
         String criteria = "brand";
         int resultSize = 1;
         String value = info.getBrand();
-        performCriteriaRequest(criteria, resultSize, vehicle7, value, USER);
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+                resultSize, vehicle7, USER);
     }
 
     @Test
     @DisplayName("Find vehicles by registration number when role is ADMIN")
     void shouldFindVehiclesByCriteriaRegistrationNumber() throws Exception {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        Vehicle vehicle8 = vehicleService.findById(8L);
         String criteria = "registration number";
         int resultSize = 1;
         RegistrationNumber registrationNumber = vehicle8.getRegistrationNumber();
         String value = registrationNumber.getRegistration();
-        performCriteriaRequest(criteria, resultSize, vehicle8, value, ADMIN);
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+                resultSize, vehicle8, ADMIN);
     }
 
     @Test
     @DisplayName("Finding vehicles with role USER should throw exception")
     void shouldNotFindVehiclesByCriteriaRegistrationNumber() throws Exception {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        Vehicle vehicle8 = vehicleService.findById(8L);
         String criteria = "registration number";
         RegistrationNumber registrationNumber = vehicle8.getRegistrationNumber();
         String value = registrationNumber.getRegistration();
-        performCriteriaRegistrationNumber(criteria, value);
+        performCriteriaRegistrationNumber(new CriteriaSearchRequest<>(criteria,value));
     }
 
     @Test
     void shouldFindVehiclesByCriteriaProductionYear() throws Exception {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        Vehicle vehicle8 = vehicleService.findById(8L);
         var info = vehicle8.getVehicleInformation();
         String criteria = "production year";
         int resultSize = 2;
         String value = String.valueOf(info.getProductionYear().getYear());
-        performCriteriaRequest(criteria, resultSize, vehicle8, value, USER);
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value)
+                , resultSize, vehicle8, USER);
     }
 
     @Test
@@ -114,9 +125,12 @@ class VehicleControllerCriteriaSearchTest {
         String userToken = tokenGenerator.generateToken(USER);
         String criteria = "wheels number";
         String value = "4";
-        mockMvc.perform(get("/vehicles/criteria")
-                        .param("criteriaName", criteria)
-                        .param("value", value)
+        var request = new CriteriaSearchRequest<>(criteria, value);
+        mockMvc.perform(post("/vehicles/criteria")
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request))
+                        .param("page",String.valueOf(pageable.getPageNumber()))
+                        .param("size",String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
@@ -125,31 +139,33 @@ class VehicleControllerCriteriaSearchTest {
 
     @Test
     void shouldFindVehiclesByCriteriaStatusAvailable() throws Exception {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        Vehicle vehicle8 = vehicleService.findById(8L);
         vehicle8.setStatus(Vehicle.Status.UNAVAILABLE);
         vehicleRepository.save(vehicle8);
 
         String criteria = "status";
         int resultSize = 4;
         String value = "available";
-        performCriteriaRequest(criteria, resultSize, vehicleWithId5, value, USER);
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+                resultSize, vehicleWithId5, USER);
     }
 
     @Test
     void shouldFindVehiclesByCriteriaStatusUnavailable() throws Exception {
-        Vehicle vehicle8 = vehicleOperations.findById(8L);
+        Vehicle vehicle8 = vehicleService.findById(8L);
         vehicle8.setStatus(Vehicle.Status.UNAVAILABLE);
         vehicleRepository.save(vehicle8);
 
         String criteria = "status";
         int resultSize = 1;
         String value = "unavailable";
-        performCriteriaRequest(criteria, resultSize, vehicle8, value, USER);
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+                resultSize, vehicle8, USER);
     }
 
-    private void performCriteriaRequest(
-            String criteria, int resultSize,
-            Vehicle result, String value, String role)
+    private <T> void performCriteriaRequest(
+            CriteriaSearchRequest<T> searchRequest,
+            int resultSize, Vehicle result, String role)
             throws Exception {
         String userToken = tokenGenerator.generateToken(role);
         var info = result.getVehicleInformation();
@@ -161,37 +177,41 @@ class VehicleControllerCriteriaSearchTest {
                 .getValue().setScale(2, RoundingMode.HALF_UP).doubleValue();
         String status = result.getStatus().toString();
 
-        mockMvc.perform(get("/vehicles/criteria")
-                        .param("criteriaName", criteria)
-                        .param("value", value)
+        mockMvc.perform(post("/vehicles/criteria")
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(searchRequest))
+                        .param("page",String.valueOf(pageable.getPageNumber()))
+                        .param("size",String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(resultSize)))
-                .andExpect(jsonPath("$.[0].id").value(result.getId()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.brand").value(info.getBrand()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.model").value(info.getModel()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.productionYear.year").value(productionYear.getYear()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.description").value(info.getDescription()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.cylinders").value(engine.getCylinders()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.engineType").value(engine.getEngineType()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.fuelType").value(fuelType))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.displacement").value(engine.getDisplacement()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.engine.horsepower").value(engine.getHorsepower()))
-                .andExpect(jsonPath("$.[0].vehicleInformation.gearType").value(gearType))
-                .andExpect(jsonPath("$.[0].vehicleInformation.seatsNumber").value(info.getSeatsNumber()))
-                .andExpect(jsonPath("$.[0].pricePerDay.value").value(pricePerDay))
-                .andExpect(jsonPath("$.[0].status").value(status));
+                .andExpect(jsonPath("$.content", hasSize(resultSize)))
+                .andExpect(jsonPath("$.content[0].id").value(result.getId()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.brand").value(info.getBrand()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.model").value(info.getModel()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.registrationNumber.registration").value(info.getRegistrationNumber().getRegistration()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.productionYear.year").value(productionYear.getYear()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.description").value(info.getDescription()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.cylinders").value(engine.getCylinders()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.engineType").value(engine.getEngineType()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.fuelType").value(fuelType))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.displacement").value(engine.getDisplacement()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.engine.horsepower").value(engine.getHorsepower()))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.gearType").value(gearType))
+                .andExpect(jsonPath("$.content[0].vehicleInformation.seatsNumber").value(info.getSeatsNumber()))
+                .andExpect(jsonPath("$.content[0].pricePerDay.value").value(pricePerDay))
+                .andExpect(jsonPath("$.content[0].status").value(status));
     }
 
-    private void performCriteriaRegistrationNumber(
-            String criteria, String value)
+    private <T>void performCriteriaRegistrationNumber(
+            CriteriaSearchRequest<T> searchRequest)
             throws Exception {
         String userToken = tokenGenerator.generateToken(USER);
-        mockMvc.perform(get("/vehicles/criteria")
-                        .param("criteriaName", criteria)
-                        .param("value", value)
+        mockMvc.perform(post("/vehicles/criteria")
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(searchRequest))
+                        .param("page",String.valueOf(pageable.getPageNumber()))
+                        .param("size",String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isForbidden())

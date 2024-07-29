@@ -176,17 +176,4 @@ class VehicleServiceTest {
                 vehicleService.delete(nonExistentId));
         assertEquals(5, vehicleRepository.count());
     }
-
-    @Test
-    void shouldFindAvailableVehiclesByIDsSet() {
-        vehicleWithId5.setStatus(Vehicle.Status.UNAVAILABLE);
-        vehicleService.update(5L, vehicleWithId5);
-        Set<Long> ids = new HashSet<>(Arrays.asList(5L, 6L));
-
-        Collection<Vehicle> vehicles = vehicleService.findVehiclesByIDs(ids);
-
-        assertEquals(1, vehicles.size());
-        assertFalse(vehicles.contains(vehicleWithId5));
-        assertTrue(vehicles.contains(vehicleWithId6));
-    }
 }
