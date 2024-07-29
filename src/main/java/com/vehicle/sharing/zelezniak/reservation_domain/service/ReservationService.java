@@ -4,16 +4,12 @@ import com.vehicle.sharing.zelezniak.rent_domain.service.RentService;
 import com.vehicle.sharing.zelezniak.reservation_domain.model.Reservation;
 import com.vehicle.sharing.zelezniak.reservation_domain.model.util.ReservationUpdateVisitor;
 import com.vehicle.sharing.zelezniak.reservation_domain.repository.ReservationRepository;
-import com.vehicle.sharing.zelezniak.user_domain.model.client.Client;
-import com.vehicle.sharing.zelezniak.user_domain.service.ClientService;
 import com.vehicle.sharing.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.vehicle.sharing.zelezniak.util.validation.InputValidator.CLIENT_ID_NOT_NULL;
 
@@ -30,8 +26,8 @@ public class ReservationService {
 
 
     @Transactional(readOnly = true)
-    public Collection<Reservation> findAll() {
-        return reservationRepository.findAll();
+    public Page<Reservation> findAll(Pageable pageable) {
+        return reservationRepository.findAll(pageable);
     }
 
     @Transactional

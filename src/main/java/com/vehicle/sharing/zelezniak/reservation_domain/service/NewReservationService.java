@@ -32,13 +32,13 @@ class NewReservationService {
     }
 
     public Reservation updateReservation(
-            Long id,Reservation newData){
-     checkIfKeyExists(id);
-     newReservations.put(id,newData);
-     return newData;
+            Long id, Reservation newData) {
+        checkIfKeyExists(id);
+        newReservations.put(id, newData);
+        return newData;
     }
 
-    public void removeReservation(Long id){
+    public void removeReservation(Long id) {
         newReservations.remove(id);
     }
 
@@ -52,7 +52,7 @@ class NewReservationService {
     }
 
     private void checkIfKeyExists(Long id) {
-        if(!newReservations.containsKey(id)){
+        if (!newReservations.containsKey(id)) {
             throw new IllegalArgumentException(
                     "Reservation not found");
         }
