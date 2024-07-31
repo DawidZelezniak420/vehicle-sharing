@@ -37,8 +37,6 @@ class AuthenticationControllerTest {
             MediaType.APPLICATION_JSON;
 
     @Autowired
-    private Client client;
-    @Autowired
     private AuthenticationService authService;
     @Autowired
     private ClientRepository clientRepository;
@@ -49,8 +47,11 @@ class AuthenticationControllerTest {
     @Autowired
     private DatabaseSetup databaseSetup;
 
+    private Client client;
+
     @BeforeEach
     void createUser() {
+        client = new Client();
         client.setName(new UserName("Uncle", "Bob"));
         client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
         client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());

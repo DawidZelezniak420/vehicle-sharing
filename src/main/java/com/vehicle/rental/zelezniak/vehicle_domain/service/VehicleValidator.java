@@ -40,14 +40,14 @@ public class VehicleValidator {
         }
     }
 
-    private void throwException(
-            String message) {
-        throw new IllegalArgumentException(message);
-    }
-
     private String createMessage(
             RegistrationNumber n) {
         return "Vehicle with registration number : " + n.getRegistration() + " already exists";
+    }
+
+    private void throwException(
+            String message) {
+        throw new IllegalArgumentException(message);
     }
 
     private boolean registrationsAreNotSame(

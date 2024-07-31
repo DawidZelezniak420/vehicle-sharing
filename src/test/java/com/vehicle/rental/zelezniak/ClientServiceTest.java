@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
@@ -36,8 +35,6 @@ class ClientServiceTest {
     private Client client;
     @Autowired
     private ClientService clientService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @Autowired
     private DatabaseSetup databaseSetup;
     @Autowired

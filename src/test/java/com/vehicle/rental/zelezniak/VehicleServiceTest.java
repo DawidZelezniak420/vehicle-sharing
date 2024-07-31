@@ -2,8 +2,6 @@ package com.vehicle.rental.zelezniak;
 
 import com.vehicle.rental.zelezniak.common_value_objects.Money;
 import com.vehicle.rental.zelezniak.config.DatabaseSetup;
-import com.vehicle.rental.zelezniak.config.RentDurationCreator;
-import com.vehicle.rental.zelezniak.config.ReservationCreator;
 import com.vehicle.rental.zelezniak.config.VehicleCreator;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
@@ -22,7 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,10 +40,6 @@ class VehicleServiceTest {
     private DatabaseSetup databaseSetup;
     @Autowired
     private VehicleCreator vehicleCreator;
-    @Autowired
-    private ReservationCreator reservationCreator;
-    @Autowired
-    private RentDurationCreator durationCreator;
 
     @BeforeEach
     void setupDatabase() {

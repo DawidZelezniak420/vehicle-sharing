@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vehicle.rental.zelezniak.config.DatabaseSetup;
 import com.vehicle.rental.zelezniak.config.TokenGenerator;
 import com.vehicle.rental.zelezniak.config.VehicleCreator;
-import com.vehicle.rental.zelezniak.user_domain.service.authentication.JWTGenerator;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.Engine;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.Year;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -54,10 +52,6 @@ class VehicleControllerTest {
     private VehicleService vehicleService;
     @Autowired
     private VehicleRepository vehicleRepository;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private JWTGenerator jwtGenerator;
     @Autowired
     private VehicleCreator vehicleCreator;
     @Autowired

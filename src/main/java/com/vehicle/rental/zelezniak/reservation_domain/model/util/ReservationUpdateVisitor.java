@@ -12,7 +12,7 @@ public class ReservationUpdateVisitor {
         return existingRent.toBuilder()
                 .estimatedCost(newData.getEstimatedCost())
                 .reservationStatus(newData.getReservationStatus())
-                .reservationStatus(newData.getReservationStatus())
+                .rentInformation(newData.getRentInformation())
                 .client(newData.getClient())
                 .vehicles(newData.getVehicles())
                 .build();
