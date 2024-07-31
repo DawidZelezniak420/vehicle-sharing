@@ -11,7 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
 import static com.vehicle.rental.zelezniak.util.validation.InputValidator.CLIENT_ID_NOT_NULL;
+import static com.vehicle.rental.zelezniak.util.validation.InputValidator.RESERVATION_ID_NOT_NULL;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +22,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final RentService rentService;
-    private final ReservationUpdateVisitor updateVisitor;
+
     private final NewReservationService reservationBuilder;
     private final InputValidator inputValidator;
     private final NewReservationService newReservationService;
@@ -32,13 +35,25 @@ public class ReservationService {
 
     @Transactional
     public void createReservation(Long clientId) {
-        checkIfNotNull(clientId,CLIENT_ID_NOT_NULL);
+        checkIfNotNull(clientId, CLIENT_ID_NOT_NULL);
         newReservationService.addNewReservation(clientId);
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation findById(Long id) {
+        checkIfNotNull(id, RESERVATION_ID_NOT_NULL);
+        return findReservation(id);
     }
 
     private <T> void checkIfNotNull(
             T input, String message) {
         inputValidator.throwExceptionIfObjectIsNull(
                 input, message);
+    }
+
+    private Reservation findReservation(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Reservation with id " + id + " does not exist."));
     }
 }
