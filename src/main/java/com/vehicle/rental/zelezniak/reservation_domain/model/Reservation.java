@@ -77,16 +77,15 @@ public class Reservation {
                 this, newData);
     }
 
-    public void addVehicleToReservation(
-            Vehicle vehicle){
-      initializeVehiclesIfNull();
-      vehicles.add(vehicle);
+    public void addVehicle(
+            Vehicle v){
+        initializeVehiclesIfNull();
+        vehicles.add(v);
     }
 
-    public void addVehiclesToReservation(
-            Collection<Vehicle> v){
-        initializeVehiclesIfNull();
-        vehicles.addAll(v);
+    public void removeVehicle(
+            Vehicle v){
+        vehicles.remove(v);
     }
 
     @Override
