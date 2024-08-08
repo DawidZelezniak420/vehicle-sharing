@@ -1,17 +1,11 @@
 package com.vehicle.rental.zelezniak;
 
-import com.vehicle.rental.zelezniak.common_value_objects.RentInformation;
 import com.vehicle.rental.zelezniak.config.RentCreator;
 import com.vehicle.rental.zelezniak.config.VehicleCreator;
 import com.vehicle.rental.zelezniak.rent_domain.model.Rent;
-import com.vehicle.rental.zelezniak.reservation_domain.service.ReservationCalculator;
-import com.vehicle.rental.zelezniak.common_value_objects.RentDuration;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,11 +24,11 @@ class RentCalculatorTest {
     @Autowired
     private VehicleCreator vehicleCreator;
 
-    @BeforeEach
-    void setupDatabase() {
-        rentWithId5 = rentCreator.createRentWithId5();
-        rentWithId5.setVehicles(vehicleCreator.createSetWithVehicle5And6());
-    }
+//    @BeforeEach
+//    void setupDatabase() {
+//        rentWithId5 = rentCreator.createRentWithId5();
+//        rentWithId5.setVehicles(vehicleCreator.createSetWithVehicle5And6());
+//    }
 
 //    @Test
 //    void shouldCalculateTotalCost() {
@@ -70,15 +64,15 @@ class RentCalculatorTest {
 //        assertEquals(given,totalCost);
 //    }
 
-    private void updateDurationRentWithId5(
-            LocalDateTime start, LocalDateTime end) {
-        RentInformation rentInformation = rentWithId5.getRentInformation();
-        RentInformation updated = rentInformation.toBuilder()
-                .rentDuration(RentDuration.builder()
-                        .rentalStart(start)
-                        .rentalEnd(end)
-                        .build())
-                .build();
-        rentWithId5.setRentInformation(updated);
-    }
+//    private void updateDurationRentWithId5(
+//            LocalDateTime start, LocalDateTime end) {
+//        RentInformation rentInformation = rentWithId5.getRentInformation();
+//        RentInformation updated = rentInformation.toBuilder()
+//                .rentDuration(RentDuration.builder()
+//                        .rentalStart(start)
+//                        .rentalEnd(end)
+//                        .build())
+//                .build();
+//        rentWithId5.setRentInformation(updated);
+//    }
 }

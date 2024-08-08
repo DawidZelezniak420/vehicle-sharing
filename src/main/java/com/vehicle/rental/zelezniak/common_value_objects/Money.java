@@ -7,9 +7,9 @@ import java.math.*;
 
 @Embeddable
 @Getter
-@NoArgsConstructor(force = true)
-@EqualsAndHashCode
 @ToString
+@EqualsAndHashCode
+@NoArgsConstructor(force = true)
 public class Money {
 
     private static final BigDecimal ZERO = BigDecimal.ZERO;
@@ -36,7 +36,6 @@ public class Money {
     }
 
     private BigDecimal format(BigDecimal money) {
-        return money.setScale(
-                2, RoundingMode.HALF_UP);
+        return money.setScale(2, RoundingMode.HALF_UP);
     }
 }

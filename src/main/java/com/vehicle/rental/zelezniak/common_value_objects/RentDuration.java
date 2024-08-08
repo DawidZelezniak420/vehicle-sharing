@@ -7,12 +7,12 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Embeddable
-@NoArgsConstructor(force = true)
+@Getter
 @Builder
-@EqualsAndHashCode
 @ToString
+@EqualsAndHashCode
+@NoArgsConstructor(force = true)
 public class RentDuration {
 
     private static final String MUST_BE_IN_FUTURE = " must be in future";
@@ -23,18 +23,14 @@ public class RentDuration {
     @Future(message = "Rental end" + MUST_BE_IN_FUTURE)
     private final LocalDateTime rentalEnd;
 
-    public RentDuration(
-            LocalDateTime start,
-            LocalDateTime end) {
-        validateArguments(start,end);
+    public RentDuration(LocalDateTime start, LocalDateTime end) {
+        validateArguments(start, end);
         this.rentalStart = start;
         this.rentalEnd = end;
     }
 
-    private void validateArguments(
-            LocalDateTime start,
-            LocalDateTime end) {
-        if(start.isAfter(end)){
+    private void validateArguments(LocalDateTime start, LocalDateTime end) {
+        if (start.isAfter(end)) {
             throw new IllegalArgumentException(
                     "Rental start can not be after rental end.");
         }

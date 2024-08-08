@@ -9,12 +9,12 @@ import jakarta.persistence.Embedded;
 import lombok.*;
 
 @Embeddable
+@Builder(toBuilder = true)
 @Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@Builder(toBuilder = true)
-@EqualsAndHashCode
-@ToString
 public class Location {
 
     @Embedded
