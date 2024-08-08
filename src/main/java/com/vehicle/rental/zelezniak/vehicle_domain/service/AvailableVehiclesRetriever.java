@@ -25,11 +25,11 @@ public class AvailableVehiclesRetriever {
     private final VehicleRepository vehicleRepository;
 
     public Page<Vehicle> findAvailableVehiclesInPeriod(RentDuration duration, Pageable pageable) {
-        Set<Long> unavailableVehiclesIdsInPeriod = findUnavailableVehiclesIdsInPeriod(duration);
+        Set<Long> unavailableVehiclesIdsInPeriod = findReservedAndRentedVehiclesInPeriod(duration);
         return vehicleRepository.findVehiclesByIdNotIn(unavailableVehiclesIdsInPeriod,pageable);
     }
 
-    private Set<Long> findUnavailableVehiclesIdsInPeriod(RentDuration duration) {
+    private Set<Long> findReservedAndRentedVehiclesInPeriod(RentDuration duration) {
         LocalDateTime start = duration.getRentalStart();
         LocalDateTime end = duration.getRentalEnd();
         Set<Long> unavailableForRents = rentRepository.findUnavailableVehicleIdsForRentInPeriod(start, end);

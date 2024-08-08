@@ -59,7 +59,7 @@ class AvailableVehiclesRetrieverTest {
     }
 
     @Test
-    void shouldFindAvailableVehiclesAvailableInPeriod1() {
+    void shouldFindAvailableVehiclesInPeriod1() {
         RentDuration duration = durationCreator.createDuration1();
 
         Page<Vehicle> page = vehiclesRetriever.findAvailableVehiclesInPeriod(duration, pageable);
@@ -69,7 +69,7 @@ class AvailableVehiclesRetrieverTest {
     }
 
     @Test
-    void shouldFindAvailableVehiclesAvailableInPeriod2() {
+    void shouldFindAvailableVehiclesInPeriod2() {
         Vehicle motorcycle = vehicleCreator.createMotorcycleWithId6();
         motorcycle.setStatus(Vehicle.Status.UNAVAILABLE);
         vehicleService.update(6L, motorcycle);
@@ -87,7 +87,7 @@ class AvailableVehiclesRetrieverTest {
     }
 
     @Test
-    void shouldFindAvailableVehiclesAvailableInPeriod3() {
+    void shouldFindAvailableVehiclesInPeriod3() {
         RentDuration duration = durationCreator.createDuration3();
 
         Page<Vehicle> page = vehiclesRetriever.findAvailableVehiclesInPeriod(duration, pageable);

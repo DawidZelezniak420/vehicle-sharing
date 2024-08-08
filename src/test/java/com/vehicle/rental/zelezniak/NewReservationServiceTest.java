@@ -139,7 +139,7 @@ class NewReservationServiceTest {
     }
 
     @Test
-    void shouldRemoveReservation() {
+    void shouldDeleteReservation() {
         Long client5Id = 5L;
 
         List<Reservation> initialReservations = (List<Reservation>) reservationRepository.findAllByClientId(client5Id);
@@ -147,16 +147,16 @@ class NewReservationServiceTest {
 
         Reservation reservation = initialReservations.get(0);
         setReservationStatusToNew(reservation);
-        newReservationService.remove(reservation);
+        newReservationService.deleteReservation(reservation);
 
         List<Reservation> updatedReservations = (List<Reservation>) reservationRepository.findAllByClientId(client5Id);
         assertEquals(1, updatedReservations.size());
     }
 
     @Test
-    void shouldNotRemoveReservation() {
+    void shouldNotDeleteReservation() {
         assertThrows(IllegalArgumentException.class,
-                () -> newReservationService.remove(reservationWithId5));
+                () -> newReservationService.deleteReservation(reservationWithId5));
     }
 
     @Test
@@ -191,7 +191,7 @@ class NewReservationServiceTest {
         Collection<Vehicle> vehicles = reservationRepository.findVehiclesByReservationId(reservationWithId5.getId());
         assertEquals(1, vehicles.size());
 
-        newReservationService.removeVehicleFromReservation(reservationWithId5, vehicle5Id);
+        newReservationService.deleteVehicleFromReservation(reservationWithId5, vehicle5Id);
 
         vehicles = reservationRepository.findVehiclesByReservationId(reservationWithId5.getId());
         assertEquals(0, vehicles.size());
@@ -205,7 +205,7 @@ class NewReservationServiceTest {
         assertEquals(1, vehicles.size());
 
         assertThrows(IllegalArgumentException.class,
-                () -> newReservationService.removeVehicleFromReservation(reservationWithId5, vehicle5Id));
+                () -> newReservationService.deleteVehicleFromReservation(reservationWithId5, vehicle5Id));
     }
 
     private void setReservationStatusToNew(Reservation reservation) {
