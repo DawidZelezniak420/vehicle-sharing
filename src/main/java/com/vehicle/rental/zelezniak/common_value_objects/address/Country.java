@@ -7,10 +7,10 @@ import lombok.*;
 
 @Embeddable
 @Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@EqualsAndHashCode
-@ToString
 public class Country {
 
     @NotBlank(message = "Country name" + ValidationMessages.CAN_NOT_BE_BLANK)

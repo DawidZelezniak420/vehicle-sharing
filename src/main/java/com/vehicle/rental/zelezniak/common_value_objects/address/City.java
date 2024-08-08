@@ -8,10 +8,10 @@ import static com.vehicle.rental.zelezniak.constants.ValidationMessages.CAN_NOT_
 
 @Embeddable
 @Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@EqualsAndHashCode
-@ToString
 public class City {
 
     @NotBlank(message = "City name" + CAN_NOT_BE_BLANK)
