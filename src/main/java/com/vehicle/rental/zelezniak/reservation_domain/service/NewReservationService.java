@@ -62,7 +62,7 @@ public class NewReservationService {
     }
 
     @Transactional
-    public void remove(Reservation reservation) {
+    public void deleteReservation(Reservation reservation) {
         checkIfStatusIsEqualNEW(reservation, "Can not remove reservation with status: "
                 + reservation.getReservationStatus());
         handleRemove(reservation);
@@ -76,7 +76,7 @@ public class NewReservationService {
     }
 
     @Transactional
-    public void removeVehicleFromReservation(Reservation r, Long vehicleId) {
+    public void deleteVehicleFromReservation(Reservation r, Long vehicleId) {
         checkIfStatusIsEqualNEW(r, "Can not remove vehicle from reservation with status: "
                 + r.getReservationStatus());
         reservationRepository.deleteVehicleFromReservation(r.getId(), vehicleId);
