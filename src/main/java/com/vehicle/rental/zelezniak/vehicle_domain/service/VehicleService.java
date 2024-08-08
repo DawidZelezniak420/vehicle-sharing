@@ -100,7 +100,9 @@ public class VehicleService {
 
     private void handleDeleteVehicle(Long id) {
         Vehicle vehicle = findVehicle(id);
-        vehicleRepository.delete(vehicle);
+        if (vehicle.getStatus() == Vehicle.Status.UNAVAILABLE) {
+            vehicleRepository.delete(vehicle);
+        } else throw new IllegalStateException("Vehicle must be in status UNAVAILABLE before it can be deleted.");
     }
 
     private <T> void validateCriteriaSearchRequest(CriteriaSearchRequest<T> searchRequest) {
