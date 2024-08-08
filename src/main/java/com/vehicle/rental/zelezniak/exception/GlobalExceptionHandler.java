@@ -28,6 +28,12 @@ public class GlobalExceptionHandler {
         return createResponse(status, exception.getMessage());
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorInformation> handleException(IllegalStateException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return createResponse(status, exception.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInformation> handleException(Exception exception) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
