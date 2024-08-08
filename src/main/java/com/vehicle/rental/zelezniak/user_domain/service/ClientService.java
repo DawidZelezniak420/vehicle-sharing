@@ -26,74 +26,71 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public Client findById(Long id) {
-        checkIfNotNull(id, InputValidator.CLIENT_ID_NOT_NULL);
+        validateId(id);
         return findClient(id);
     }
 
     @Transactional
-    public void update(
-            Long id, Client newData) {
-        checkIfNotNull(id, InputValidator.CLIENT_ID_NOT_NULL);
-        checkIfNotNull(newData, InputValidator.CLIENT_NOT_NULL);
+    public Client update(Long id, Client newData) {
+        validateId(id);
+        validateClient(newData);
         Client clientFromDb = findClient(id);
-        validateAndUpdateClient(
-                clientFromDb, newData);
+        return validateAndUpdateClient(clientFromDb, newData);
     }
 
     @Transactional
     public void delete(Long id) {
-        checkIfNotNull(id, InputValidator.CLIENT_ID_NOT_NULL);
+        validateId(id);
         Client clientToDelete = findClient(id);
         handleDeleteClient(clientToDelete);
     }
 
-    private <T> void checkIfNotNull(
-            T value, String message) {
-        inputValidator.throwExceptionIfObjectIsNull(
-                value, message);
+    @Transactional(readOnly = true)
+    public Client findByEmail(String email) {
+        validateEmail(email);
+        return clientRepository.findByCredentialsEmail(email)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Client with email: " + email + " does not exists."));
+    }
+
+    private void validateId(Long id) {
+        inputValidator.throwExceptionIfObjectIsNull(id, InputValidator.CLIENT_ID_NOT_NULL);
+    }
+
+    private void validateClient(Client client) {
+        inputValidator.throwExceptionIfObjectIsNull(client, InputValidator.CLIENT_NOT_NULL);
+    }
+
+    private void validateEmail(String email) {
+        inputValidator.throwExceptionIfObjectIsNull(email, InputValidator.CLIENT_EMAIL_NOT_NULL);
     }
 
     private Client findClient(Long id) {
         return clientRepository.findById(id)
-                .orElseThrow(
-                        () -> new NoSuchElementException(
+                .orElseThrow(() -> new NoSuchElementException(
                         "User with id: " + id + " does not exist."));
     }
 
-    private void validateAndUpdateClient(
-            Client clientFromDb,
-            Client newData) {
+    private Client validateAndUpdateClient(Client clientFromDb, Client newData) {
         String clientEmail = clientFromDb.getEmail();
-        clientValidator.checkIfUserCanBeUpdated(
-                clientEmail, newData);
-        clientFromDb.setName(
-                newData.getName());
-        clientFromDb.setCredentials(
-                newData.getCredentials());
-        clientFromDb.setAddress(
-                newData.getAddress());
-        save(clientFromDb);
+        clientValidator.checkIfUserCanBeUpdated(clientEmail, newData);
+        updateClient(clientFromDb, newData);
+        return clientRepository.save(clientFromDb);
     }
 
-    private void save(Client client) {
-    clientRepository.save(client);
+    private void updateClient(Client clientFromDb, Client newData) {
+        clientFromDb.setName(newData.getName());
+        clientFromDb.setCredentials(newData.getCredentials());
+        clientFromDb.setAddress(newData.getAddress());
     }
 
-    private void handleDeleteClient(
-            Client clientToDelete) {
+    private void handleDeleteClient(Client clientToDelete) {
         removeRoles(clientToDelete);
         clientRepository.delete(clientToDelete);
     }
 
-    private void removeRoles(
-            Client userToDelete) {
+    private void removeRoles(Client userToDelete) {
         userToDelete.setRoles(null);
-    }
-
-    public Client findByEmail(String email) {
-        checkIfNotNull(email, InputValidator.CLIENT_EMAIL_NOT_NULL);
-        return clientRepository.findByCredentialsEmail(
-                email);
     }
 }
 

@@ -28,57 +28,47 @@ public class RentService {
 
     @Transactional(readOnly = true)
     public Rent findById(Long id) {
-        checkIfNotNull(id,
-                RENT_ID_NOT_NULL);
+        validateId(id);
         return findRent(id);
     }
 
     @Transactional
-    public void add(
-            Rent rent) {
-        checkIfNotNull(rent,
-                RENT_NOT_NULL);
+    public void add(Rent rent) {
+        validateRent(rent);
         handleAddRent(rent);
     }
 
     @Transactional(readOnly = true)
-    public Page<Rent> findAllByClientId(
-            Long id,
-            Pageable pageable){
-        checkIfNotNull(id,
-                CLIENT_ID_NOT_NULL);
-        return rentRepository.findAllByClientId(id,pageable);
+    public Page<Rent> findAllByClientId(Long id, Pageable pageable) {
+        validateClientId(id);
+        return rentRepository.findAllByClientId(id, pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<Vehicle> findVehiclesByRentId(
-            Long id,
-            Pageable pageable){
-        checkIfNotNull(id,
-                RENT_ID_NOT_NULL);
-        return rentRepository.findVehiclesByRentId(id,pageable);
-    }
-
-    private <T> void checkIfNotNull(
-            T input, String message) {
-        inputValidator.throwExceptionIfObjectIsNull(
-                input, message);
+    public Page<Vehicle> findVehiclesByRentId(Long id, Pageable pageable) {
+        validateId(id);
+        return rentRepository.findVehiclesByRentId(id, pageable);
     }
 
     private Rent findRent(Long id) {
         return rentRepository.findById(id)
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "Rent with id: " + id + " does not exists."));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Rent with id: " + id + " does not exists."));
     }
 
-    private void handleAddRent(
-            Rent rent) {
-        save(rent);
-    }
-
-    private void save(Rent rent) {
+    private void handleAddRent(Rent rent) {
         rentRepository.save(rent);
     }
 
+    private void validateId(Long id) {
+        inputValidator.throwExceptionIfObjectIsNull(id, RENT_ID_NOT_NULL);
+    }
+
+    private void validateRent(Rent rent) {
+        inputValidator.throwExceptionIfObjectIsNull(rent, RENT_NOT_NULL);
+    }
+
+    private void validateClientId(Long clientId) {
+        inputValidator.throwExceptionIfObjectIsNull(clientId, CLIENT_ID_NOT_NULL);
+    }
 }

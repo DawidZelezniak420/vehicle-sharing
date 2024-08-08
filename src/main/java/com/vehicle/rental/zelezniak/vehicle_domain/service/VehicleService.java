@@ -1,11 +1,12 @@
 package com.vehicle.rental.zelezniak.vehicle_domain.service;
 
-import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import com.vehicle.rental.zelezniak.common_value_objects.RentDuration;
 import com.vehicle.rental.zelezniak.util.validation.InputValidator;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.util.CriteriaSearchRequest;
 import com.vehicle.rental.zelezniak.vehicle_domain.repository.VehicleRepository;
+import com.vehicle.rental.zelezniak.vehicle_domain.service.vehicle_update.VehicleUpdateStrategy;
+import com.vehicle.rental.zelezniak.vehicle_domain.service.vehicle_update.VehicleUpdateStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,97 +24,91 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final VehicleValidator vehicleValidator;
     private final InputValidator inputValidator;
-    private final VehicleUpdateVisitor updateVisitor;
+    private final VehicleUpdateStrategyFactory strategyFactory;
     private final VehicleCriteriaSearch criteriaSearch;
     private final AvailableVehiclesRetriever vehiclesRetriever;
 
     @Transactional(readOnly = true)
-    public Page<Vehicle> findAll(
-            Pageable pageable) {
+    public Page<Vehicle> findAll(Pageable pageable) {
         return vehicleRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
     public Vehicle findById(Long id) {
-        checkIfNotNull(id, InputValidator.VEHICLE_ID_NOT_NULL);
+        validateId(id);
         return findVehicle(id);
     }
 
     @Transactional
     public void add(Vehicle vehicle) {
-        checkIfNotNull(vehicle, InputValidator.VEHICLE_NOT_NULL);
-        vehicleValidator.throwExceptionIfVehicleExists(
-                vehicle.getRegistrationNumber());
-        save(vehicle);
+        validateVehicle(vehicle);
+        vehicleValidator.throwExceptionIfVehicleExists(vehicle.getRegistrationNumber());
+        vehicleRepository.save(vehicle);
     }
 
     @Transactional
-    public void update(
-            Long id, Vehicle newData) {
-        checkIfNotNull(id, InputValidator.VEHICLE_ID_NOT_NULL);
-        checkIfNotNull(newData, InputValidator.VEHICLE_NOT_NULL);
+    public Vehicle update(Long id, Vehicle newData) {
+        validateId(id);
+        validateVehicle(newData);
         Vehicle vehicleFromDb = findVehicle(id);
-        validateAndUpdateVehicle(
-                vehicleFromDb, newData);
+        return validateAndUpdateVehicle(vehicleFromDb, newData);
     }
 
     @Transactional
     public void delete(Long id) {
-        checkIfNotNull(id, InputValidator.VEHICLE_ID_NOT_NULL);
+        validateId(id);
         handleDeleteVehicle(id);
     }
 
     @Transactional(readOnly = true)
-    public <T> Page<Vehicle> findByCriteria(
-            CriteriaSearchRequest<T> searchRequest,
-            Pageable pageable) {
-        checkIfNotNull(searchRequest,
-                "Criteria search request"
-                        + CAN_NOT_BE_NULL);
-        return criteriaSearch.findVehiclesByCriteria(
-                searchRequest,pageable);
+    public <T> Page<Vehicle> findByCriteria(CriteriaSearchRequest<T> searchRequest, Pageable pageable) {
+        validateCriteriaSearchRequest(searchRequest);
+        return criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<Vehicle> findAvailableVehicles(
-            RentDuration duration,
-            Pageable pageable) {
-        checkIfNotNull(duration,
-                "Duration"+ CAN_NOT_BE_NULL);
-             return vehiclesRetriever.findAvailableVehiclesInPeriod(
-                     duration,pageable);
+    public Page<Vehicle> findAvailableVehicles(RentDuration duration, Pageable pageable) {
+        validateDuration(duration);
+        return vehiclesRetriever.findAvailableVehiclesInPeriod(duration, pageable);
     }
 
-    private <T> void checkIfNotNull(
-            T input, String message) {
-        inputValidator.throwExceptionIfObjectIsNull(
-                input, message);
+    private void validateId(Long id) {
+        inputValidator.throwExceptionIfObjectIsNull(id, InputValidator.VEHICLE_ID_NOT_NULL);
     }
 
     private Vehicle findVehicle(Long id) {
         return vehicleRepository.findById(id)
-                .orElseThrow(
-                        () -> new NoSuchElementException(
-                                "Vehicle with id: " + id + " does not exists."));
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Vehicle with id: " + id + " does not exists."));
     }
 
-    private void save(Vehicle vehicle) {
-        vehicleRepository.save(vehicle);
+    private void validateVehicle(Vehicle vehicle) {
+        inputValidator.throwExceptionIfObjectIsNull(vehicle, InputValidator.VEHICLE_NOT_NULL);
     }
 
-    private void validateAndUpdateVehicle(
-            Vehicle vehicleFromDb, Vehicle newData) {
-        vehicleValidator.checkIfVehiclesHasSameTypes(
-                vehicleFromDb,newData);
-        vehicleValidator.checkIfVehicleCanBeUpdated(
-                vehicleFromDb.getRegistrationNumber(), newData);
-        Vehicle updatedVehicle = vehicleFromDb.update(updateVisitor, newData);
-        save(updatedVehicle);
+    private Vehicle validateAndUpdateVehicle(Vehicle vehicleFromDb, Vehicle newData) {
+        vehicleValidator.checkIfVehiclesHasSameTypes(vehicleFromDb, newData);
+        vehicleValidator.checkIfVehicleCanBeUpdated(vehicleFromDb.getRegistrationNumber(), newData);
+        return pickUpStrategyAndUpdate(vehicleFromDb, newData);
     }
 
-    private void handleDeleteVehicle(
-            Long id) {
+    private Vehicle pickUpStrategyAndUpdate(Vehicle vehicleFromDb, Vehicle newData) {
+        VehicleUpdateStrategy strategy = strategyFactory.getStrategy(vehicleFromDb.getClass());
+        Vehicle updated = strategy.update(vehicleFromDb, newData);
+        return vehicleRepository.save(updated);
+    }
+
+    private void handleDeleteVehicle(Long id) {
         Vehicle vehicle = findVehicle(id);
         vehicleRepository.delete(vehicle);
+    }
+
+    private <T> void validateCriteriaSearchRequest(CriteriaSearchRequest<T> searchRequest) {
+        inputValidator.throwExceptionIfObjectIsNull(searchRequest, "Criteria search request" + CAN_NOT_BE_NULL);
+    }
+
+
+    private void validateDuration(RentDuration duration) {
+        inputValidator.throwExceptionIfObjectIsNull(duration, "Duration" + CAN_NOT_BE_NULL);
     }
 }
