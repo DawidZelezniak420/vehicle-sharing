@@ -3,13 +3,16 @@ package com.vehicle.rental.zelezniak.common_value_objects;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Represents the rental information for a vehicle reservation, including duration and location details.
+ */
 @Embeddable
+@Builder(toBuilder = true)
 @Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@Builder(toBuilder = true)
-@EqualsAndHashCode
-@ToString
 public class RentInformation {
 
     @Embedded
