@@ -40,7 +40,7 @@ class VehicleControllerTest {
     private static Vehicle vehicleWithId5;
     private static Vehicle vehicleWithId6;
 
-    private static final Pageable pageable = PageRequest.of(0,5);
+    private static final Pageable pageable = PageRequest.of(0, 5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
@@ -88,8 +88,8 @@ class VehicleControllerTest {
 
         mockMvc.perform(get("/vehicles/")
                         .header("Authorization", "Bearer " + userToken)
-                .param("page",String.valueOf(pageable.getPageNumber()))
-                .param("size",String.valueOf(pageable.getPageSize())))
+                        .param("page", String.valueOf(pageable.getPageNumber()))
+                        .param("size", String.valueOf(pageable.getPageSize())))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(5)))
@@ -217,16 +217,17 @@ class VehicleControllerTest {
 
     @Test
     void shouldDeleteVehicle() throws Exception {
-        Long vehicle5Id = vehicleWithId5.getId();
+        vehicleWithId5.setStatus(Vehicle.Status.UNAVAILABLE);
+        vehicleRepository.save(vehicleWithId5);
 
         assertEquals(5, vehicleRepository.count());
-        mockMvc.perform(delete("/vehicles/delete/{id}", vehicle5Id)
+        mockMvc.perform(delete("/vehicles/delete/{id}", vehicleWithId5.getId())
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNoContent());
 
         assertEquals(4, vehicleRepository.count());
 
-        Pageable pageable = PageRequest.of(0,5);
+        Pageable pageable = PageRequest.of(0, 5);
         Page<Vehicle> page = vehicleService.findAll(pageable);
         List<Vehicle> list = page.get().toList();
         assertFalse(list.contains(vehicleWithId5));
@@ -242,6 +243,20 @@ class VehicleControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(
                         "Vehicle with id: " + nonExistentId + " does not exists."));
+
+        assertEquals(5, vehicleRepository.count());
+    }
+
+    @Test
+    void shouldNotDeleteVehicleWithStatusAvailable() throws Exception {
+        Long id = vehicleWithId5.getId();
+
+        assertEquals(5, vehicleRepository.count());
+        mockMvc.perform(delete("/vehicles/delete/{id}", id)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(
+                        "Vehicle must be in status UNAVAILABLE before it can be deleted."));
 
         assertEquals(5, vehicleRepository.count());
     }

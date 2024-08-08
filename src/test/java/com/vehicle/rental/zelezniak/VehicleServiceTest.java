@@ -1,6 +1,5 @@
 package com.vehicle.rental.zelezniak;
 
-import com.vehicle.rental.zelezniak.VehicleRentalApplication;
 import com.vehicle.rental.zelezniak.common_value_objects.Money;
 import com.vehicle.rental.zelezniak.config.DatabaseSetup;
 import com.vehicle.rental.zelezniak.config.VehicleCreator;
@@ -145,11 +144,12 @@ class VehicleServiceTest {
 
     @Test
     void shouldDeleteVehicle() {
-        Long vehicle5Id = vehicleWithId5.getId();
+        vehicleWithId5.setStatus(Vehicle.Status.UNAVAILABLE);
+        vehicleRepository.save(vehicleWithId5);
 
         assertEquals(5, vehicleRepository.count());
 
-        vehicleService.delete(vehicle5Id);
+        vehicleService.delete(vehicleWithId5.getId());
 
         assertEquals(4, vehicleRepository.count());
 
@@ -164,5 +164,11 @@ class VehicleServiceTest {
         assertEquals(5, vehicleRepository.count());
         assertThrows(NoSuchElementException.class, () -> vehicleService.delete(nonExistentId));
         assertEquals(5, vehicleRepository.count());
+    }
+
+    @Test
+    void shouldNotDeleteVehicleWithStatusAvailable(){
+        Long id = vehicleWithId5.getId();
+        assertThrows(IllegalStateException.class,()->vehicleService.delete(id));
     }
 }
