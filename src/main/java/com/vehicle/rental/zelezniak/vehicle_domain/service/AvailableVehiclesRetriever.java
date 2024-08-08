@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+/**
+ * Class responsible for finding vehicles available in period selected by user.
+ */
 @Component
 @RequiredArgsConstructor
 public class AvailableVehiclesRetriever {
@@ -21,18 +24,15 @@ public class AvailableVehiclesRetriever {
     private final ReservationRepository reservationRepository;
     private final VehicleRepository vehicleRepository;
 
-    public Page<Vehicle> findAvailableVehiclesInPeriod(
-            RentDuration duration, Pageable pageable) {
+    public Page<Vehicle> findAvailableVehiclesInPeriod(RentDuration duration, Pageable pageable) {
         Set<Long> unavailableVehiclesIdsInPeriod = findUnavailableVehiclesIdsInPeriod(duration);
-        return vehicleRepository.findVehiclesByIdNotIn(
-                unavailableVehiclesIdsInPeriod,pageable);
+        return vehicleRepository.findVehiclesByIdNotIn(unavailableVehiclesIdsInPeriod,pageable);
     }
 
-    private Set<Long> findUnavailableVehiclesIdsInPeriod(
-            RentDuration duration) {
+    private Set<Long> findUnavailableVehiclesIdsInPeriod(RentDuration duration) {
         LocalDateTime start = duration.getRentalStart();
         LocalDateTime end = duration.getRentalEnd();
-        Set<Long> unavailableForRents = rentRepository.unavailableVehicleIdsForRentInPeriod(start, end);
+        Set<Long> unavailableForRents = rentRepository.findUnavailableVehicleIdsForRentInPeriod(start, end);
         Set<Long> unavailableForReservations = reservationRepository.unavailableVehicleIdsForReservationInPeriod(start, end);
         unavailableForRents.addAll(unavailableForReservations);
         return unavailableForRents;

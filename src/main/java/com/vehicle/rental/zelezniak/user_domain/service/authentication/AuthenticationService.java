@@ -7,6 +7,7 @@ import com.vehicle.rental.zelezniak.user_domain.model.login.LoginRequest;
 import com.vehicle.rental.zelezniak.user_domain.model.login.LoginResponse;
 import com.vehicle.rental.zelezniak.user_domain.repository.ClientRepository;
 import com.vehicle.rental.zelezniak.user_domain.repository.RoleRepository;
+import com.vehicle.rental.zelezniak.user_domain.service.ClientService;
 import com.vehicle.rental.zelezniak.user_domain.service.ClientValidator;
 import com.vehicle.rental.zelezniak.util.TimeFormatter;
 import com.vehicle.rental.zelezniak.util.validation.InputValidator;
@@ -24,13 +25,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+/**
+ * Service responsible for registering and logging users.
+ */
+
 @Service
-@RequiredArgsConstructor
 @Transactional
 @Slf4j
+@RequiredArgsConstructor
 public class AuthenticationService implements UserDetailsService {
 
-    private final ClientRepository clientRepository;
+    private static final String ROLE_USER = "USER";
+
+    private final ClientService clientService;
+    private final ClientRepository repository;
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepository;
     private final ClientValidator clientValidator;
@@ -38,27 +46,15 @@ public class AuthenticationService implements UserDetailsService {
     private final AuthenticationManager authenticationManager;
     private final JWTGenerator jwtGenerator;
 
-    public UserDetails loadUserByUsername(
-            String username)
-            throws UsernameNotFoundException {
-        inputValidator.throwExceptionIfObjectIsNull(
-                username, "Email can not be a null.");
-        return clientRepository.findByCredentialsEmail(username);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        inputValidator.throwExceptionIfObjectIsNull(username, "Email can not be a null.");
+        return clientService.findByEmail(username);
     }
 
-    public Client register(
-            Client client) {
+    public Client register(Client client) {
         validateData(client);
         saveClient(client);
         return client;
-    }
-
-    private void validateData(Client client) {
-        inputValidator.throwExceptionIfObjectIsNull(
-                client, InputValidator.CLIENT_NOT_NULL);
-        EmailPatternValidator.validate(client.getEmail());
-        clientValidator.ifUserExistsThrowException(
-                client.getEmail());
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
@@ -67,52 +63,51 @@ public class AuthenticationService implements UserDetailsService {
         return tryLoginUser(email, password);
     }
 
-    private void saveClient(Client client) {
-        setRequiredDataAndEncodePassword(client);
-        clientRepository.save(client);
+    private void validateData(Client client) {
+        inputValidator.throwExceptionIfObjectIsNull(client, InputValidator.CLIENT_NOT_NULL);
+        EmailPatternValidator.validate(client.getEmail());
+        clientValidator.ifUserExistsThrowException(client.getEmail());
     }
 
-    private void setRequiredDataAndEncodePassword(
-            Client client) {
-        client.setCreatedAt(
-                TimeFormatter.getFormattedActualDateTime());
-        client.setCredentials(
-                new UserCredentials(client.getEmail(),
-                        encoder.encode(client.getPassword())));
+    private void saveClient(Client client) {
+        setRequiredDataAndEncodePassword(client);
+        repository.save(client);
+    }
+
+    private void setRequiredDataAndEncodePassword(Client client) {
+        client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
+        String encoded = encoder.encode(client.getPassword());
+        client.setCredentials(new UserCredentials(client.getEmail(), encoded));
         handleAddRoleForUser(client);
     }
 
-    private void handleAddRoleForUser(
-            Client client) {
+    private void handleAddRoleForUser(Client client) {
         Role roleUser = findOrCreateRoleUser();
         client.addRole(roleUser);
     }
 
     private Role findOrCreateRoleUser() {
-        Role role = roleRepository.findByRoleName(
-                "USER");
+        Role role = roleRepository.findByRoleName(ROLE_USER);
         if (role == null) {
-            role = new Role("USER");
+            role = new Role(ROLE_USER);
             roleRepository.save(role);
         }
         return role;
     }
 
-    private LoginResponse tryLoginUser(
-            String email, String password) {
+    private LoginResponse tryLoginUser(String email, String password) {
+        String token = null;
         try {
             Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            email, password));
-            String token = jwtGenerator.generateJWT(auth);
-            return new LoginResponse(
-                    clientRepository.findByCredentialsEmail(email),
-                    token);
+                    new UsernamePasswordAuthenticationToken(email, password));
+            token = jwtGenerator.generateJWT(auth);
         } catch (AuthenticationException e) {
-            log.error("User with email : " + email +
-                    " can not be authenticated - bad credentials.");
-            return new LoginResponse(null, "");
+            throwException();
         }
+        return new LoginResponse(clientService.findByEmail(email), token);
     }
 
+    private void throwException() {
+        throw new IllegalArgumentException("Bad credentials");
+    }
 }

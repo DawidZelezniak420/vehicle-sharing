@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
-
+/**
+ * Class responsible for generating JSON Web Tokens
+ */
 @Service
 @RequiredArgsConstructor
 public class JWTGenerator {
@@ -22,23 +24,19 @@ public class JWTGenerator {
         return getToken(jwtClaimsSet);
     }
 
-    private JwtClaimsSet handleGetClaims(
-            Authentication authentication) {
+    private JwtClaimsSet handleGetClaims(Authentication authentication) {
         String authorities = getAuthoritiesAsString(authentication);
         return buildClaimsSet(authorities, authentication);
     }
 
-    private String getAuthoritiesAsString(
-            Authentication authentication) {
+    private String getAuthoritiesAsString(Authentication authentication) {
         return authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
     }
 
-    private JwtClaimsSet buildClaimsSet(
-            String authorities,
-            Authentication authentication) {
+    private JwtClaimsSet buildClaimsSet(String authorities, Authentication authentication) {
         return JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(Instant.now())
@@ -49,8 +47,8 @@ public class JWTGenerator {
 
     private String getToken(JwtClaimsSet jwtClaimsSet) {
         return jwtEncoder.encode(
-                        JwtEncoderParameters.from(jwtClaimsSet)
-                ).getTokenValue();
+                        JwtEncoderParameters.from(jwtClaimsSet))
+                .getTokenValue();
     }
 
 }

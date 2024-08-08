@@ -20,6 +20,8 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.*;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.security.interfaces.RSAPublicKey;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -54,8 +56,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            @Lazy UserDetailsService userDetailsService) {
+    public AuthenticationManager authenticationManager(@Lazy UserDetailsService userDetailsService) {
         var authProvider = new DaoAuthenticationProvider();
         authProvider.setPasswordEncoder(passwordEncoder());
         authProvider.setUserDetailsService(userDetailsService);
@@ -64,8 +65,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity.
-                csrf(AbstractHttpConfigurer::disable)
+        return httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(config -> {
                     config
                             .requestMatchers(USER_AND_ADMIN_ENDPOINTS).hasAnyRole(USER, ADMIN)
@@ -73,18 +74,16 @@ public class SecurityConfig {
                             .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                             .anyRequest().authenticated();
                 })
-                .oauth2ResourceServer(oauth ->
-                        oauth.jwt(Customizer.withDefaults()))
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(
-                keyProperties.getPublicKey()
-        ).build();
+        RSAPublicKey key = keyProperties.getPublicKey();
+        return NimbusJwtDecoder.withPublicKey(key)
+                .build();
     }
 
     @Bean
@@ -93,19 +92,21 @@ public class SecurityConfig {
                 .Builder(keyProperties.getPublicKey())
                 .privateKey(keyProperties.getPrivateKey())
                 .build();
-        ImmutableJWKSet<SecurityContext> jwkSet =
-                new ImmutableJWKSet<>(new JWKSet(jwk));
+        JWKSet set = new JWKSet(jwk);
+        ImmutableJWKSet<SecurityContext> jwkSet = new ImmutableJWKSet<>(set);
         return new NimbusJwtEncoder(jwkSet);
     }
 
+    /**
+     * Configures JwtAuthenticationConverter to convert JWT to Spring Security authentication.
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         var authoritiesConverter = new JwtGrantedAuthoritiesConverter();
         authoritiesConverter.setAuthoritiesClaimName("roles");
         authoritiesConverter.setAuthorityPrefix("ROLE_");
         var jwtAuthConverter = new JwtAuthenticationConverter();
-        jwtAuthConverter.setJwtGrantedAuthoritiesConverter(
-                authoritiesConverter);
+        jwtAuthConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
         return jwtAuthConverter;
     }
 }
