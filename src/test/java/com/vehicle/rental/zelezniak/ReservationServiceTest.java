@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReservationServiceTest {
 
     private static Reservation reservationWithId5;
-    private static Pageable pageable = PageRequest.of(0,5);
+    private static final Pageable pageable = PageRequest.of(0,5);
 
     @Autowired
     private DatabaseSetup databaseSetup;

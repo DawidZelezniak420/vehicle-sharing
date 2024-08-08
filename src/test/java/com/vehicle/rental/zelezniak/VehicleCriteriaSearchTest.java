@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VehicleCriteriaSearchTest {
 
     private static Vehicle vehicleWithId5;
+    private static final Pageable pageable = PageRequest.of(0, 5);
 
     @Autowired
     private VehicleService vehicleService;
@@ -48,11 +49,9 @@ class VehicleCriteriaSearchTest {
     @Autowired
     private VehicleCreator vehicleCreator;
 
-    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
-        pageable = PageRequest.of(0, 5);
         databaseSetup.setupVehicles();
         vehicleWithId5 = vehicleCreator.createCarWithId5();
     }
@@ -65,12 +64,11 @@ class VehicleCriteriaSearchTest {
     @Test
     void shouldFindVehiclesByCriteriaModel() {
         var info = vehicleWithId5.getVehicleInformation();
+        var searchRequest = new CriteriaSearchRequest<>("model", info.getModel());
 
-        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(
-                new CriteriaSearchRequest<>("model", info.getModel()),
-                pageable);
-
+        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
         List<Vehicle> vehicles = page.getContent();
+
         assertEquals(1, vehicles.size());
         assertTrue(vehicles.contains(vehicleWithId5));
     }
@@ -79,12 +77,11 @@ class VehicleCriteriaSearchTest {
     void shouldFindVehiclesByCriteriaBrand() {
         Vehicle vehicle7 = vehicleService.findById(7L);
         var info = vehicle7.getVehicleInformation();
+        var searchRequest = new CriteriaSearchRequest<>("brand", info.getBrand());
 
-        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(
-                new CriteriaSearchRequest<>("brand", info.getBrand()),
-                pageable);
-
+        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
         List<Vehicle> vehicles = page.getContent();
+
         assertTrue(vehicles.contains(vehicle7));
         assertEquals(1, vehicles.size());
     }
@@ -95,12 +92,11 @@ class VehicleCriteriaSearchTest {
         setSecurityContextHolder("ROLE_ADMIN");
         Vehicle vehicle8 = vehicleService.findById(8L);
         RegistrationNumber vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
+        var searchRequest = new CriteriaSearchRequest<>("registration number", vehicle8RegistrationNumber);
 
-        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(
-                new CriteriaSearchRequest<>("registration number", vehicle8RegistrationNumber),
-                pageable);
-
+        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
         List<Vehicle> vehicles = page.getContent();
+
         assertEquals(1, vehicles.size());
         assertTrue(vehicles.contains(vehicle8));
     }
@@ -109,14 +105,12 @@ class VehicleCriteriaSearchTest {
     @DisplayName("Client can't search vehicles by registration")
     void shouldNotFindVehiclesByCriteriaRegistrationNumber() {
         setSecurityContextHolder("ROLE_USER");
-
         Vehicle vehicle8 = vehicleService.findById(8L);
         RegistrationNumber vehicle8RegistrationNumber = vehicle8.getRegistrationNumber();
+        var searchRequest = new CriteriaSearchRequest<>("registration number", vehicle8RegistrationNumber);
 
-        assertThrows(CriteriaAccessException.class, () ->
-                criteriaSearch.findVehiclesByCriteria(
-                        new CriteriaSearchRequest<>("registration number", vehicle8RegistrationNumber),
-                        pageable));
+        assertThrows(CriteriaAccessException.class,
+                () -> criteriaSearch.findVehiclesByCriteria(searchRequest, pageable));
     }
 
     @Test
@@ -124,12 +118,11 @@ class VehicleCriteriaSearchTest {
         Vehicle vehicle8 = vehicleService.findById(8L);
         Vehicle vehicle9 = vehicleService.findById(9L);
         var info = vehicle8.getVehicleInformation();
+        var searchRequest = new CriteriaSearchRequest<>("production year", info.getProductionYear().getYear());
 
-        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(
-                new CriteriaSearchRequest<>("production year", info.getProductionYear().getYear()),
-                pageable);
-
+        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
         List<Vehicle> vehicles = page.getContent();
+
         assertEquals(2, vehicles.size());
         assertTrue(vehicles.contains(vehicle8));
         assertTrue(vehicles.contains(vehicle9));
@@ -137,10 +130,10 @@ class VehicleCriteriaSearchTest {
 
     @Test
     void shouldNotFindVehiclesByNonExistentCriteria() {
-        assertThrows(IllegalArgumentException.class, () ->
-                criteriaSearch.findVehiclesByCriteria(
-                        new CriteriaSearchRequest<>("wheels number", 4),
-                        pageable));
+        var searchRequest = new CriteriaSearchRequest<>("wheels number", 4);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> criteriaSearch.findVehiclesByCriteria(searchRequest, pageable));
     }
 
     @Test
@@ -150,12 +143,11 @@ class VehicleCriteriaSearchTest {
         vehicleRepository.save(unavailableVehicle);
 
         assertEquals(5, vehicleRepository.count());
+        var searchRequest = new CriteriaSearchRequest<>("status", "available");
 
-        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(
-                new CriteriaSearchRequest<>("status", "available"),
-                pageable);
-
+        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
         List<Vehicle> vehicles = page.getContent();
+
         assertFalse(vehicles.contains(unavailableVehicle));
         assertEquals(4, vehicles.size());
     }
@@ -165,14 +157,14 @@ class VehicleCriteriaSearchTest {
         Vehicle unavailableVehicle = vehicleService.findById(6L);
         unavailableVehicle.setStatus(Vehicle.Status.UNAVAILABLE);
         vehicleRepository.save(unavailableVehicle);
+        var searchRequest = new CriteriaSearchRequest<>("status", "unavailable");
 
         assertEquals(5, vehicleRepository.count());
 
-        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(
-                new CriteriaSearchRequest<>("status", "unavailable"),
-                pageable);
 
+        Page<Vehicle> page = criteriaSearch.findVehiclesByCriteria(searchRequest, pageable);
         List<Vehicle> vehicles = page.getContent();
+
         assertTrue(vehicles.contains(unavailableVehicle));
         assertEquals(1, vehicles.size());
     }

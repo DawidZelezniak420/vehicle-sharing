@@ -7,7 +7,6 @@ import com.vehicle.rental.zelezniak.common_value_objects.RentInformation;
 import com.vehicle.rental.zelezniak.common_value_objects.address.City;
 import com.vehicle.rental.zelezniak.common_value_objects.address.Street;
 import com.vehicle.rental.zelezniak.reservation_domain.model.Reservation;
-import com.vehicle.rental.zelezniak.reservation_domain.model.util.ReservationCreationRequest;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +21,6 @@ public class ReservationCreator {
 
     @Autowired
     private ClientCreator clientCreator;
-
     @Autowired
     private VehicleCreator vehicleCreator;
 
@@ -30,18 +28,11 @@ public class ReservationCreator {
         return Reservation.builder()
                 .id(5L)
                 .reservationStatus(Reservation.ReservationStatus.COMPLETED)
-                .estimatedCost(new Money(BigDecimal.valueOf(150.00)))
+                .totalCost(new Money(BigDecimal.valueOf(1200.00)))
+                .depositAmount(new Money(BigDecimal.valueOf(1000.00)))
                 .rentInformation(buildRentInformation())
                 .vehicles(addVehicleWithId5())
                 .client(clientCreator.createClientWithId5())
-                .build();
-    }
-
-    public ReservationCreationRequest createReservationCreationRequest() {
-        return ReservationCreationRequest.builder()
-                .reservation(buildTestReservation())
-                .clientId(5L)
-                .vehiclesIds(createVehiclesIds())
                 .build();
     }
 
@@ -68,18 +59,5 @@ public class ReservationCreator {
         Set<Vehicle> vehicles = new HashSet<>();
         vehicles.add(vehicleCreator.createCarWithId5());
         return vehicles;
-    }
-
-    private Reservation buildTestReservation() {
-        return Reservation.builder()
-                .rentInformation(buildRentInformation())
-                .build();
-    }
-
-    private Set<Long> createVehiclesIds() {
-        Set<Long> ids = new HashSet<>();
-        ids.add(5L);
-        ids.add(6L);
-        return ids;
     }
 }

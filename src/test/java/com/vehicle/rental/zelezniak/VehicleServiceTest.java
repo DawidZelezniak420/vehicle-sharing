@@ -1,5 +1,6 @@
 package com.vehicle.rental.zelezniak;
 
+import com.vehicle.rental.zelezniak.VehicleRentalApplication;
 import com.vehicle.rental.zelezniak.common_value_objects.Money;
 import com.vehicle.rental.zelezniak.config.DatabaseSetup;
 import com.vehicle.rental.zelezniak.config.VehicleCreator;
@@ -57,7 +58,7 @@ class VehicleServiceTest {
     void shouldReturnPageOf2Vehicles() {
         Pageable pageable = PageRequest.of(0, 2);
         Page<Vehicle> page = vehicleService.findAll(pageable);
-        List<Vehicle> vehicles = page.get().toList();
+        List<Vehicle> vehicles = page.getContent();
 
         assertEquals(2, vehicles.size());
     }
@@ -66,19 +67,18 @@ class VehicleServiceTest {
     void shouldReturnAllVehicles() {
         Pageable pageable = PageRequest.of(0, 5);
         Page<Vehicle> page = vehicleService.findAll(pageable);
-        List<Vehicle> vehicles = page.get().toList();
-        assertTrue(vehicles.contains(vehicleWithId5));
+        List<Vehicle> vehicles = page.getContent();
 
+        assertTrue(vehicles.contains(vehicleWithId5));
         assertTrue(vehicles.contains(vehicleWithId6));
         assertEquals(5, vehicles.size());
     }
 
     @Test
     void shouldFindVehicleById() {
-        Vehicle vehicle5 = vehicleService.findById(
-                vehicleWithId5.getId());
-        Vehicle vehicle6 = vehicleService.findById(
-                vehicleWithId6.getId());
+        Vehicle vehicle5 = vehicleService.findById(vehicleWithId5.getId());
+        Vehicle vehicle6 = vehicleService.findById(vehicleWithId6.getId());
+
         assertEquals(vehicleWithId5, vehicle5);
         assertEquals(vehicleWithId6, vehicle6);
     }
@@ -86,8 +86,7 @@ class VehicleServiceTest {
     @Test
     void shouldNotFindVehicleById() {
         Long nonExistentId = 20L;
-        assertThrows(NoSuchElementException.class, () ->
-                vehicleService.findById(nonExistentId));
+        assertThrows(NoSuchElementException.class, () -> vehicleService.findById(nonExistentId));
     }
 
     @Test
@@ -97,16 +96,13 @@ class VehicleServiceTest {
         vehicleService.add(testCar);
 
         assertEquals(6, vehicleRepository.count());
-        assertTrue(vehicleRepository.existsByVehicleInformationRegistrationNumber(
-                testCar.getRegistrationNumber()));
+        assertTrue(vehicleRepository.existsByVehicleInformationRegistrationNumber(testCar.getRegistrationNumber()));
     }
 
     @Test
     void shouldNotAddVehicle() {
-        assertThrows(IllegalArgumentException.class, () ->
-                vehicleService.add(vehicleWithId5));
-        assertThrows(IllegalArgumentException.class, () ->
-                vehicleService.add(vehicleWithId6));
+        assertThrows(IllegalArgumentException.class, () -> vehicleService.add(vehicleWithId5));
+        assertThrows(IllegalArgumentException.class, () -> vehicleService.add(vehicleWithId6));
     }
 
     @Test
@@ -114,9 +110,7 @@ class VehicleServiceTest {
         Long vehicle5Id = vehicleWithId5.getId();
         Vehicle newData = vehicleCreator.buildVehicle5WithDifferentData();
 
-        vehicleService.update(vehicle5Id, newData);
-
-        Vehicle updated = vehicleService.findById(vehicle5Id);
+        Vehicle updated = vehicleService.update(vehicle5Id, newData);
 
         assertEquals(newData, updated);
     }
@@ -124,18 +118,17 @@ class VehicleServiceTest {
     @Test
     @DisplayName("Should not update vehicle when new data contains an existing registration number")
     void shouldNotUpdateVehicle() {
-        RegistrationNumber existentRegistration = vehicleWithId6.getRegistrationNumber();
         Vehicle newData = vehicleCreator.buildVehicle5WithDifferentData();
         VehicleInformation vehicleInformation = newData.getVehicleInformation();
-        VehicleInformation infoWithExistentRegistration = vehicleInformation.toBuilder()
-                .registrationNumber(existentRegistration)
+        RegistrationNumber existingRegistration = vehicleWithId6.getRegistrationNumber();
+        VehicleInformation infoWithExistingRegistration = vehicleInformation.toBuilder()
+                .registrationNumber(existingRegistration)
                 .build();
 
-        newData.setVehicleInformation(infoWithExistentRegistration);
+        newData.setVehicleInformation(infoWithExistingRegistration);
         Long vehicleToUpdateId = vehicleWithId5.getId();
 
-        assertThrows(IllegalArgumentException.class, () ->
-                vehicleService.update(vehicleToUpdateId, newData));
+        assertThrows(IllegalArgumentException.class, () -> vehicleService.update(vehicleToUpdateId, newData));
     }
 
     @Test
@@ -145,8 +138,7 @@ class VehicleServiceTest {
         newData.setStatus(Vehicle.Status.UNAVAILABLE);
         newData.setDeposit(new Money(BigDecimal.valueOf(1000)));
 
-        vehicleService.update(vehicle6Id, newData);
-        Vehicle updated = vehicleService.findById(vehicle6Id);
+        Vehicle updated = vehicleService.update(vehicle6Id, newData);
 
         assertEquals(newData, updated);
     }
@@ -156,7 +148,9 @@ class VehicleServiceTest {
         Long vehicle5Id = vehicleWithId5.getId();
 
         assertEquals(5, vehicleRepository.count());
+
         vehicleService.delete(vehicle5Id);
+
         assertEquals(4, vehicleRepository.count());
 
         List<Vehicle> all = vehicleRepository.findAll();
@@ -166,9 +160,9 @@ class VehicleServiceTest {
     @Test
     void shouldNotDeleteVehicle() {
         Long nonExistentId = 20L;
+
         assertEquals(5, vehicleRepository.count());
-        assertThrows(NoSuchElementException.class, () ->
-                vehicleService.delete(nonExistentId));
+        assertThrows(NoSuchElementException.class, () -> vehicleService.delete(nonExistentId));
         assertEquals(5, vehicleRepository.count());
     }
 }

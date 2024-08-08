@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class VehicleControllerCriteriaSearchTest {
 
     private static Vehicle vehicleWithId5;
-    private static Pageable pageable = PageRequest.of(0, 5);
+    private static final Pageable pageable = PageRequest.of(0, 5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String USER = "USER";
     private static final String ADMIN = "ADMIN";
@@ -72,7 +72,7 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "model";
         int resultSize = 1;
         String value = vehicleWithId5.getVehicleInformation().getModel();
-        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria, value),
                 resultSize, vehicleWithId5, USER);
     }
 
@@ -83,7 +83,7 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "brand";
         int resultSize = 1;
         String value = info.getBrand();
-        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria, value),
                 resultSize, vehicle7, USER);
     }
 
@@ -95,7 +95,7 @@ class VehicleControllerCriteriaSearchTest {
         int resultSize = 1;
         RegistrationNumber registrationNumber = vehicle8.getRegistrationNumber();
         String value = registrationNumber.getRegistration();
-        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria, value),
                 resultSize, vehicle8, ADMIN);
     }
 
@@ -106,7 +106,7 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "registration number";
         RegistrationNumber registrationNumber = vehicle8.getRegistrationNumber();
         String value = registrationNumber.getRegistration();
-        performCriteriaRegistrationNumber(new CriteriaSearchRequest<>(criteria,value));
+        performCriteriaRegistrationNumber(new CriteriaSearchRequest<>(criteria, value));
     }
 
     @Test
@@ -116,7 +116,7 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "production year";
         int resultSize = 2;
         String value = String.valueOf(info.getProductionYear().getYear());
-        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value)
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria, value)
                 , resultSize, vehicle8, USER);
     }
 
@@ -129,8 +129,8 @@ class VehicleControllerCriteriaSearchTest {
         mockMvc.perform(post("/vehicles/criteria")
                         .contentType(APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request))
-                        .param("page",String.valueOf(pageable.getPageNumber()))
-                        .param("size",String.valueOf(pageable.getPageSize()))
+                        .param("page", String.valueOf(pageable.getPageNumber()))
+                        .param("size", String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(
@@ -146,7 +146,7 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "status";
         int resultSize = 4;
         String value = "available";
-        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria, value),
                 resultSize, vehicleWithId5, USER);
     }
 
@@ -159,14 +159,12 @@ class VehicleControllerCriteriaSearchTest {
         String criteria = "status";
         int resultSize = 1;
         String value = "unavailable";
-        performCriteriaRequest(new CriteriaSearchRequest<>(criteria,value),
+        performCriteriaRequest(new CriteriaSearchRequest<>(criteria, value),
                 resultSize, vehicle8, USER);
     }
 
-    private <T> void performCriteriaRequest(
-            CriteriaSearchRequest<T> searchRequest,
-            int resultSize, Vehicle result, String role)
-            throws Exception {
+    private <T> void performCriteriaRequest(CriteriaSearchRequest<T> searchRequest,
+                                            int resultSize, Vehicle result, String role) throws Exception {
         String userToken = tokenGenerator.generateToken(role);
         var info = result.getVehicleInformation();
         Year productionYear = info.getProductionYear();
@@ -180,8 +178,8 @@ class VehicleControllerCriteriaSearchTest {
         mockMvc.perform(post("/vehicles/criteria")
                         .contentType(APPLICATION_JSON)
                         .content(mapper.writeValueAsString(searchRequest))
-                        .param("page",String.valueOf(pageable.getPageNumber()))
-                        .param("size",String.valueOf(pageable.getPageSize()))
+                        .param("page", String.valueOf(pageable.getPageNumber()))
+                        .param("size", String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -203,15 +201,15 @@ class VehicleControllerCriteriaSearchTest {
                 .andExpect(jsonPath("$.content[0].status").value(status));
     }
 
-    private <T>void performCriteriaRegistrationNumber(
+    private <T> void performCriteriaRegistrationNumber(
             CriteriaSearchRequest<T> searchRequest)
             throws Exception {
         String userToken = tokenGenerator.generateToken(USER);
         mockMvc.perform(post("/vehicles/criteria")
                         .contentType(APPLICATION_JSON)
                         .content(mapper.writeValueAsString(searchRequest))
-                        .param("page",String.valueOf(pageable.getPageNumber()))
-                        .param("size",String.valueOf(pageable.getPageSize()))
+                        .param("page", String.valueOf(pageable.getPageNumber()))
+                        .param("size", String.valueOf(pageable.getPageSize()))
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(status().isForbidden())

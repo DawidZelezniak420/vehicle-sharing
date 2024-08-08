@@ -39,7 +39,8 @@ class VehicleControllerTest {
 
     private static Vehicle vehicleWithId5;
     private static Vehicle vehicleWithId6;
-    private static Pageable pageable = PageRequest.of(0,5);
+
+    private static final Pageable pageable = PageRequest.of(0,5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
@@ -163,8 +164,7 @@ class VehicleControllerTest {
                 .andExpect(status().isCreated());
 
         assertEquals(6, vehicleRepository.count());
-        assertTrue(vehicleRepository.existsByVehicleInformationRegistrationNumber(
-                testCar.getRegistrationNumber()));
+        assertTrue(vehicleRepository.existsByVehicleInformationRegistrationNumber(testCar.getRegistrationNumber()));
     }
 
     @Test

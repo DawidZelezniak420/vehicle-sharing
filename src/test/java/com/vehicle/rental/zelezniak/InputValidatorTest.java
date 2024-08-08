@@ -20,16 +20,13 @@ class InputValidatorTest {
     @Test
     void shouldThrowException() {
         String given = null;
-        assertThrows(IllegalArgumentException.class, () ->
-                inputValidator.throwExceptionIfObjectIsNull(
-                        given,"Should not be a null."));
+        assertThrows(IllegalArgumentException.class,
+                () -> inputValidator.throwExceptionIfObjectIsNull(given,"Should not be a null."));
     }
 
     @Test
     void shouldNotThrowException() {
         String given = "string";
-        assertDoesNotThrow(() ->
-                inputValidator.throwExceptionIfObjectIsNull(
-                        given,"Should not be a null."));
+        assertDoesNotThrow(() -> inputValidator.throwExceptionIfObjectIsNull(given,"Should not be a null."));
     }
 }

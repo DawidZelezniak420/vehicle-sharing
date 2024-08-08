@@ -44,10 +44,8 @@ class VehicleValidatorTest {
 
     @Test
     void shouldTestVehicleCanBeUpdated() {
-        assertDoesNotThrow(() ->
-                validator.checkIfVehicleCanBeUpdated(
-                        vehicleWithId5.getRegistrationNumber(),
-                        vehicleCreator.createTestCar()));
+        assertDoesNotThrow(() -> validator.checkIfVehicleCanBeUpdated(
+                        vehicleWithId5.getRegistrationNumber(), vehicleCreator.createTestCar()));
     }
 
     @Test
@@ -60,25 +58,23 @@ class VehicleValidatorTest {
                 .registrationNumber(existingRegistration)
                 .build();
         newCarData.setVehicleInformation(information);
-
         RegistrationNumber vehicleWithId5Registration = vehicleWithId5.getRegistrationNumber();
+
         assertThrows(IllegalArgumentException.class,
-                () -> validator.checkIfVehicleCanBeUpdated(
-                        vehicleWithId5Registration, newCarData));
+                () -> validator.checkIfVehicleCanBeUpdated(vehicleWithId5Registration, newCarData));
     }
 
     @Test
     void shouldThrowExceptionIfVehicleExists() {
         RegistrationNumber vehicleWithId5Registration = vehicleWithId5.getRegistrationNumber();
+
         assertThrows(IllegalArgumentException.class,
-                () -> validator.throwExceptionIfVehicleExists(
-                        vehicleWithId5Registration));
+                () -> validator.throwExceptionIfVehicleExists(vehicleWithId5Registration));
     }
 
     @Test
     void shouldTestVehicleTypesAreNotSame(){
-       assertThrows(IllegalArgumentException.class, ()->
-               validator.checkIfVehiclesHasSameTypes(
-                       vehicleWithId5,vehicleWithId6));
+       assertThrows(IllegalArgumentException.class,
+               ()-> validator.checkIfVehiclesHasSameTypes(vehicleWithId5,vehicleWithId6));
     }
 }

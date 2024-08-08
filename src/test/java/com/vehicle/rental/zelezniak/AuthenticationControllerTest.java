@@ -33,8 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource("/application-test.properties")
 class AuthenticationControllerTest {
 
-    private static final MediaType APPLICATION_JSON =
-            MediaType.APPLICATION_JSON;
+    private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
 
     @Autowired
     private AuthenticationService authService;
@@ -91,11 +90,9 @@ class AuthenticationControllerTest {
     void shouldLoginUser() throws Exception {
         authService.register(client);
         String email = client.getEmail();
-        LoginRequest loginRequest = new LoginRequest(
-               email , "somepassword");
+        LoginRequest loginRequest = new LoginRequest(email , "somepassword");
 
-        Client registeredUser = clientRepository.findByCredentialsEmail(
-                email);
+        Client registeredUser = clientRepository.findByCredentialsEmail(email).get();
         UserName name = registeredUser.getName();
         Address address = registeredUser.getAddress();
 
@@ -118,8 +115,7 @@ class AuthenticationControllerTest {
 
     @Test
     void shouldTestInvalidEmailPattern() throws Exception {
-        client.setCredentials(new UserCredentials(
-                "wrongemail@com","somepassword"));
+        client.setCredentials(new UserCredentials("wrongemail@com","somepassword"));
         String email = client.getEmail();
         mockMvc.perform(post("/auth/register")
                 .contentType(APPLICATION_JSON)

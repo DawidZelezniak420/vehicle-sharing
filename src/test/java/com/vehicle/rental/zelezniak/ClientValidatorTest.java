@@ -46,29 +46,24 @@ class ClientValidatorTest {
     void shouldThrowExceptionIfClientExists() {
         String existingEmail = clientWithId5.getEmail();
 
-        assertThrows(IllegalArgumentException.class, () ->
-                validator.ifUserExistsThrowException(existingEmail));
+        assertThrows(IllegalArgumentException.class,
+                () -> validator.ifUserExistsThrowException(existingEmail));
     }
 
     @Test
     void shouldNotThrowExceptionIfClientNotExists() {
         Client c = new Client();
-        c.setCredentials(new UserCredentials(
-                "someuser@gmail.com", "somepass"));
+        c.setCredentials(new UserCredentials("someuser@gmail.com", "somepass"));
 
-        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(
-                c.getEmail()));
+        assertDoesNotThrow(() -> validator.ifUserExistsThrowException(c.getEmail()));
     }
 
     @Test
     void shouldTestClientCanBeUpdated() {
         String userFromDbEmail = clientWithId5.getEmail();
-        clientWithId5.setCredentials(new UserCredentials(
-                "newemail@gmail.com", "somepass"));
+        clientWithId5.setCredentials(new UserCredentials("newemail@gmail.com", "somepass"));
 
-        assertDoesNotThrow(() ->
-                validator.checkIfUserCanBeUpdated(
-                        userFromDbEmail, clientWithId5));
+        assertDoesNotThrow(() -> validator.checkIfUserCanBeUpdated(userFromDbEmail, clientWithId5));
     }
 
     @Test
@@ -76,8 +71,7 @@ class ClientValidatorTest {
         Client byId = clientService.findById(6L);
         String existingEmail = byId.getEmail();
 
-        assertThrows(IllegalArgumentException.class, () ->
-                validator.checkIfUserCanBeUpdated(
-                        existingEmail, clientWithId5));
+        assertThrows(IllegalArgumentException.class,
+                () -> validator.checkIfUserCanBeUpdated(existingEmail, clientWithId5));
     }
 }

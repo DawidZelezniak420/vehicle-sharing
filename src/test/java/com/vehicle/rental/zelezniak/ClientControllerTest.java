@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ClientControllerTest {
 
     private static Client clientWithId5;
-    private static Pageable pageable = PageRequest.of(0, 5);
+    private static final Pageable pageable = PageRequest.of(0, 5);
     private static final MediaType APPLICATION_JSON = MediaType.APPLICATION_JSON;
     private static final String ADMIN = "ADMIN";
     private static final String USER = "USER";
@@ -152,7 +152,7 @@ class ClientControllerTest {
     void shouldDeleteClient() throws Exception {
         Long existingClientId = 5L;
         Page<Client> page = clientService.findAll(pageable);
-        List<Client> clients = page.get().toList();
+        List<Client> clients = page.getContent();
 
         assertEquals(3, clients.size());
         mockMvc.perform(delete("/clients/delete/{id}", existingClientId)
@@ -160,7 +160,7 @@ class ClientControllerTest {
                 .andExpect(status().isNoContent());
 
         page = clientService.findAll(pageable);
-        clients = page.get().toList();
+        clients = page.getContent();
         assertEquals(2, clients.size());
     }
 
@@ -182,12 +182,21 @@ class ClientControllerTest {
                 .andExpect(jsonPath("$.roles[0].roleName").value(USER));
     }
 
+    @Test
+    void shouldNotFindClientByEmail() throws Exception {
+        String email = "nonexistingemail@gmail.com";
+        mockMvc.perform(get("/clients/email/{email}", email)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(
+                        "Client with email: " + email + " does not exists."));
+    }
+
     private Client createTestClient() {
         Client client = new Client();
         client.setId(5L);
         client.setName(new UserName("Jim", "Beam"));
-        client.setCredentials(new UserCredentials(
-                "someemail@gmail.com", "changedpass"));
+        client.setCredentials(new UserCredentials("someemail@gmail.com", "changedpass"));
         Address address = new Address(5L, new Street("somestreet"), "25",
                 "10", new City("Lublin"), "21-070", new Country("Poland"));
         client.setAddress(address);
@@ -195,9 +204,7 @@ class ClientControllerTest {
         return client;
     }
 
-    private void performUpdateClient(
-            Client newData, String token)
-            throws Exception {
+    private void performUpdateClient(Client newData, String token) throws Exception {
         Long existingClientId = 5L;
         mockMvc.perform(put("/clients/update/{id}", existingClientId)
                         .contentType(APPLICATION_JSON)

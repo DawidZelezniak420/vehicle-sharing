@@ -19,12 +19,18 @@ public class ClientCreator {
         Client client = new Client();
         client.setId(5L);
         client.setName(new UserName("UserFive", "Five"));
-        client.setCredentials(new UserCredentials(
-                "userfive@gmail.com", "somepass"));
+        client.setCredentials(new UserCredentials("userfive@gmail.com", "somepass"));
         Address address = buildAddress();
         client.setAddress(address);
-        client.setRoles(Set.of(new Role("USER")));
+        client.setRoles(Set.of(buildRoleUser()));
         return client;
+    }
+
+    private Role buildRoleUser() {
+        Role role = new Role();
+        role.setId(1);
+        role.setRoleName("USER");
+        return role;
     }
 
     private Address buildAddress(){

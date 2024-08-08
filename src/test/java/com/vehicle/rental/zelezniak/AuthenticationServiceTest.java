@@ -18,6 +18,7 @@ import com.vehicle.rental.zelezniak.util.TimeFormatter;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,8 +71,7 @@ class AuthenticationServiceTest {
         setDataForClient();
         authenticationService.register(client);
 
-        LoginRequest loginRequest = new LoginRequest(
-                client.getEmail(), "somepassword");
+        LoginRequest loginRequest = new LoginRequest(client.getEmail(), "somepassword");
         LoginResponse login = authenticationService.login(loginRequest);
 
         Assertions.assertEquals(client, login.getClient());
@@ -82,15 +82,13 @@ class AuthenticationServiceTest {
 
     @Test
     void shouldLoadUserByEmail() {
-        assertEquals(clientWithId5,
-                authenticationService.loadUserByUsername(
-                                    clientWithId5.getEmail()));
+        UserDetails userDetails = authenticationService.loadUserByUsername(clientWithId5.getEmail());
+        assertEquals(clientWithId5, userDetails);
     }
 
     private void setDataForClient() {
         client.setName(new UserName("Uncle", "Bob"));
-        client.setCredentials(new UserCredentials(
-                "bob@gmail.com", "somepassword"));
+        client.setCredentials(new UserCredentials("bob@gmail.com", "somepassword"));
         client.setCreatedAt(TimeFormatter.getFormattedActualDateTime());
         Address address = new Address(null, new Street("teststreet"),
                 "5", "150", new City("Warsaw"),

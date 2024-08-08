@@ -21,7 +21,6 @@ public class RentCreator {
 
     @Autowired
     private ClientCreator clientCreator;
-
     @Autowired
     private VehicleCreator vehicleCreator;
 
@@ -29,7 +28,8 @@ public class RentCreator {
         return Rent.builder()
                 .id(5L)
                 .rentStatus(Rent.RentStatus.COMPLETED)
-                .totalCost(new Money(BigDecimal.valueOf(150.00)))
+                .totalCost(new Money(BigDecimal.valueOf(1200.00)))
+                .depositAmount(new Money(BigDecimal.valueOf(1000.00)))
                 .rentInformation(buildRentInformation())
                 .vehicles(addVehicleWithId5())
                 .client(clientCreator.createClientWithId5())
