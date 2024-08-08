@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vehicle.rental.zelezniak.common_value_objects.Money;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.RegistrationNumber;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicle_value_objects.VehicleInformation;
-import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -20,19 +19,17 @@ import static com.vehicle.rental.zelezniak.constants.ValidationMessages.CAN_NOT_
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        property = "type"
-)
+        property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Car.class, name = "car"),
-        @JsonSubTypes.Type(value = Motorcycle.class, name = "motorcycle")
-})
+        @JsonSubTypes.Type(value = Motorcycle.class, name = "motorcycle")})
 @Entity
+@Table(name = "vehicles")
 @Inheritance(strategy = InheritanceType.JOINED)
+@SuperBuilder(toBuilder = true)
 @Getter
 @Setter
 @AllArgsConstructor
-@Table(name = "vehicles")
-@SuperBuilder(toBuilder = true)
 public abstract class Vehicle {
 
     @Id
@@ -63,9 +60,6 @@ public abstract class Vehicle {
     public RegistrationNumber getRegistrationNumber() {
         return vehicleInformation.getRegistrationNumber();
     }
-
-    public abstract  Vehicle update(
-            VehicleUpdateVisitor visitor, Vehicle newData);
 
     @Override
     public boolean equals(Object object) {

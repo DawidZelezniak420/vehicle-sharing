@@ -18,31 +18,24 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     @GetMapping("/")
-    public Page<Vehicle> findAll(
-            Pageable pageable) {
-        return vehicleService.findAll(
-                pageable);
+    public Page<Vehicle> findAll(Pageable pageable) {
+        return vehicleService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
-    public Vehicle findById(
-            @PathVariable Long id) {
+    public Vehicle findById(@PathVariable Long id) {
         return vehicleService.findById(id);
     }
 
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public void add(
-            @RequestBody @Validated
-            Vehicle vehicle) {
+    public void add(@RequestBody @Validated Vehicle vehicle) {
         vehicleService.add(vehicle);
     }
 
     @PutMapping("/update/{id}")
-    public void update(@PathVariable Long id,
-                       @Validated @RequestBody
-                       Vehicle newData) {
-        vehicleService.update(id, newData);
+    public Vehicle update(@PathVariable Long id, @Validated @RequestBody Vehicle newData) {
+       return vehicleService.update(id, newData);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -52,9 +45,7 @@ public class VehicleController {
     }
 
     @PostMapping("/criteria")
-    public <T> Page<Vehicle> findByCriteria(
-            @RequestBody CriteriaSearchRequest<T> searchRequest,
-            Pageable pageable) {
+    public <T> Page<Vehicle> findByCriteria(@RequestBody CriteriaSearchRequest<T> searchRequest, Pageable pageable) {
         return vehicleService.findByCriteria(
                 searchRequest,pageable);
     }

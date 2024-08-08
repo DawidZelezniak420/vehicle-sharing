@@ -10,8 +10,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/clients")
 @RequiredArgsConstructor
+@RequestMapping("/clients")
 public class ClientController {
 
     private final ClientService clientService;
@@ -22,16 +22,13 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public Client findById(
-            @PathVariable Long id) {
+    public Client findById(@PathVariable Long id) {
         return clientService.findById(id);
     }
 
     @PutMapping("/update/{id}")
-    public void update(
-            @PathVariable Long id,
-            @Validated @RequestBody Client newData) {
-        clientService.update(id, newData);
+    public Client update(@PathVariable Long id, @Validated @RequestBody Client newData) {
+       return clientService.update(id, newData);
     }
 
     @DeleteMapping("/delete/{id}")

@@ -1,9 +1,9 @@
 package com.vehicle.rental.zelezniak.reservation_domain.service;
 
 import com.vehicle.rental.zelezniak.rent_domain.service.RentService;
-import com.vehicle.rental.zelezniak.reservation_domain.model.util.ReservationUpdateVisitor;
-import com.vehicle.rental.zelezniak.reservation_domain.repository.ReservationRepository;
 import com.vehicle.rental.zelezniak.reservation_domain.model.Reservation;
+import com.vehicle.rental.zelezniak.reservation_domain.model.util.ReservationCreationRequest;
+import com.vehicle.rental.zelezniak.reservation_domain.repository.ReservationRepository;
 import com.vehicle.rental.zelezniak.util.validation.InputValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,8 +22,6 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final RentService rentService;
-
-    private final NewReservationService reservationBuilder;
     private final InputValidator inputValidator;
     private final NewReservationService newReservationService;
 
@@ -34,9 +32,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void createReservation(Long clientId) {
-        checkIfNotNull(clientId, CLIENT_ID_NOT_NULL);
-        newReservationService.addNewReservation(clientId);
+    public void createReservation(ReservationCreationRequest request) {
+        checkIfNotNull(request.getClientId(), CLIENT_ID_NOT_NULL);
+        newReservationService.addNewReservation(request);
     }
 
     @Transactional(readOnly = true)
@@ -45,8 +43,7 @@ public class ReservationService {
         return findReservation(id);
     }
 
-    private <T> void checkIfNotNull(
-            T input, String message) {
+    private <T> void checkIfNotNull(T input, String message) {
         inputValidator.throwExceptionIfObjectIsNull(
                 input, message);
     }

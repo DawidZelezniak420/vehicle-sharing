@@ -6,13 +6,13 @@ import lombok.*;
 
 import static com.vehicle.rental.zelezniak.constants.ValidationMessages.*;
 
-@Getter
 @Embeddable
 @Builder(toBuilder = true)
+@Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@EqualsAndHashCode
-@ToString
 public class VehicleInformation {
 
     @NotBlank(message = "Brand" + CAN_NOT_BE_BLANK)

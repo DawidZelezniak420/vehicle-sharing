@@ -2,9 +2,10 @@ package com.vehicle.rental.zelezniak.exception;
 
 import lombok.*;
 
-@AllArgsConstructor
+
 @Getter
 @Setter
+@AllArgsConstructor
 public class ErrorInformation {
 
     private String message;

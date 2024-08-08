@@ -1,6 +1,5 @@
 package com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles;
 
-import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
@@ -17,12 +15,11 @@ import java.util.Objects;
 import static com.vehicle.rental.zelezniak.constants.ValidationMessages.CAN_NOT_BE_NULL;
 
 @Entity
+@Table(name = "cars")
+@SuperBuilder(toBuilder = true)
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder(toBuilder = true)
-@Table(name = "cars")
 public class Car extends Vehicle {
 
     @NotNull(message = "Number of doors" + CAN_NOT_BE_NULL)
@@ -33,12 +30,6 @@ public class Car extends Vehicle {
 
     @Enumerated(EnumType.STRING)
     private BodyType bodyType;
-
-    public  Car update(
-            VehicleUpdateVisitor visitor, Vehicle newData) {
-        return  visitor.update(
-                this, (Car) newData);
-    }
 
     @Override
     public String toString() {

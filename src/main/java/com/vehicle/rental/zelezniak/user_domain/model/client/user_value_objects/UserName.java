@@ -4,12 +4,12 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-@Getter
 @Embeddable
+@Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@EqualsAndHashCode
-@ToString
 public class UserName {
 
     private static final String FIRST_NAME_SIZE_INVALID =  "First name must contains at least 3 characters";

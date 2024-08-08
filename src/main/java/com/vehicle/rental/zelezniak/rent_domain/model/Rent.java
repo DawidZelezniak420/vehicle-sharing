@@ -11,12 +11,11 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "rents")
 @Builder(toBuilder = true)
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Rent {
 
     @Id
@@ -32,20 +31,24 @@ public class Rent {
             column = @Column(name = "total_cost"))
     private Money totalCost;
 
+    @Embedded
+    @AttributeOverride(
+            name = "value",
+            column = @Column(name = "deposit_amount"))
+    private Money depositAmount;
+
     @Enumerated(EnumType.STRING)
     private RentStatus rentStatus;
 
-    @ManyToOne(
-            cascade = {
-                    CascadeType.MERGE, CascadeType.DETACH,
-                    CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {
+            CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "client_id")
     private Client client;
 
-    @ManyToMany(
-            cascade = {
-                    CascadeType.MERGE, CascadeType.DETACH,
-                    CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {
+            CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "rented_vehicles",
             joinColumns = @JoinColumn(name = "rent_id"),

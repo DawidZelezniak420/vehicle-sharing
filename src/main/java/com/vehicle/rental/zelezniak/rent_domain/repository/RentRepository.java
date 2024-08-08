@@ -14,17 +14,15 @@ import java.util.Set;
 public interface RentRepository extends JpaRepository<Rent, Long> {
 
     @Query("SELECT r FROM Rent r WHERE r.client.id = :id")
-    Page<Rent> findAllByClientId(@Param("id") Long id, Pageable pageable);
+    Page<Rent> findAllByClientId(Long id, Pageable pageable);
 
     @Query("SELECT v FROM Rent r JOIN r.vehicles v WHERE r.id = :id")
-    Page<Vehicle> findVehiclesByRentId(@Param("id") Long id, Pageable pageable);
+    Page<Vehicle> findVehiclesByRentId(Long id, Pageable pageable);
 
     @Query("SELECT v.id FROM Rent r " +
             "JOIN r.vehicles v " +
             "WHERE r.rentInformation.rentDuration.rentalStart <= :end " +
             "AND r.rentInformation.rentDuration.rentalEnd >= :start " +
             "AND r.rentStatus = 'ACTIVE'")
-    Set<Long> unavailableVehicleIdsForRentInPeriod(
-            @Param("start") LocalDateTime start,
-            @Param("end")LocalDateTime end);
+    Set<Long> findUnavailableVehicleIdsForRentInPeriod(LocalDateTime start,LocalDateTime end);
 }

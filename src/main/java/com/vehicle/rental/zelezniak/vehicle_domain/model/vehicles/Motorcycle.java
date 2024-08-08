@@ -1,6 +1,5 @@
 package com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles;
 
-import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.util.VehicleUpdateVisitor;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -8,22 +7,16 @@ import lombok.experimental.SuperBuilder;
 import java.util.Objects;
 
 @Entity
+@Table(name = "motorcycles")
+@SuperBuilder(toBuilder = true)
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder(toBuilder = true)
-@Table(name = "motorcycles")
+@AllArgsConstructor
 public class Motorcycle extends Vehicle {
 
     @Enumerated(EnumType.STRING)
     private MotorcycleType motorcycleType;
-
-    public Motorcycle update(
-            VehicleUpdateVisitor visitor, Vehicle newData) {
-        return  visitor.update(
-                this, (Motorcycle) newData);
-    }
 
     @Override
     public boolean equals(Object o) {

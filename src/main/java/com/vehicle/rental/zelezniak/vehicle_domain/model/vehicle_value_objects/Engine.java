@@ -7,12 +7,12 @@ import lombok.*;
 import static com.vehicle.rental.zelezniak.constants.ValidationMessages.CAN_NOT_BE_BLANK;
 
 @Embeddable
-@Getter
 @Builder(toBuilder = true)
+@Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@EqualsAndHashCode
-@ToString
 public class Engine {
 
     private static final String CANT_BE_BELOW_ONE = " can not be lower than 1";

@@ -7,14 +7,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "addresses")
 @Builder
-@EqualsAndHashCode
+@Table(name = "addresses")
+@Getter
 @ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class Address {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

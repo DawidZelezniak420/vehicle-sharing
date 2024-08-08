@@ -8,10 +8,10 @@ import static com.vehicle.rental.zelezniak.constants.ValidationMessages.CAN_NOT_
 
 @Embeddable
 @Getter
-@NoArgsConstructor(force = true)
-@RequiredArgsConstructor
-@EqualsAndHashCode
 @ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
 public class RegistrationNumber {
 
     @NotBlank(message = "Registration number" + CAN_NOT_BE_BLANK)

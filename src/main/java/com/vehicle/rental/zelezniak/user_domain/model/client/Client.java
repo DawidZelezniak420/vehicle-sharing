@@ -15,12 +15,12 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "clients")
 @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Client implements UserDetails {
 
     @Id
@@ -40,9 +40,10 @@ public class Client implements UserDetails {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {
-            CascadeType.DETACH,
-            CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER,
+            cascade = {CascadeType.MERGE,
+                    CascadeType.DETACH
+            })
     @JoinTable(name = "clients_roles", joinColumns =
     @JoinColumn(name = "user_id"), inverseJoinColumns =
     @JoinColumn(name = "role_id"))
@@ -86,13 +87,15 @@ public class Client implements UserDetails {
                 createdAt, address);
     }
 
+    @Override
     public String toString() {
-        return "ApplicationUser{" +
-                "address=" + address +
-                ", createdAt=" + createdAt +
-                ", credentials=" + credentials +
+        return "Client{" +
+                "id=" + id +
                 ", name=" + name +
-                ", id=" + id +
+                ", credentials=" + credentials +
+                ", createdAt=" + createdAt +
+                ", address=" + address +
+                ", roles=" + roles +
                 '}';
     }
 }

@@ -5,11 +5,12 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+
 @Embeddable
 @Getter
-@NoArgsConstructor(force = true)
-@EqualsAndHashCode
 @ToString
+@EqualsAndHashCode
+@NoArgsConstructor(force = true)
 public class Year {
 
     private final int year;

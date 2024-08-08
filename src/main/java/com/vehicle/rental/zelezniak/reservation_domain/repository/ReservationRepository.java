@@ -23,14 +23,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "WHERE r.rentInformation.rentDuration.rentalStart <= :end " +
             "AND r.rentInformation.rentDuration.rentalEnd >= :start " +
             "AND r.reservationStatus = 'ACTIVE'")
-    Set<Long> unavailableVehicleIdsForReservationInPeriod(
-            LocalDateTime start,
-            LocalDateTime end);
+    Set<Long> unavailableVehicleIdsForReservationInPeriod(LocalDateTime start, LocalDateTime end);
 
     @Modifying
     @Query(nativeQuery = true,value = "DELETE FROM reserved_vehicles " +
             "WHERE reservation_id = :reservationId AND vehicle_id = :vehicleId")
-    void deleteVehicleFromReservation(
-            Long reservationId,
-            Long vehicleId);
+    void deleteVehicleFromReservation(Long reservationId, Long vehicleId);
+
+    @Modifying
+    @Query(nativeQuery = true,value = "INSERT INTO reserved_vehicles " +
+            "(reservation_id,vehicle_id) values (:reservationId,:vehicleId)")
+    void addVehicleToReservation(Long vehicleId, Long reservationId);
+
 }

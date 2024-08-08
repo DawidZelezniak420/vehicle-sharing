@@ -1,27 +1,23 @@
 package com.vehicle.rental.zelezniak.reservation_domain.model;
 
 import com.vehicle.rental.zelezniak.common_value_objects.Money;
+import com.vehicle.rental.zelezniak.common_value_objects.RentDuration;
 import com.vehicle.rental.zelezniak.common_value_objects.RentInformation;
-import com.vehicle.rental.zelezniak.reservation_domain.model.util.ReservationUpdateVisitor;
 import com.vehicle.rental.zelezniak.user_domain.model.client.Client;
 import com.vehicle.rental.zelezniak.vehicle_domain.model.vehicles.Vehicle;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import static java.util.Objects.isNull;
-
 @Entity
+@Table(name = "reservations")
+@Builder(toBuilder = true)
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "reservations")
-@Builder(toBuilder = true)
 public class Reservation {
 
     @Id
@@ -34,29 +30,27 @@ public class Reservation {
     @Embedded
     @AttributeOverride(
             name = "value",
-            column = @Column(name = "estimated_cost"))
-    private Money estimatedCost;
+            column = @Column(name = "total_cost"))
+    private Money totalCost;
 
     @Embedded
     @AttributeOverride(
             name = "value",
-            column = @Column(name = "total_deposit"))
-    private Money totalDeposit;
+            column = @Column(name = "deposit_amount"))
+    private Money depositAmount;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    @ManyToOne(
-            cascade = {
-                    CascadeType.MERGE, CascadeType.DETACH,
-                    CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {
+            CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.REFRESH})
     @JoinColumn(name = "client_id")
     private Client client;
 
-    @ManyToMany(
-            cascade = {
-                    CascadeType.MERGE, CascadeType.DETACH,
-                    CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(cascade = {
+            CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "reserved_vehicles",
             joinColumns = @JoinColumn(name = "reservation_id"),
@@ -70,24 +64,6 @@ public class Reservation {
         COMPLETED
     }
 
-    public Reservation updateReservation(
-            ReservationUpdateVisitor updateVisitor,
-            Reservation newData) {
-        return updateVisitor.updateReservation(
-                this, newData);
-    }
-
-    public void addVehicle(
-            Vehicle v){
-        initializeVehiclesIfNull();
-        vehicles.add(v);
-    }
-
-    public void removeVehicle(
-            Vehicle v){
-        vehicles.remove(v);
-    }
-
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
@@ -95,7 +71,7 @@ public class Reservation {
         Reservation that = (Reservation) object;
         return Objects.equals(id, that.id)
                 && Objects.equals(rentInformation, that.rentInformation)
-                && Objects.equals(estimatedCost, that.estimatedCost)
+                && Objects.equals(totalCost, that.totalCost)
                 && reservationStatus == that.reservationStatus
                 && Objects.equals(client, that.client);
     }
@@ -103,7 +79,7 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id,
-                rentInformation, estimatedCost,
+                rentInformation, totalCost,
                 reservationStatus, client);
     }
 
@@ -112,15 +88,9 @@ public class Reservation {
         return "Reservation{" +
                 "id=" + id +
                 ", rentInformation=" + rentInformation +
-                ", estimatedCost=" + estimatedCost +
+                ", estimatedCost=" + totalCost +
                 ", reservationStatus=" + reservationStatus +
                 ", client=" + client +
                 '}';
-    }
-
-    private void initializeVehiclesIfNull() {
-        if(isNull(vehicles)){
-            vehicles = new HashSet<>();
-        }
     }
 }

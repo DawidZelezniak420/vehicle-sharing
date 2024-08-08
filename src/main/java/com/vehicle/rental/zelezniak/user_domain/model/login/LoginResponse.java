@@ -5,18 +5,11 @@ import lombok.*;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponse {
 
     private Client client;
     private String jwt;
-
-    @Override
-    public String toString() {
-        return "LoginResponse{" +
-                "user=" + client +
-                ", jwt='" + jwt +
-                '}';
-    }
 }

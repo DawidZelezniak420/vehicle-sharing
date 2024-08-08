@@ -7,9 +7,9 @@ import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
-@Component
 @Getter
 @Setter
+@Component
 public class RSAKeyProperties {
 
 private RSAPublicKey publicKey;

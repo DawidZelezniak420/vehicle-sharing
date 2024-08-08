@@ -17,33 +17,24 @@ import java.util.*;
 import java.util.function.Function;
 
 @Service
-@Slf4j
 public class VehicleCriteriaSearch {
 
     private final InputValidator validator;
     private final CriteriaSearchExecutor searchExecutor;
-    private final Map<CriteriaType,
-            Function<Object, Page<Vehicle>>> criteriaMap;
+    private final Map<CriteriaType, Function<Object, Page<Vehicle>>> criteriaMap;
 
-    public VehicleCriteriaSearch(
-            InputValidator validator,
-            CriteriaSearchExecutor searchExecutor) {
+    public VehicleCriteriaSearch(InputValidator validator, CriteriaSearchExecutor searchExecutor) {
         this.validator = validator;
         this.searchExecutor = searchExecutor;
         criteriaMap = initializeCriteriaMap();
     }
 
-    public <T> Page<Vehicle> findVehiclesByCriteria(
-            CriteriaSearchRequest<T> searchRequest,
-            Pageable pageable) {
-        CriteriaType criteria = CriteriaType.getCriteriaFromString(
-                searchRequest.getCriteriaName());
+    public <T> Page<Vehicle> findVehiclesByCriteria(CriteriaSearchRequest<T> searchRequest, Pageable pageable) {
+        CriteriaType criteria = CriteriaType.getCriteriaFromString(searchRequest.getCriteriaName());
         checkIfUserCanUseSuchCriteria(criteria);
         Function<Object, Page<Vehicle>> queryFunction = criteriaMap.get(criteria);
         searchExecutor.setPageable(pageable);
-        return handleExecuteFunction(
-                searchRequest.getValue(),
-                queryFunction);
+        return handleExecuteFunction(searchRequest.getValue(), queryFunction);
     }
 
     private void checkIfUserCanUseSuchCriteria(CriteriaType criteria) {
@@ -73,16 +64,13 @@ public class VehicleCriteriaSearch {
                 "Access denied: Only admins can search by registration number");
     }
 
-    private <T> Page<Vehicle> handleExecuteFunction(
-            T value, Function<T, Page<Vehicle>> queryFunction) {
-        validator.throwExceptionIfObjectIsNull(queryFunction
-                , "The specified criterion is not supported");
+    private <T> Page<Vehicle> handleExecuteFunction(T value, Function<T, Page<Vehicle>> queryFunction) {
+        validator.throwExceptionIfObjectIsNull(queryFunction,
+                "The specified criterion is not supported");
         return queryFunction.apply(value);
     }
 
-    private <T> Map<
-            CriteriaType,
-            Function<T, Page<Vehicle>>> initializeCriteriaMap() {
+    private <T> Map<CriteriaType, Function<T, Page<Vehicle>>> initializeCriteriaMap() {
         Map<CriteriaType, Function<T, Page<Vehicle>>> result = new EnumMap<>(CriteriaType.class);
         assert searchExecutor != null;
         result.put(CriteriaType.BRAND, searchExecutor::findByBrand);

@@ -10,51 +10,41 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
 @Component
 @Setter
+@RequiredArgsConstructor
 public class CriteriaSearchExecutor {
-    //to do: add method with try catch block to handle unexpected exceptions
-    public Pageable pageable;
+
     private static final String CAN_NOT_CONVERT = "Can not convert value to ";
+
+    Pageable pageable;
     private final VehicleRepository vehicleRepository;
 
-    public Page<Vehicle> findByBrand(
-            Object brand) {
-        return vehicleRepository.findByVehicleInformationBrand(
-                (String) brand,pageable);
+    public Page<Vehicle> findByBrand(Object brand) {
+        return vehicleRepository.findByVehicleInformationBrand((String) brand,pageable);
     }
 
-    public Page<Vehicle> findByModel(
-            Object model) {
-        return vehicleRepository.findByVehicleInformationModel(
-                (String) model,pageable);
+    public Page<Vehicle> findByModel(Object model) {
+        return vehicleRepository.findByVehicleInformationModel((String) model,pageable);
     }
 
-    public Page<Vehicle> findByRegistrationNumber(
-            Object registration) {
+    public Page<Vehicle> findByRegistrationNumber(Object registration) {
         RegistrationNumber number = getRegistrationValue(registration);
-        return vehicleRepository.findByVehicleInformationRegistrationNumber(
-                number,pageable);
+        return vehicleRepository.findByVehicleInformationRegistrationNumber(number,pageable);
     }
 
-    public Page<Vehicle> findByProductionYear(
-            Object productionYear) {
+    public Page<Vehicle> findByProductionYear(Object productionYear) {
         Year year = new Year(getYearValue(productionYear));
-        return vehicleRepository.findByVehicleInformationProductionYear(
-                year,pageable);
+        return vehicleRepository.findByVehicleInformationProductionYear(year,pageable);
     }
 
-    public Page<Vehicle> findByStatus(
-            Object statusValue) {
+    public Page<Vehicle> findByStatus(Object statusValue) {
         String status = (String) statusValue;
-        Vehicle.Status s = Vehicle.Status.getStatusFromString(
-                status);
+        Vehicle.Status s = Vehicle.Status.getStatusFromString(status);
         return vehicleRepository.findByStatus(s,pageable);
     }
 
-    private <T> RegistrationNumber getRegistrationValue(
-            T value) {
+    private <T> RegistrationNumber getRegistrationValue(T value) {
         if (value instanceof RegistrationNumber number) {
             return number;
         } else if (value instanceof String number) {
@@ -64,8 +54,7 @@ public class CriteriaSearchExecutor {
         throw new IllegalArgumentException(message);
     }
 
-    private <T> int getYearValue(
-            T value) {
+    private <T> int getYearValue(T value) {
         if (value instanceof String s) {
             return Integer.parseInt((s));
         } else if (value instanceof Number) {

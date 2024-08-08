@@ -5,12 +5,12 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Getter
 @Embeddable
+@Getter
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
-@EqualsAndHashCode
-@ToString
 public class UserCredentials {
 
     private static final String INVALID_PASSWORD = "Password must contains at least 5 characters.";
