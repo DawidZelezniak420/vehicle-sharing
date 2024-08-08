@@ -14,7 +14,7 @@ public class EmailPatternValidator {
     }
 
     private static boolean doesNotMatch(String email) {
-        return !email.matches(EMAIL_PATTERN);
+        return email == null || !email.matches(EMAIL_PATTERN);
     }
 
     private static void throwException(String email) {
